@@ -180,11 +180,10 @@ const fr: SiteContent = {
       },
     },
 
-    // CONFIRM : repose sur la parole de Guilhem seule. Une entrée courte, formulée en équipe. Aucune mesure.
+    // CONFIRM : repose sur la parole de Guilhem seule. Une seule phrase courte à la première personne. Aucune mesure, aucun résultat, aucune autre personne, aucun lien.
     svlr: {
-      title: 'SVLR, avec Alec Bossard',
-      text: 'À l’AIST, j’ai aussi participé, avec mon camarade de promotion Alec Bossard, à l’extension de SVLR (Scalable, Training-Free Visual Language Robotics ; Samson, Muraccioli, Kanehiro, CNRS-AIST JRL) vers la manipulation qui dépend de la mémoire.',
-      link: 'Les résultats sont dans le rapport technique d’Alec',
+      title: 'SVLR',
+      text: 'À l’AIST, j’ai aussi travaillé sur SVLR (Scalable, Training-Free Visual Language Robotics, CNRS-AIST JRL), un pipeline modulaire qui enchaîne un modèle vision-langage, une segmentation zero-shot, un modèle de langage et une similarité de phrases pour transformer une consigne en actions du robot, sans entraînement.',
     },
 
     tlse: {
@@ -192,7 +191,7 @@ const fr: SiteContent = {
       title: 'La couche de simulation d’une voiture de course driverless',
       marquee: 'Formula Student driverless',
       mine: 'Ma part est la couche de simulation et d’outillage : un simulateur Pygame 2D avec une caméra qui s’ajuste à la piste, un chargeur de pistes de cônes en CSV typé, une voiture à l’échelle Formula Student et un modèle de capteur à champ de vision configurable qui sélectionne les cônes visibles.',
-      team: 'Les planificateurs sont le travail de mes coéquipiers : Alec Bossard (ligne centrale par milieux, B-spline, premier contrôleur réactif) et TJeanm (RRT*, lissage).',
+      team: 'Les planificateurs sont le travail de mes coéquipiers : l’un a écrit la ligne centrale par milieux, la B-spline et le premier contrôleur réactif, un autre les planificateurs RRT* et le lissage.',
       also: 'J’ai aussi travaillé sur des modèles de détection de cônes en PyTorch et sur des modules de traitement d’image et de commande avec ROS, Python et C++.',
       demo: 'Essayer le modèle de capteur : régler la portée et l’ouverture, les cônes sélectionnés s’allument.',
       range: 'Portée',
@@ -213,8 +212,8 @@ const fr: SiteContent = {
       kicker: 'Projet Fil Rouge. Première année du cycle ingénieur, 2024-2025.',
       title: 'Un vrai robot, piloté depuis une page web',
       mine: 'En équipe de six, nous avons construit un robot mobile : pilotage des moteurs par Arduino, caméra Raspberry Pi, cartographie LiDAR, commandes vocales, suivi de balle. Ma part était l’interface web : une application monopage qui pilote le robot par l’API Web Bluetooth (un rechargement de page couperait la liaison), le flux caméra MJPEG en direct, et l’algorithme qui transforme les coordonnées image de la balle en commandes de conduite pour la garder centrée.',
-      team: 'La cartographie, la reconnaissance vocale, le pilotage des moteurs et le traitement d’image ont été faits par mes coéquipiers Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard et Fairouz Ijerdaoun.',
-      before: 'Le semestre d’avant, avec Alec Bossard : un détecteur de balles de couleur en C11 pur, sans OpenCV.',
+      team: 'La cartographie, la reconnaissance vocale, le pilotage des moteurs et le traitement d’image ont été faits par mes cinq coéquipiers.',
+      before: 'Le semestre d’avant, avec un camarade de promotion : un détecteur de balles de couleur en C11 pur, sans OpenCV.',
       feedWall: 'Sur le mur :',
       feed: 'Flux caméra du vrai robot, avec les balles suivies. Enregistrement de démonstration de l’équipe.',
       hmi: 'L’interface web sur un téléphone, qui pilote le vrai robot. Enregistrement de démonstration de l’équipe.',
@@ -484,7 +483,7 @@ const fr: SiteContent = {
 
     // ---------------------------------------------------------------- TLSe Racing
     // Sa part : la couche de simulation et d’outillage (nov. 2025), puis la boucle fermée et les bancs d’essai (oct. 2026).
-    // Les planificateurs sont ceux d’Alec Bossard et de TJeanm : toujours crédités. Simulation 2D uniquement.
+    // Les planificateurs et le premier contrôleur réactif sont ceux de coéquipiers : toujours crédités par leur rôle. Simulation 2D uniquement.
     'tlse-racing-driverless': {
       metaTitle: 'Simulateur driverless TLSe Racing | Guilhem Carmouze',
       metaDescription:
@@ -495,7 +494,7 @@ const fr: SiteContent = {
         'J’ai écrit le simulateur 2D, avec son modèle de capteur à champ de vision, dans lequel on peut essayer une logique de conduite avant tout essai sur une vraie voiture. En octobre 2026, j’ai fermé la boucle : un contrôleur qui enchaîne des tours en ne voyant que ce que ce capteur lui laisse voir. Tout cela est de la simulation 2D.',
       meta: {
         role: 'Membre de l’équipe driverless. Auteur de la couche de simulation et d’outillage (novembre 2025), puis de la boucle fermée, des bancs d’essai, des tests et de l’intégration continue (octobre 2026).',
-        team: 'Alec Bossard (premier contrôleur réactif, planificateur par milieux) et TJeanm (planificateurs RRT*, lissage).',
+        team: 'Un coéquipier a écrit le premier contrôleur réactif et le planificateur par milieux, un autre les planificateurs RRT* et le lissage.',
         period: 'Novembre et décembre 2025, puis octobre 2026',
         organisation: 'TLSe Racing, équipe driverless de Formula Student. Les deux dépôts sont des prototypes d’équipe hébergés sur mon compte GitHub, pas le logiciel officiel de l’équipe.',
         stack: 'Python, Pygame (pygame-ce), NumPy, SciPy, pytest, intégration continue, ffmpeg pour les clips',
@@ -521,7 +520,7 @@ const fr: SiteContent = {
         {
           kind: 'text',
           body: [
-            'Pendant la saison 2025-2026, j’étais membre de l’équipe driverless de TLSe Racing, une équipe de Formula Student. En novembre 2025, deux de ses membres ont commencé un petit simulateur en Python et Pygame pour essayer une logique de conduite avant tout essai sur une vraie voiture : j’ai écrit la couche de simulation, Alec Bossard le premier contrôleur réactif.',
+            'Pendant la saison 2025-2026, j’étais membre de l’équipe driverless de TLSe Racing, une équipe de Formula Student. En novembre 2025, deux de ses membres ont commencé un petit simulateur en Python et Pygame pour essayer une logique de conduite avant tout essai sur une vraie voiture : j’ai écrit la couche de simulation, un coéquipier le premier contrôleur réactif.',
             'Deux dépôts en sont sortis, tous deux des prototypes d’équipe hébergés sur mon compte. TLSe_Racing_Driverless est le simulateur. PathPlanning (novembre et décembre 2025) contient trois planificateurs hors ligne qui construisent une ligne de référence fermée autour d’une piste de cônes, et un visualiseur qui y conduit une voiture. Le code de planification est le travail de mes coéquipiers. Le simulateur, le visualiseur, la caméra et le chargeur de pistes sont les miens.',
             'En octobre 2026, je suis revenu sur les deux avec ce qui leur manquait : des mesures. Dans le simulateur, un contrôleur qui enchaîne des tours à partir de ce que voit le capteur. Dans PathPlanning, une ligne de commande, des mesures des lignes planifiées, un banc d’essai avec des résultats versionnés, des tests et de l’intégration continue. Le code de mes coéquipiers est laissé tel qu’ils l’ont écrit.',
           ],
@@ -536,15 +535,15 @@ const fr: SiteContent = {
               tag: 'Novembre 2025',
               title: 'La couche de simulation',
               body: 'Un simulateur Pygame 2D pour pistes de cônes de Formula Student : un chargeur CSV typé avec vérification du schéma, une caméra qui s’ajuste à la piste et zoome autour du curseur, une voiture dessinée à l’échelle Formula Student, et un modèle de capteur à champ de vision configurable, une portée et un angle d’ouverture, qui sélectionne les cônes que la voiture peut voir. Le modèle de capteur est purement géométrique : pas d’occlusion, pas de traitement d’image.',
-              note: 'Alec Bossard a écrit, au-dessus de cette couche, le premier contrôleur réactif : il vise le milieu des cônes bleu et jaune visibles les plus proches.',
+              note: 'Un coéquipier a écrit, au-dessus de cette couche, le premier contrôleur réactif : il vise le milieu des cônes bleu et jaune visibles les plus proches.',
               repo: 'TLSe_Racing_Driverless',
               repoNote: 'le simulateur',
             },
             {
               tag: 'Novembre et décembre 2025',
               title: 'Un visualiseur pour les planificateurs',
-              body: 'Dans PathPlanning, trois planificateurs construisent une ligne de référence fermée autour d’une piste de cônes à partir de la carte complète des cônes : une ligne centrale par milieux ajustée par une B-spline (Alec Bossard), et deux variantes de RRT* avec lissage (TJeanm). Ma part est le visualiseur Pygame qui déplace une voiture le long de la ligne, sa caméra 2D, et le chargeur CSV des 26 cartes de cônes fournies.',
-              note: 'Les planificateurs voient tous les cônes : il n’y a pas de perception dans ce dépôt. Par git blame fin 2025 : 634 lignes de TJeanm, 355 de moi, 146 d’Alec Bossard.',
+              body: 'Dans PathPlanning, trois planificateurs construisent une ligne de référence fermée autour d’une piste de cônes à partir de la carte complète des cônes : une ligne centrale par milieux ajustée par une B-spline (un coéquipier), et deux variantes de RRT* avec lissage (un autre coéquipier). Ma part est le visualiseur Pygame qui déplace une voiture le long de la ligne, sa caméra 2D, et le chargeur CSV des 26 cartes de cônes fournies.',
+              note: 'Les planificateurs voient tous les cônes : il n’y a pas de perception dans ce dépôt. Par git blame fin 2025 : 634 lignes du coéquipier qui a écrit les planificateurs RRT*, 355 de moi, 146 de celui qui a écrit le planificateur par milieux.',
               repo: 'PathPlanning',
               repoNote: 'planificateurs hors ligne et visualiseur',
             },
@@ -686,7 +685,7 @@ const fr: SiteContent = {
         {
           kind: 'list',
           items: [
-            { text: 'Alec Bossard a écrit le premier contrôleur réactif et le prototype hors ligne de ligne centrale du dépôt du simulateur, ainsi que le planificateur midpoint de PathPlanning. TJeanm a écrit les deux planificateurs RRT* et leur lissage, ainsi que la note française d’origine de PathPlanning (TJeanm est un nom d’utilisateur GitHub).' },
+            { text: 'Un coéquipier a écrit le premier contrôleur réactif et le prototype hors ligne de ligne centrale du dépôt du simulateur, ainsi que le planificateur midpoint de PathPlanning. Un autre coéquipier a écrit les deux planificateurs RRT* et leur lissage, ainsi que la note française d’origine de PathPlanning. L’historique des commits des deux dépôts montre qui a écrit quoi.' },
             { text: 'J’ai écrit le chargeur de pistes, la caméra, le visualiseur et le modèle de capteur à champ de vision en novembre 2025, puis le paquet de boucle fermée, l’arbitre, les bancs d’essai, les figures, les tests et l’intégration continue en octobre 2026.' },
             { text: 'Le travail d’octobre 2026 a été écrit avec l’aide d’un assistant de code IA, et ces commits portent la mention Co-Authored-By. Chaque nombre et chaque image de cette page est réécrit par un script du dépôt.' },
             { text: 'L’origine des quatre pistes du dépôt du simulateur et des 26 cartes de PathPlanning n’est pas documentée dans les dépôts.' },
@@ -712,10 +711,10 @@ const fr: SiteContent = {
       kicker: 'Projet Fil Rouge. Première année du cycle ingénieur, 2024-2025.',
       title: 'Un vrai robot, piloté depuis une page web',
       outcome:
-        'Au printemps 2025, une équipe de six a construit un vrai robot mobile. Ma part était ce que touche l’opérateur : une page web qui le pilote en Bluetooth, montre ce que voit sa caméra et transforme la position d’une balle en commandes qui la gardent centrée. Le semestre d’avant, avec Alec Bossard, j’avais écrit un détecteur de balles de couleur en C pur.',
+        'Au printemps 2025, une équipe de six a construit un vrai robot mobile. Ma part était ce que touche l’opérateur : une page web qui le pilote en Bluetooth, montre ce que voit sa caméra et transforme la position d’une balle en commandes qui la gardent centrée. Le semestre d’avant, avec un camarade de promotion, j’avais écrit un détecteur de balles de couleur en C pur.',
       meta: {
         role: 'Partie 2, le vrai robot : l’interface web (application monopage Web Bluetooth, flux caméra, règle de centrage de la balle, cadencement des commandes vocales). Partie 1 : analyse des images, entrées et sorties de fichiers, seuils de couleur et structures de clusters du détecteur en C.',
-        team: 'Partie 2 : une équipe de six, avec Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard et Fairouz Ijerdaoun. Partie 1 : avec Alec Bossard.',
+        team: 'Partie 2 : une équipe de six, avec cinq coéquipiers. Partie 1 : avec un camarade de promotion.',
         period: 'Partie 1 : janvier 2025. Partie 2 : printemps 2025.',
         organisation: 'UPSSITECH, Université de Toulouse. Cursus Systèmes Robotiques et Interactifs (SRI), première année du cycle ingénieur.',
         stack: 'JavaScript, API Web Bluetooth, Bootstrap 5, MJPEG sur HTTP. Partie 1 : C11, GNU Make, CMake. Sur le robot, écrit par mes coéquipiers : Arduino, Raspberry Pi, RPLiDAR, Python et OpenCV.',
@@ -742,7 +741,7 @@ const fr: SiteContent = {
           kind: 'text',
           body: [
             'Le Projet Fil Rouge est le projet transversal de la première année du cycle ingénieur à l’UPSSITECH, sur deux semestres. La première moitié (semestre 5, janvier 2025) était du logiciel en C. Dans la seconde (semestre 6, printemps 2025), chaque équipe devait passer d’un monde simulé à un vrai robot qui se déplace dans une pièce, réagit à des commandes vocales et détecte des objets avec ses capteurs.',
-            'Notre robot combine pilotage des moteurs par Arduino, caméra Raspberry Pi, cartographie RPLiDAR avec ICP, commandes vocales, suivi de balle et une interface web. Nous étions six : Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard, Fairouz Ijerdaoun et moi. Le code, le rapport, les diapositives et les enregistrements de démonstration sont dans le dépôt d’équipe waliwassim/PFR2.',
+            'Notre robot combine pilotage des moteurs par Arduino, caméra Raspberry Pi, cartographie RPLiDAR avec ICP, commandes vocales, suivi de balle et une interface web. Nous étions six : mes cinq coéquipiers et moi. Le code, le rapport, les diapositives et les enregistrements de démonstration sont dans le dépôt d’équipe PFR2.',
           ],
         },
         {
@@ -814,8 +813,8 @@ const fr: SiteContent = {
           kind: 'text',
           title: 'Partie 1, janvier 2025 : un détecteur de balles de couleur en C pur',
           body: [
-            'Avec Alec Bossard, j’ai écrit la partie traitement d’image de la première moitié du projet : un programme C11 qui trouve des balles orange, bleues et jaunes dans une image RGB de 300 × 300 et rapporte le centre et le rayon de chacune, sans bibliothèque de vision. Il lit l’image sous forme d’export texte, segmente chaque couleur avec des seuils RGB fixes, garde la plus grande tache 4-connexe de chaque couleur et la mesure par sa boîte englobante.',
-            'Par git blame, ma part est l’analyseur d’image et sa structure, la lecture et l’écriture de fichiers, les seuils de couleur et la construction des masques, et la liste de clusters avec leur boîte englobante, leur centre et leur rayon. Alec Bossard a écrit la quantification RGB et le filtre de la plus grande composante.',
+            'Avec un camarade de promotion, j’ai écrit la partie traitement d’image de la première moitié du projet : un programme C11 qui trouve des balles orange, bleues et jaunes dans une image RGB de 300 × 300 et rapporte le centre et le rayon de chacune, sans bibliothèque de vision. Il lit l’image sous forme d’export texte, segmente chaque couleur avec des seuils RGB fixes, garde la plus grande tache 4-connexe de chaque couleur et la mesure par sa boîte englobante.',
+            'Par git blame, ma part est l’analyseur d’image et sa structure, la lecture et l’écriture de fichiers, les seuils de couleur et la construction des masques, et la liste de clusters avec leur boîte englobante, leur centre et leur rayon. Mon camarade de promotion a écrit la quantification RGB et le filtre de la plus grande composante.',
             'En octobre 2026, j’ai nettoyé le dépôt, avec un assistant de code IA : la version réglée utilisée à la fin du projet a été reprise, les bugs restants ont été corrigés (un débordement de pile dans le remplissage par diffusion (flood fill) récursif, des fuites mémoire, un plantage à la suppression d’une petite tache), et des tests, une évaluation étiquetée et les figures ont été ajoutés.',
           ],
         },
@@ -897,9 +896,9 @@ const fr: SiteContent = {
         {
           kind: 'list',
           items: [
-            { text: 'Les autres parties du robot sont le travail de mes coéquipiers, comme le disent les sections individuelles du rapport d’équipe : reconnaissance vocale et filtre de commandes (Alexandre Perrin, qui a aussi contribué au code Arduino et à l’interface utilisateur), suivi de balle sur le Raspberry Pi et son serveur vidéo (Wassim Wali et Fairouz Ijerdaoun), cartographie LiDAR avec ICP (Abdelbasset Houdass), code Arduino et câblage des capteurs (Alec Bossard).' },
-            { text: 'Le robot, les enregistrements de démonstration, le rapport et les diapositives appartiennent à l’équipe. Les enregistrements de cette page viennent du dépôt d’équipe waliwassim/PFR2, hébergé par un coéquipier.' },
-            { text: 'La partie 1 a été écrite avec Alec Bossard. Le nettoyage et l’évaluation d’octobre 2026 sont les miens, faits avec un assistant de code IA : ces commits portent la mention Co-Authored-By.' },
+            { text: 'Les autres parties du robot sont le travail de mes cinq coéquipiers, comme le disent les sections individuelles du rapport d’équipe : reconnaissance vocale et filtre de commandes (un coéquipier, qui a aussi contribué au code Arduino et à l’interface utilisateur), suivi de balle sur le Raspberry Pi et son serveur vidéo (deux coéquipiers), cartographie LiDAR avec ICP (un coéquipier), code Arduino et câblage des capteurs (un coéquipier).' },
+            { text: 'Le robot, les enregistrements de démonstration, le rapport et les diapositives appartiennent à l’équipe. Les enregistrements de cette page viennent du dépôt d’équipe PFR2, hébergé par un coéquipier.' },
+            { text: 'La partie 1 a été écrite avec un camarade de promotion. Le nettoyage et l’évaluation d’octobre 2026 sont les miens, faits avec un assistant de code IA : ces commits portent la mention Co-Authored-By.' },
           ],
         },
       ],

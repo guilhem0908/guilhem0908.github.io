@@ -69,8 +69,8 @@ const en: CvContent = {
         'Built ArtiFixer-360, a pipeline from a plain pinhole video to a 360° video: COLMAP, a 3DGRUT Gaussian scene, a world-locked rig of 14 overlapping 110° views repaired jointly by a 14B video diffusion model, then distilled back into the scene, with reference-free quality gates. +23,602 lines and 119 tests over NVIDIA’s upstream ArtiFixer; runs on 4-GPU nodes of the ABCI cluster.',
         'Depth-aware synchronisation lowered the cross-view depth-overlap error of the repaired views by 27% (0.0340 to 0.0247) before distillation. On a 117-frame reference run the temporal warp error (MAE, raw renders against output) fell from 0.037 to 0.020. The full 154-frame run failed my own acceptance gates and led to a geometry-first redesign.',
         'Earlier phases: A* on a 5 cm occupancy grid and 4096 × 2048 panoramas rendered from six pinhole views, logged with position and heading, in a DISCOVERSE and MuJoCo simulation; a ROS 2 Humble interface prepared for a visual navigation model on the Kachaka robot (on main the model is not wired in; no run on the real robot is claimed).',
-        // CONFIRM: rests on Guilhem's word only. One short, team-framed line, no metric.
-        'Also took part, with Alec Bossard, in extending SVLR (training-free visual language robotics, CNRS-AIST JRL) towards memory-dependent manipulation.',
+        // CONFIRM: rests on Guilhem's word only. One short line, no metric, no result, no other person.
+        'Also worked on SVLR (training-free visual language robotics, CNRS-AIST JRL), a modular pipeline that turns an instruction into robot actions without training.',
       ],
       note: 'AI tools were used for research, code and spell-checking, as declared in the report; not for running experiments or producing results.',
       links: [
@@ -93,7 +93,7 @@ const en: CvContent = {
       when: '2025 to 2026',
       bullets: [
         'My part: the simulation and tooling layer. A 2D Pygame simulator with a fit-to-track camera, a typed CSV cone-track loader and a configurable field-of-view sensor model that selects the visible cones.',
-        'Also worked on cone-detection models (PyTorch) and on image-processing and control modules (ROS, Python, C++). The planners are my teammates’ work: Alec Bossard and TJeanm.',
+        'Also worked on cone-detection models (PyTorch) and on image-processing and control modules (ROS, Python, C++). The planners are my teammates’ work.',
       ],
       links: [
         { label: 'TLSe_Racing_Driverless', href: repos.TLSe_Racing_Driverless },
@@ -106,7 +106,7 @@ const en: CvContent = {
       org: 'Team of six: Arduino motor control, Raspberry Pi camera, LiDAR mapping with ICP, voice commands, ball tracking.',
       bullets: [
         'My part: the web interface, a single-page app that drives the robot over the Web Bluetooth API; the Raspberry Pi MJPEG camera stream; the algorithm that turns the ball’s image coordinates into drive commands to keep it centred; the timing of split voice commands.',
-        'The semester before, with Alec Bossard: a colour-ball detector in pure C11, without OpenCV.',
+        'The semester before, with a classmate: a colour-ball detector in pure C11, without OpenCV.',
       ],
       links: [
         { label: 'PFR2 (team repository)', href: repos.PFR2 },

@@ -155,7 +155,7 @@ of those rooms is a render or a model output.
   [GSAP](https://gsap.com) (GreenSock standard "no charge" licence).
 - Development tools only, not shipped: Playwright, Pillow, pypdf, pypdfium2.
 - Real media: the figures, panoramas and clips come from the repositories linked on the site and
-  from the team recordings of Projet Fil Rouge ([`waliwassim/PFR2`](https://github.com/waliwassim/PFR2));
+  from the team recordings of Projet Fil Rouge ([PFR2, the team repository](https://github.com/waliwassim/PFR2));
   each page says what a figure shows and where it comes from. ArtiFixer-360 is a derivative of
   NVIDIA's ArtiFixer (Apache-2.0). The side projects were built in October 2026 with AI
   assistance, as the lab page says.

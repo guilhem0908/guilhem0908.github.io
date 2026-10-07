@@ -49,7 +49,6 @@ export type RepoKey = keyof typeof repos;
 
 export const external = {
   aistReport: repos['artifixer-360-pipeline'] + '/blob/main/docs/assets/readme/Rapport_de_stage_2026_CARMOUZE_Guilhem.pdf',
-  svlrReport: 'https://alecbossard.com/svlr/report',
 };
 
 // ------------------------------------------------------------------- case studies

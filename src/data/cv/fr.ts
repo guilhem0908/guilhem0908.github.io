@@ -69,8 +69,8 @@ const fr: CvContent = {
         'Développement d’ArtiFixer-360, un pipeline d’une vidéo pinhole à une vidéo 360° : COLMAP, scène de gaussiennes 3DGRUT, rig ancré dans le monde de 14 vues de 110° qui se recouvrent, réparées ensemble par un modèle de diffusion vidéo 14B puis redistillées dans la scène, critères d’acceptation sans référence. +23 602 lignes et 119 tests sur l’ArtiFixer amont de NVIDIA ; nœuds à 4 GPU du cluster ABCI.',
         'Synchronisation tenant compte de la profondeur : −27 % d’erreur de recouvrement de profondeur inter-vues sur les vues réparées (0,0340 à 0,0247), avant distillation. Essai de référence de 117 images : erreur de recalage temporel (MAE, rendus bruts contre sortie) de 0,037 à 0,020. L’essai complet de 154 images a échoué à mes propres critères d’acceptation, d’où une refonte qui part de la géométrie.',
         'Phases précédentes : A* sur grille d’occupation à 5 cm et panoramas de 4096 × 2048 rendus depuis six vues pinhole (simulation DISCOVERSE et MuJoCo) ; interface ROS 2 Humble préparée pour un modèle de navigation visuelle sur le robot Kachaka (sur main, modèle non branché ; aucun essai sur le vrai robot revendiqué).',
-        // CONFIRM : repose sur la parole de Guilhem seule. Une ligne courte, formulée en équipe, sans mesure.
-        'Participation, avec Alec Bossard, à l’extension de SVLR (training-free visual language robotics, CNRS-AIST JRL) vers la manipulation qui dépend de la mémoire.',
+        // CONFIRM : repose sur la parole de Guilhem seule. Une ligne courte, sans mesure, sans résultat, sans autre personne.
+        'Aussi : travail sur SVLR (training-free visual language robotics, CNRS-AIST JRL), un pipeline modulaire qui transforme une consigne en actions du robot sans entraînement.',
       ],
       note: 'Outils d’IA utilisés pour la recherche, le code et la relecture, comme déclaré dans le rapport ; pas pour lancer les expériences ni produire les résultats.',
       links: [
@@ -93,7 +93,7 @@ const fr: CvContent = {
       when: '2025-2026',
       bullets: [
         'Ma part : la couche de simulation et d’outillage. Simulateur Pygame 2D avec caméra qui s’ajuste à la piste, chargeur de pistes de cônes CSV typé et modèle de capteur à champ de vision configurable qui sélectionne les cônes visibles.',
-        'Aussi : détection de cônes (PyTorch), traitement d’image et commande (ROS, Python, C++). Planificateurs : travail de mes coéquipiers Alec Bossard et TJeanm.',
+        'Aussi : détection de cônes (PyTorch), traitement d’image et commande (ROS, Python, C++). Planificateurs : travail de mes coéquipiers.',
       ],
       links: [
         { label: 'TLSe_Racing_Driverless', href: repos.TLSe_Racing_Driverless },
@@ -106,7 +106,7 @@ const fr: CvContent = {
       org: 'Équipe de six : pilotage des moteurs par Arduino, caméra Raspberry Pi, cartographie LiDAR avec ICP, commandes vocales, suivi de balle.',
       bullets: [
         'Ma part : l’interface web, une application monopage qui pilote le robot par l’API Web Bluetooth ; le flux caméra MJPEG du Raspberry Pi ; l’algorithme qui transforme les coordonnées image de la balle en commandes pour la garder centrée ; le cadencement des commandes vocales découpées.',
-        'Le semestre d’avant, avec Alec Bossard : un détecteur de balles de couleur en C11 pur, sans OpenCV.',
+        'Le semestre d’avant, avec un camarade de promotion : un détecteur de balles de couleur en C11 pur, sans OpenCV.',
       ],
       links: [
         { label: 'PFR2 (dépôt d’équipe)', href: repos.PFR2 },

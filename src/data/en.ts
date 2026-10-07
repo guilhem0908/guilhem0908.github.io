@@ -172,11 +172,10 @@ const en: SiteContent = {
       },
     },
 
-    // CONFIRM: rests on Guilhem's word only. One short, team-framed entry. No metric.
+    // CONFIRM: rests on Guilhem's word only. One short first-person sentence. No metric, no result, no other person, no link.
     svlr: {
-      title: 'SVLR, with Alec Bossard',
-      text: 'At AIST I also took part, with my classmate Alec Bossard, in extending SVLR (Scalable, Training-Free Visual Language Robotics; Samson, Muraccioli, Kanehiro, CNRS-AIST JRL) towards memory-dependent manipulation.',
-      link: 'Results are in Alec’s technical report',
+      title: 'SVLR',
+      text: 'At AIST I also worked on SVLR (Scalable, Training-Free Visual Language Robotics, CNRS-AIST JRL), a modular pipeline that chains a vision-language model, zero-shot segmentation, a language model and sentence similarity to turn an instruction into robot actions without training.',
     },
 
     tlse: {
@@ -184,7 +183,7 @@ const en: SiteContent = {
       title: 'The simulation layer of a driverless race car',
       marquee: 'Formula Student driverless',
       mine: 'My part is the simulation and tooling layer: a 2D Pygame simulator with a fit-to-track camera, a typed CSV cone-track loader, a car at Formula Student scale, and a configurable field-of-view sensor model that selects the visible cones.',
-      team: 'The planners are my teammates’ work: Alec Bossard (midpoint centerline, B-spline, first reactive controller) and TJeanm (RRT*, smoothing).',
+      team: 'The planners are my teammates’ work: one teammate wrote the midpoint centerline, the B-spline and the first reactive controller, another the RRT* planners and the smoothing.',
       also: 'I also worked on cone-detection models in PyTorch and on image-processing and control modules with ROS, Python and C++.',
       demo: 'Try the sensor model: set its range and opening angle, the cones it selects light up.',
       range: 'Range',
@@ -205,8 +204,8 @@ const en: SiteContent = {
       kicker: 'Projet Fil Rouge. First year of the engineering cycle, 2024 to 2025.',
       title: 'A real robot, driven from a web page',
       mine: 'In a team of six we built a mobile robot: Arduino motor control, Raspberry Pi camera, LiDAR mapping, voice commands, ball tracking. My part was the web interface: a single-page app that drives the robot over the Web Bluetooth API (a page reload would drop the link), the live MJPEG camera stream, and the algorithm that turns the ball’s image coordinates into drive commands to keep it centred.',
-      team: 'Mapping, voice recognition, motor control and image processing were done by my teammates Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard and Fairouz Ijerdaoun.',
-      before: 'The semester before, with Alec Bossard: a colour-ball detector in pure C11, no OpenCV.',
+      team: 'Mapping, voice recognition, motor control and image processing were done by my five teammates.',
+      before: 'The semester before, with a classmate: a colour-ball detector in pure C11, no OpenCV.',
       feedWall: 'On the wall:',
       feed: 'Camera feed of the real robot with the tracked balls. Team demo recording.',
       hmi: 'The web interface on a phone, driving the real robot. Team demo recording.',
@@ -476,7 +475,7 @@ const en: SiteContent = {
 
     // ---------------------------------------------------------------- TLSe Racing
     // His part: the simulation and tooling layer (Nov 2025), then the closed loop and the benchmarks (Oct 2026).
-    // The planners are Alec Bossard's and TJeanm's: always credited. 2D simulation only, never a car result.
+    // The planners and the first reactive controller are teammates': always credited by role. 2D simulation only, never a car result.
     'tlse-racing-driverless': {
       metaTitle: 'TLSe Racing driverless simulator | Guilhem Carmouze',
       metaDescription:
@@ -487,7 +486,7 @@ const en: SiteContent = {
         'I wrote the 2D simulator, with its field-of-view sensor model, in which driving logic can be tried before anything runs on a car. In October 2026 I closed the loop: a controller that drives laps while seeing only what that sensor lets it see. All of it is 2D simulation.',
       meta: {
         role: 'Member of the driverless team. Author of the simulation and tooling layer (November 2025), then of the closed loop, the benchmarks, the tests and the CI (October 2026).',
-        team: 'Alec Bossard (first reactive controller, midpoint planner) and TJeanm (RRT* planners, smoothing).',
+        team: 'One teammate wrote the first reactive controller and the midpoint planner, another the RRT* planners and the smoothing.',
         period: 'November and December 2025, then October 2026',
         organisation: 'TLSe Racing, Formula Student driverless team. The two repositories are team prototypes hosted on my GitHub account, not the team’s official software.',
         stack: 'Python, Pygame (pygame-ce), NumPy, SciPy, pytest, continuous integration, ffmpeg for the clips',
@@ -513,7 +512,7 @@ const en: SiteContent = {
         {
           kind: 'text',
           body: [
-            'In the 2025 to 2026 season I was a member of the driverless team of TLSe Racing, a Formula Student team. In November 2025 two of its members started a small simulator in Python and Pygame to try out driving logic before anything runs on a car: I wrote the simulation layer, Alec Bossard the first reactive controller.',
+            'In the 2025 to 2026 season I was a member of the driverless team of TLSe Racing, a Formula Student team. In November 2025 two of its members started a small simulator in Python and Pygame to try out driving logic before anything runs on a car: I wrote the simulation layer, a teammate the first reactive controller.',
             'Two repositories came out of it, both team prototypes hosted on my account. TLSe_Racing_Driverless is the simulator. PathPlanning (November and December 2025) holds three offline planners that build a closed reference line around a cone track, and a viewer that drives a car along it. The planning code is my teammates’ work. The simulator, the viewer, the camera and the track loader are mine.',
             'In October 2026 I came back to both with what they lacked: measurements. In the simulator, a controller that completes laps from what the sensor sees. In PathPlanning, a command line, measures of the planned lines, a benchmark with committed results, tests and CI. My teammates’ code is left as they wrote it.',
           ],
@@ -528,15 +527,15 @@ const en: SiteContent = {
               tag: 'November 2025',
               title: 'The simulation layer',
               body: 'A 2D Pygame simulator for Formula Student cone tracks: a typed CSV loader with a schema check, a camera that fits the track and zooms about the cursor, a car drawn at Formula Student scale, and a configurable field-of-view sensor model, a range and an opening angle, that selects the cones the car can see. The sensor model is purely geometric: no occlusion, no image processing.',
-              note: 'Alec Bossard wrote the first reactive controller on top of it: it aims at the midpoint of the nearest visible blue and yellow cones.',
+              note: 'A teammate wrote the first reactive controller on top of it: it aims at the midpoint of the nearest visible blue and yellow cones.',
               repo: 'TLSe_Racing_Driverless',
               repoNote: 'the simulator',
             },
             {
               tag: 'November and December 2025',
               title: 'A viewer for the planners',
-              body: 'In PathPlanning, three planners build a closed reference line around a cone track from the full cone map: a midpoint centre line fitted with a B-spline (Alec Bossard), and two RRT* variants with smoothing (TJeanm). My part is the Pygame viewer that moves a car along the line, its 2D camera, and the CSV loader for the 26 bundled cone maps.',
-              note: 'The planners see every cone: there is no perception in this repository. By git blame at the end of 2025: 634 lines by TJeanm, 355 by me, 146 by Alec Bossard.',
+              body: 'In PathPlanning, three planners build a closed reference line around a cone track from the full cone map: a midpoint centre line fitted with a B-spline (one teammate), and two RRT* variants with smoothing (another teammate). My part is the Pygame viewer that moves a car along the line, its 2D camera, and the CSV loader for the 26 bundled cone maps.',
+              note: 'The planners see every cone: there is no perception in this repository. By git blame at the end of 2025: 634 lines by the teammate who wrote the RRT* planners, 355 by me, 146 by the teammate who wrote the midpoint planner.',
               repo: 'PathPlanning',
               repoNote: 'offline planners and viewer',
             },
@@ -678,7 +677,7 @@ const en: SiteContent = {
         {
           kind: 'list',
           items: [
-            { text: 'Alec Bossard wrote the first reactive controller and the offline centre-line prototype of the simulator repository, and the midpoint planner of PathPlanning. TJeanm wrote the two RRT* planners and their smoothing, and the original French note of PathPlanning (TJeanm is a GitHub user name).' },
+            { text: 'One teammate wrote the first reactive controller and the offline centre-line prototype of the simulator repository, and the midpoint planner of PathPlanning. Another teammate wrote the two RRT* planners and their smoothing, and the original French note of PathPlanning. The commit history of both repositories shows who wrote what.' },
             { text: 'I wrote the track loader, the camera, the viewer and the field-of-view sensor model in November 2025, then the closed-loop package, the referee, the benchmarks, the figures, the tests and the CI in October 2026.' },
             { text: 'The October 2026 work was written with AI coding assistance, and those commits carry a Co-Authored-By trailer. Every number and every picture on this page is rewritten by a script of the repository.' },
             { text: 'The origin of the four tracks of the simulator repository and of the 26 maps of PathPlanning is not documented in the repositories.' },
@@ -704,10 +703,10 @@ const en: SiteContent = {
       kicker: 'Projet Fil Rouge. First year of the engineering cycle, 2024 to 2025.',
       title: 'A real robot, driven from a web page',
       outcome:
-        'In spring 2025 a team of six built a real mobile robot. My part was what the operator touches: a web page that drives it over Bluetooth, shows what its camera sees and turns the position of a ball into commands that keep it centred. The semester before, with Alec Bossard, I wrote a colour-ball detector in pure C.',
+        'In spring 2025 a team of six built a real mobile robot. My part was what the operator touches: a web page that drives it over Bluetooth, shows what its camera sees and turns the position of a ball into commands that keep it centred. The semester before, with a classmate, I wrote a colour-ball detector in pure C.',
       meta: {
         role: 'Part 2, the real robot: the web interface (Web Bluetooth single-page app, camera stream, ball-centring rule, timing of the voice commands). Part 1: image parsing, file input and output, colour thresholds and cluster structures of the C detector.',
-        team: 'Part 2: a team of six, with Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard and Fairouz Ijerdaoun. Part 1: with Alec Bossard.',
+        team: 'Part 2: a team of six, with five teammates. Part 1: with a classmate.',
         period: 'Part 1: January 2025. Part 2: spring 2025.',
         organisation: 'UPSSITECH, University of Toulouse. Robotic and Interactive Systems programme (SRI), first year of the engineering cycle.',
         stack: 'JavaScript, Web Bluetooth API, Bootstrap 5, MJPEG over HTTP. Part 1: C11, GNU Make, CMake. On the robot, written by my teammates: Arduino, Raspberry Pi, RPLiDAR, Python and OpenCV.',
@@ -734,7 +733,7 @@ const en: SiteContent = {
           kind: 'text',
           body: [
             'The Projet Fil Rouge is the cross-disciplinary project of the first year of the engineering cycle at UPSSITECH, run over two semesters. The first half (semester 5, January 2025) was software written in C. In the second half (semester 6, spring 2025) each team had to move from a simulated world to a real robot that moves in a room, reacts to voice commands and detects objects with its sensors.',
-            'Our robot combines Arduino motor control, a Raspberry Pi camera, RPLiDAR mapping with ICP, voice commands, ball tracking and a web interface. We were six: Alexandre Perrin, Abdelbasset Houdass, Wassim Wali, Alec Bossard, Fairouz Ijerdaoun and me. The code, the report, the slides and the demo recordings are in the team repository waliwassim/PFR2.',
+            'Our robot combines Arduino motor control, a Raspberry Pi camera, RPLiDAR mapping with ICP, voice commands, ball tracking and a web interface. We were six: my five teammates and me. The code, the report, the slides and the demo recordings are in the team repository PFR2.',
           ],
         },
         {
@@ -806,8 +805,8 @@ const en: SiteContent = {
           kind: 'text',
           title: 'Part 1, January 2025: a colour-ball detector in pure C',
           body: [
-            'With Alec Bossard I wrote the image-processing part of the first half of the project: a C11 program that finds orange, blue and yellow balls in a 300 × 300 RGB image and reports the centre and radius of each one, without any vision library. It reads the image as a text dump, segments each colour with fixed RGB thresholds, keeps the largest 4-connected blob of each colour and measures it through its bounding box.',
-            'By git blame, my part is the image parser and structure, the file reading and writing, the colour thresholds and mask construction, and the cluster list with its bounding box, centre and radius. Alec Bossard wrote the RGB quantisation and the largest-component filter.',
+            'With a classmate I wrote the image-processing part of the first half of the project: a C11 program that finds orange, blue and yellow balls in a 300 × 300 RGB image and reports the centre and radius of each one, without any vision library. It reads the image as a text dump, segments each colour with fixed RGB thresholds, keeps the largest 4-connected blob of each colour and measures it through its bounding box.',
+            'By git blame, my part is the image parser and structure, the file reading and writing, the colour thresholds and mask construction, and the cluster list with its bounding box, centre and radius. My classmate wrote the RGB quantisation and the largest-component filter.',
             'In October 2026 I cleaned the repository up, with an AI coding assistant: the tuned version used at the end of the project was brought in, the remaining bugs were fixed (a stack overflow in the recursive flood fill, memory leaks, a crash when removing a small blob), and tests, a labelled evaluation and the figures were added.',
           ],
         },
@@ -889,9 +888,9 @@ const en: SiteContent = {
         {
           kind: 'list',
           items: [
-            { text: 'The other parts of the robot are my teammates’ work, as the individual sections of the team report say: voice recognition and the command filter (Alexandre Perrin, who also contributed to the Arduino code and to the user interface), ball tracking on the Raspberry Pi and its video server (Wassim Wali and Fairouz Ijerdaoun), LiDAR mapping with ICP (Abdelbasset Houdass), Arduino code and sensor wiring (Alec Bossard).' },
-            { text: 'The robot, the demo recordings, the report and the slides belong to the team. The recordings on this page come from the team repository waliwassim/PFR2, which is hosted by a teammate.' },
-            { text: 'Part 1 was written with Alec Bossard. The October 2026 clean-up and the evaluation are mine, made with an AI coding assistant: those commits carry a Co-Authored-By trailer.' },
+            { text: 'The other parts of the robot are the work of my five teammates, as the individual sections of the team report say: voice recognition and the command filter (one teammate, who also contributed to the Arduino code and to the user interface), ball tracking on the Raspberry Pi and its video server (two teammates), LiDAR mapping with ICP (one teammate), Arduino code and sensor wiring (one teammate).' },
+            { text: 'The robot, the demo recordings, the report and the slides belong to the team. The recordings on this page come from the team repository PFR2, which is hosted by a teammate.' },
+            { text: 'Part 1 was written with a classmate. The October 2026 clean-up and the evaluation are mine, made with an AI coding assistant: those commits carry a Co-Authored-By trailer.' },
           ],
         },
       ],

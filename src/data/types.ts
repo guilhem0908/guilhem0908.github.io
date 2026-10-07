@@ -130,7 +130,7 @@ export interface SiteContent {
       /** two figures, each with its exact meaning */
       figures: { rig: BigFigure; depth: BigFigure };
     };
-    svlr: { title: string; text: string; link: string };
+    svlr: { title: string; text: string };
     tlse: Room & { marquee: string; mine: string; team: string; also: string; demo: string; range: string; opening: string; selected: string };
     usine: Room & { status: string; text: string; note: string };
     pfr: Room & { mine: string; team: string; before: string; feedWall: string; feed: string; hmi: string; demo: string; robotAlt: string };
