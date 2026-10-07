@@ -442,7 +442,7 @@ async function run() {
   let lastY = -1;
   let lastHere = '?';
   let rafStart = 0;
-  let lastTick = 0, lastRender = 0;
+  let lastRender = 0;
   let giantCss = '';
   const hud = $('.hud');
   // on phones the instruments sit at the bottom of the screen, where the lab enters: they step aside just before it does
@@ -451,25 +451,11 @@ async function run() {
   const measureHud = () => {
     hudAwayY = labHead.getBoundingClientRect().top + window.scrollY - window.innerHeight - 40;
   };
-  // On a 240 Hz screen the world is drawn every second refresh: 120 pictures a second look the same
-  // and the GPU does half the work. `every` is set once the refresh rate has been measured.
-  let every = 1, tickNo = 0;
-  const hz: number[] = [];
   // runs before GSAP renders its animations: the time between this and the frame callback is theirs
   gsap.ticker.add(() => { rafStart = performance.now(); }, false, true);
 
   const frame = (time: number) => {
     const now = performance.now();
-    if (hz.length < 50 && lastTick) {
-      hz.push(now - lastTick);
-      if (hz.length === 50) {
-        const med = hz.slice().sort((a, b) => a - b)[25];
-        every = med < 5.2 ? Math.max(1, Math.round(1000 / med / 110)) : 1;
-        perf.event('refresh', `${(1000 / med).toFixed(0)} Hz, world every ${every}`);
-      }
-    }
-    lastTick = now;
-    if (every > 1 && ++tickNo % every) { lenis.raf(time * 1000); return; }
     const deltaMs = lastRender ? now - lastRender : 16.7;
     lastRender = now;
 

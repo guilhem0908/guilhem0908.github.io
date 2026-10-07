@@ -419,6 +419,18 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .aist__still figcaption .gl-only { display: none; }
 }
 
+/* a very short laptop window: the copy of the AIST stage tightens so that it stays under the header */
+@media (min-width: 761px) and (max-height: 640px) {
+  html.gl .aist__copy { padding: 0.8rem 1rem 0.85rem; max-width: min(36rem, 39vw); }
+  html.gl .aist__copy > .t { font-size: clamp(1.15rem, 1.7vw, 1.5rem); max-width: none; margin-bottom: 0.5rem; }
+  html.gl .aist__copy .body { font-size: 0.85rem; line-height: 1.42; }
+  html.gl .aist__copy .body + .body { margin-top: 0.4rem; }
+  html.gl .aist__copy .beat__cta { margin-top: 0.7rem; }
+  html.gl .aist__copy .beat__cta .btn { min-height: 38px; }
+  html.gl .aist__copy .links--inline { margin-top: 0.5rem; }
+  html.gl .aist__proof { width: min(26rem, 30vw); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html:not(.gl) * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }

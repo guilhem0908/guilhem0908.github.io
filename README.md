@@ -47,7 +47,7 @@ no `base` path. CI does not run Python: the CV PDFs and the share image are comm
 | `src/components/Seo.astro` | Title, description, canonical, hreflang, Open Graph, Twitter, icons, JSON-LD |
 | `src/views/` | `HomeView` (the run), `CaseStudyView`, `LabView`, `CvView` |
 | `src/pages/` | Thin route files (English at the root, other languages under `[lang]/`), `404.astro`, `robots.txt.ts` |
-| `src/world/`, `src/scripts/main.ts` | The world: scene generator, planner, splat shaders, traffic; the scroll director |
+| `src/world/`, `src/scripts/main.ts` | The world: scene generator, planner, splat shaders, traffic, room culling (`layout.ts`), quality governor (`quality.ts`), frame recorder (`perf.ts`); the scroll director |
 | `src/styles/` | `global.css` (tokens, type), `home.css`, `page.css`, `cv.css`, `notfound.css` |
 | `public/media/` | Web-sized real media, every file listed in `src/data/site.ts` |
 | `public/cv/` | The CV as PDF, one per language |
@@ -106,7 +106,25 @@ PDF holds real TrueType fonts, which keeps its text extractable for applicant-tr
 | `tools/pinhole.py` | `public/media/aist-pinhole.jpg`, the pinhole view on the vestibule wall, cut out of the raw 3DGRUT panorama |
 | `tools/check_links.mjs` | Internal links of `dist/`, and whether every linked GitHub repository is public (Node, no dependency; run by the deploy workflow) |
 | `tools/shots.py` | Art-director loop: scroll depths of the run, static pages, intro frames |
+| `tools/perf.py` | Frame pacing of the run: scrolls the whole page at three speeds on two window sizes, a fresh page per run, medians of three; prints every long frame with its place in the run and where the time went (`--gpu low` asks for the integrated GPU) |
+| `tools/arrival.py` | The first seconds: intro length, the scroll cue, the lights on the path, the peek, keys, wheel and click during the intro, the Start button, touch wording, reduced motion |
+| `tools/sight.py` | Draws frozen positions of the run with and without the room culling and compares the pictures |
 | `tools/pageshot.py` | Full-page captures of static pages (CV, 404, lab) at 1440 and 390 px |
+
+## Performance
+
+Add `?perf=1` to the address of the home page to see what the run costs on your machine: frame
+time, GPU time, render scale and quality level, Gaussians drawn, sort time, and the last long
+frame with the place where it happened. The buttons pin a quality level; "Auto" hands it back to
+the governor. The method and the rules are in [DESIGN.md](DESIGN.md#performance).
+
+```bash
+npm run build
+python tools/perf.py _work/perf/now.json                  # the fast GPU
+python tools/perf.py _work/perf/low.json --gpu low        # the integrated GPU of a dual-GPU laptop
+python tools/arrival.py                                   # the first seconds of the run
+python tools/sight.py                                     # the room culling changes nothing on screen
+```
 
 ## Search and sharing
 

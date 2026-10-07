@@ -36,11 +36,12 @@ with sync_playwright() as pw:
         # main * as well: the run sets visibility on the hero inline, which a hidden parent does not override
         ('poster', (1440, 900), 'main, main *, .top, .hud, .lens, .intro'),
     ):
-        page = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1).new_page()
-        page.goto(f'http://127.0.0.1:{PORT}/?nointro', wait_until='domcontentloaded')
+        # reduced motion with the 3D run opted in (?motion): no lights running on the path, no peek of the camera
+        page = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1, reduced_motion='reduce').new_page()
+        page.goto(f'http://127.0.0.1:{PORT}/?nointro&motion', wait_until='domcontentloaded')
         page.wait_for_function('() => window.__navrun && window.__world && window.__world.info', timeout=60000)
         page.add_style_tag(content=f'{hide} {{ visibility: hidden !important; }}')
-        page.evaluate('() => { window.__world.pointerActive = false; }')
+        page.evaluate('() => { window.__world.pointerActive = false; window.__world.setLevel(0); }')
         time.sleep(3.0)
         png = TMP / f'{name}.png'
         page.screenshot(path=str(png))

@@ -51,13 +51,15 @@ with sync_playwright() as pw:
     for lang in wanted:
         home, name, line = LANGS[lang]
         out = MEDIA / name
-        page = b.new_context(viewport={'width': 1200, 'height': 630}, device_scale_factor=1).new_page()
-        page.goto(f'http://127.0.0.1:{PORT}{home}?nointro', wait_until='domcontentloaded')
+        # reduced motion with the 3D run opted in (?motion): no lights running on the path, no peek of the camera
+        page = b.new_context(viewport={'width': 1200, 'height': 630}, device_scale_factor=1, reduced_motion='reduce').new_page()
+        page.goto(f'http://127.0.0.1:{PORT}{home}?nointro&motion', wait_until='domcontentloaded')
         page.wait_for_function('() => window.__navrun && window.__world && window.__world.info', timeout=60000)
-        page.add_style_tag(content='.hero__side, .top, .hud, .lens, .intro { visibility: hidden !important; }')
+        page.add_style_tag(content='.hero__side, .top, .hud, .lens, .intro, .cue { visibility: hidden !important; }')
         page.evaluate(
             """(line) => {
               window.__world.pointerActive = false;
+              window.__world.setLevel(0);
               const p = document.createElement('p');
               p.className = 'read';
               p.textContent = line;
