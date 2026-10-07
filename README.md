@@ -109,6 +109,7 @@ PDF holds real TrueType fonts, which keeps its text extractable for applicant-tr
 | `tools/perf.py` | Frame pacing of the run: scrolls the whole page at three speeds on two window sizes, a fresh page per run, medians of three; prints every long frame with its place in the run and where the time went (`--gpu low` asks for the integrated GPU) |
 | `tools/arrival.py` | The first seconds: intro length, the scroll cue, the lights on the path, the peek, keys, wheel and click during the intro, the Start button, touch wording, reduced motion |
 | `tools/sight.py` | Draws frozen positions of the run with and without the room culling and compares the pictures |
+| `tools/governor.mjs` | The quality governor against simulated machines: a weak GPU, a very weak one, a lighter room, a browser capped at 30 frames a second, with and without a GPU timer (`node tools/governor.mjs`, Node 23.6 or newer) |
 | `tools/pageshot.py` | Full-page captures of static pages (CV, 404, lab) at 1440 and 390 px |
 
 ## Performance
@@ -124,6 +125,7 @@ python tools/perf.py _work/perf/now.json                  # the fast GPU
 python tools/perf.py _work/perf/low.json --gpu low        # the integrated GPU of a dual-GPU laptop
 python tools/arrival.py                                   # the first seconds of the run
 python tools/sight.py                                     # the room culling changes nothing on screen
+node tools/governor.mjs                                   # the quality governor on simulated machines
 ```
 
 ## Search and sharing

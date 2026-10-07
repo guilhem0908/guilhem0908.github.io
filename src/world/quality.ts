@@ -10,9 +10,12 @@ export const SCALES = [1, 0.87, 0.76, 0.66, 0.57, 0.5, 0.44];
 export const KEEPS = [0.8, 0.62];
 export const LEVELS = SCALES.length + KEEPS.length;
 
-const GPU_HIGH = 12.5;  // ms of GPU time per frame: over this, 60 frames a second are at risk
-const GPU_GOAL = 10.0;  // a step down aims under this
-const GPU_LOW = 6.5;    // under this there is room to go back up
+// ms of GPU time per frame. The page needs the GPU for more than the canvas (the browser composites the
+// canvas and the type on the same GPU), so the budget leaves a third of a 60 Hz frame free: measured on an
+// Intel UHD, frames start to slip from about 11 ms.
+const GPU_HIGH = 11.0;  // over this, 60 frames a second are at risk
+const GPU_GOAL = 9.0;   // a step down aims under this
+const GPU_LOW = 5.8;    // under this there is room to go back up
 const SLOW = 26.5;      // ms: a frame that missed 60 Hz by more than half a frame
 const FILL = 0.78;      // share of the GPU time that scales with the number of pixels (measured: 0.75 to 0.85)
 
@@ -59,8 +62,8 @@ export class Governor {
   private blind = { from: -1, frameMs: 0, steps: 0 };
   private locked = 0;     // ms during which frame times alone may not lower the level
   private runLevel = 0;   // the level the pixel budget gives the run (the intro starts lower)
-
-  constructor(public auto = true) {}
+  /** false while a level is pinned (the overlay, tests) */
+  auto = true;
 
   get scale() { return SCALES[Math.min(this.level, SCALES.length - 1)]; }
   get keep() { return this.level < SCALES.length ? 1 : KEEPS[this.level - SCALES.length]; }
@@ -149,34 +152,44 @@ export class Governor {
         this.lastUp = -1;
         return this.set(to, `GPU ${this.gpuMs.toFixed(1)} ms`);
       }
-      if (this.level > 0 && moving && this.gpuMs < GPU_LOW && this.since > this.upWait && this.calm > 1500) {
-        // up, to the best level that still leaves a margin: three at most in one go, any number right after the intro
+      // up, to the best level that still leaves a margin: three at most in one go. Right after the intro the
+      // level may be reconsidered freely: any number of levels, and a thinner margin.
+      const landing = this.landing > 0;
+      if (this.level > 0 && moving && (landing || this.gpuMs < GPU_LOW) && this.since > this.upWait && this.calm > 1500) {
         let to = this.level;
-        const span = this.landing > 0 ? LEVELS : 3;
-        while (to > Math.max(0, this.level - span) && this.predict(to - 1) < GPU_GOAL * 0.85) to--;
+        const span = landing ? LEVELS : 3, room = GPU_GOAL * (landing ? 0.97 : 0.85);
+        while (to > Math.max(0, this.level - span) && this.predict(to - 1) < room) to--;
         if (to < this.level) {
           this.lastUp = to;
           return this.set(to, `room: GPU ${this.gpuMs.toFixed(1)} ms`);
         }
       }
     } else {
-      // no timer (Firefox, Safari): frame times only. They cannot tell a slow GPU from a browser that
-      // caps the page at 30 frames a second, so a step that does not help is taken back.
+      // No timer (Firefox, Safari): frame times only. They cannot tell a slow GPU from a browser that caps
+      // the page at 30 frames a second, and they come in steps of a refresh interval: a smaller picture may
+      // not show in them until it is much smaller. So the scale goes down, two levels at a time while nearly
+      // every frame is slow, to the smallest one before anything is judged. If the frames are no shorter
+      // there, it was never the GPU: everything is taken back and frame times are no longer trusted.
       if (this.window >= 40) {
         const share = this.slow / this.window;
         this.slow = 0; this.window = 0;
-        if (share > 0.3 && this.locked <= 0 && this.since > 600 && this.level < floor) {
+        if (share > 0.3 && this.locked <= 0 && this.since > 500) {
+          const last = SCALES.length - 1;
           if (this.blind.from < 0) this.blind = { from: this.level, frameMs: this.frameMs, steps: 0 };
-          this.blind.steps++;
-          if (this.blind.steps > 2 && this.frameMs > this.blind.frameMs * 0.88) {
+          if (this.level >= last && this.blind.from < last && this.frameMs > this.blind.frameMs * 0.88) {
             const back = this.blind.from;
             this.blind = { from: -1, frameMs: 0, steps: 0 };
-            this.locked = 45000;
+            this.locked = 600000;
             return this.set(back, 'not the GPU');
           }
-          if (this.lastUp >= 0 && this.lastUp >= this.level) { this.failedUp++; this.upWait = Math.min(120000, this.upWait * 3); }
-          this.lastUp = -1;
-          return this.set(this.level + 1, `${Math.round(share * 100)}% slow frames`);
+          if (this.level < floor) {
+            // a climb that did not hold is taken back, one level, and the next one waits longer
+            const failed = this.lastUp >= 0 && this.lastUp >= this.level;
+            if (failed) { this.failedUp++; this.upWait = Math.min(120000, this.upWait * 3); }
+            this.lastUp = -1;
+            const step = !failed && share > 0.7 && this.level + 2 <= last ? 2 : 1;
+            return this.set(this.level + step, `${Math.round(share * 100)}% slow frames`);
+          }
         }
         if (share < 0.05) this.blind = { from: -1, frameMs: 0, steps: 0 };
       }

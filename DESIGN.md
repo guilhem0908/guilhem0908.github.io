@@ -284,9 +284,13 @@ Budget and rules that came out of it:
   phones), then two levels that thin the Gaussians tiling surfaces. It starts from a pixel budget
   for the kind of GPU (4.2 MP discrete, 1.7 integrated, 1.25 weak integrated, 2.4 unknown) and a
   smaller one for the intro, which costs twice a frame of the run. It steps down when the GPU time
-  stays over 12.5 ms (or, without a timer, when 30 % of the frames are slow; a step that does not
-  help is taken back), and climbs only when there is room, the camera is moving and a wait has
+  stays over 11 ms (the browser needs the rest of the frame to composite the page), and climbs only when there is room, the camera is moving and a wait has
   passed that grows each time a climb did not hold. Steps are 13 %: soft Gaussians hide them.
+  Without a GPU timer (Firefox, Safari) it works from frame times: down while 30 % of the frames
+  are slow, to the smallest scale before judging, because frame times come in steps of a refresh
+  interval; if the frames are no shorter there it was never the GPU (a browser capping the page at
+  30 frames a second) and everything is taken back. `tools/governor.mjs` runs it against simulated
+  machines, with and without a timer.
 - **Text effects are compositor-only.** Blurring letters one by one made the browser compile a
   shader per blur radius in the GPU process (10 to 60 ms each): every title dropped frames while
   the page's own thread was idle. Letters now move and fade. Every title is split and its animation

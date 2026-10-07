@@ -35,8 +35,8 @@ mode = sys.argv[2]
 rest = sys.argv[3:]
 out.mkdir(parents=True, exist_ok=True)
 
-HOME = [('hero', 0.0), ('aist', 0.03), ('aist', 0.16), ('aist', 0.29), ('aist', 0.46), ('aist', 0.58),
-        ('aist', 0.7), ('aist', 0.86), ('aist', 0.96), ('svlr', 0.4), ('tlse', 0.25), ('tlse', 0.7),
+HOME = [('hero', 0.0), ('aist', 0.05), ('aist', 0.2), ('aist', 0.5), ('aist', 0.66),
+        ('aist', 0.8), ('aist', 0.97), ('svlr', 0.4), ('tlse', 0.25), ('tlse', 0.7),
         ('usine', 0.3), ('usine', 0.6), ('pfr', 0.4), ('pfr', 0.8), ('lab', 0.3), ('lab', 0.75),
         ('index', 0.5), ('contact', 0.0)]
 
