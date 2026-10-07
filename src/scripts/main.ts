@@ -303,7 +303,7 @@ async function run() {
     if ((e.key === 'l' || e.key === 'L') && !e.metaKey && !e.ctrlKey && !(e.target as HTMLElement).closest('input')) toggleLens();
   });
   window.addEventListener('click', (e) => {
-    if (!fine || (e.target as HTMLElement).closest('a,button,input,label,video,.labcard,.irow,.cmp')) return;
+    if (!fine || (e.target as HTMLElement).closest('a,button,input,label,video,.labcard,.labrow,.irow,.cmp')) return;
     toggleLens();
   });
 

@@ -59,9 +59,10 @@ no `base` path. CI does not run Python: the CV PDFs and the share image are comm
   for that slug in `caseStudies` in `src/data/site.ts`. The page, the button in its room on the
   home page, the link in the project index and the "next project" chain appear together.
 - **A side project.** List it in `src/data/site.ts` with `published: true`, a repository, a visual
-  and a stack, add its name to `SIDE_NAMES`, then add its copy under `lab.projects` in `en.ts`.
-  A project whose repository is not public yet is not named in this repository: it waits in
-  `src/data/side.local.ts` (ignored by git, same shape, `published: false`) and renders nothing.
+  and a stack, add its name to `SIDE_NAMES`, then add its copy under `lab.projects` in `en.ts` and `fr.ts`.
+  The home page shows the entries marked `card: true` as cards with their clip and the others as
+  one line each (`short` in their copy). A project whose repository is not public yet is not named
+  in this repository: add it only when it is public.
 - **French.** `src/data/fr.ts` (type `SiteContent`) and `src/data/cv/fr.ts` (type `CvContent`) are
   written. Their presence generates `/fr/`, `/fr/projets/<slug>/`, `/fr/labo/` and `/fr/cv/`, the
   `hreflang` links and the language switch. Both files are written with ordinary spaces and end with

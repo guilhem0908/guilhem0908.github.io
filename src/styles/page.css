@@ -163,6 +163,7 @@ html.js .rv.is-in { opacity: 1; transform: none; }
 .labp { border-top: 1px solid var(--hair); }
 .labp__stage { padding: clamp(1rem, 3vw, 2.4rem) 0; }
 .labp__fig .media { width: 100%; max-width: calc(min(72vh, 44rem) * var(--ar, 2)); height: auto; margin-inline: auto; outline: 0; }
+.labp__credit { margin: 0.7rem auto 0; text-align: center; }
 .labp__body { padding: clamp(1.8rem, 4vw, 3.4rem) 0 clamp(3rem, 7vw, 6rem); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 2rem clamp(1.6rem, 5vw, 5rem); align-items: start; }
 .labp__main { display: grid; gap: 1.2rem; justify-items: start; }
 .labp__name { font-size: clamp(2rem, 5.2vw, 5.2rem); text-transform: lowercase; overflow-wrap: anywhere; line-height: 0.92; }

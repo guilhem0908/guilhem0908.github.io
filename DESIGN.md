@@ -190,7 +190,7 @@ carries no phone number and no street address.
 | TLSe Racing | Cone chicane; sensor field-of-view fan sweeps the floor and lights the cones it selects. | One marquee tied to scroll velocity. |
 | Usine 4.0 | The camera leaves the lane on a boom and cranes to 5.3 m, looking down on the floor while it travels: ten mobile robots on one-way lanes queue, stop at docks and yield at the merge; six workstation arms swing. | Huge title scales with the crane. |
 | Fil rouge | The robot keeps the ball on its image centre line (drawn on the floor with its field of view); the ball follows the pointer. The wall holds a screen with the real camera footage. | The web interface on a phone plays in a tile; live ball bearing readout. |
-| Lab | Camera leaves through the roof. | Four cards with the real clips rise in; one figure each. |
+| Lab | Camera leaves through the roof. | Four cards with the real clips rise in, one figure each, then the other side projects as one line each. |
 | Index | Plan view holds. | Rows rise in. |
 | Contact | Top-down: the world becomes the map, whole path drawn. | Email at display size. |
 

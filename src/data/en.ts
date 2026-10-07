@@ -14,7 +14,7 @@ const en: SiteContent = {
       'Final-year robotics student in Toulouse, AIST research intern (Japan, 2026): 3D Gaussian Splatting, robot navigation, Industry 4.0 smart factory (Usine 4.0).',
     labTitle: 'Lab: side projects | Guilhem Carmouze',
     labDescription:
-      'Four side projects: 360° image geometry, 3D Gaussian Splatting, projection error, and robot traffic in an Industry 4.0 smart factory (Usine 4.0).',
+      'Eight side projects: 3D Gaussian Splatting, 360° geometry, navigation maps, cone SLAM, and robots, data and inspection in an Industry 4.0 smart factory (Usine 4.0).',
     ogAlt: 'The name Guilhem Carmouze over a building made of Gaussian splats, drawn like a blueprint, with a red planned path leading through a doorway',
   },
 
@@ -216,8 +216,9 @@ const en: SiteContent = {
 
     lab: {
       title: 'Lab: side projects',
-      text: 'Four personal side projects that extend themes of the work above. Built in October 2026 with AI assistance; every number is reproduced by a script in its repository.',
+      text: 'Eight personal side projects that extend themes of the work above. Built in October 2026 with AI assistance; every number is reproduced by a script in its repository.',
       more: 'Open the lab',
+      others: 'Also in the lab',
     },
 
     index: {
@@ -907,17 +908,17 @@ const en: SiteContent = {
     'usine-4-0': {
       metaTitle: 'Usine 4.0, Industry 4.0 smart factory | Guilhem Carmouze',
       metaDescription:
-        'Usine 4.0, my final-year Industry 4.0 smart factory team project, is in progress. With it: a personal simulation study of robot traffic in a factory aisle.',
+        'Usine 4.0, my final-year Industry 4.0 smart factory team project, is in progress. With it: personal studies of robot traffic, factory data and visual inspection.',
       kicker: 'Final-year team project. 2026 to 2027. In progress.',
-      title: 'Usine 4.0, in progress, and a personal study of robot traffic',
+      title: 'Usine 4.0, in progress, and three personal studies',
       outcome:
-        'This year my class runs a team project on the Industry 4.0 smart factory (Usine 4.0). It is in progress, so this page shows nothing from it. It shows what I studied on the same theme on my own: how many mobile robots a factory aisle can take before it jams.',
+        'This year my class runs a team project on the Industry 4.0 smart factory (Usine 4.0). It is in progress, so this page shows nothing from it. It shows what I studied on the same theme on my own: how many mobile robots a factory aisle can take before it jams, and, more briefly, how far to trust the numbers of a plant dashboard and of a visual inspection gate.',
       meta: {
         role: 'Member of the class project. In progress: nothing more is stated for now.',
         team: 'My final-year class. Nothing more is stated here for now.',
         period: '2026 to 2027, in progress',
         organisation: 'UPSSITECH, University of Toulouse. Robotic and Interactive Systems programme (SRI).',
-        stack: 'Class project: not stated. Personal study: Python, pytest, Matplotlib and Pillow.',
+        stack: 'Class project: not stated. Personal studies: Python, pytest, Matplotlib, Pillow, PyTorch, OPC UA, MQTT, PostgreSQL, Grafana and Docker.',
       },
       videoAnchor: 'lead',
       lead: {
@@ -950,7 +951,7 @@ const en: SiteContent = {
           title: 'What I studied on my own',
           body: [
             'The theme raised a question that my AIST work had left open. There I wrote a single-robot A* planner on an occupancy grid, and prepared a ROS 2 interface for Kachaka, a mobile robot that docks under a shelf and carries it. One robot on an empty map never meets the first question that an Industry 4.0 smart factory asks about a fleet: what happens when a dozen of them share one aisle?',
-            'amr-traffic-lab is my answer, as a personal side project built in October 2026 with AI assistance, independent of the class project. It is the only thing on this page that I can show and measure.',
+            'amr-traffic-lab is my answer, as a personal side project built in October 2026 with AI assistance, independent of the class project. Two shorter personal studies on the same theme sit next to it in the results below.',
           ],
         },
       ],
@@ -987,7 +988,7 @@ const en: SiteContent = {
         {
           kind: 'text',
           title: 'Results of the personal study',
-          body: ['Everything below comes from amr-traffic-lab, my own simulation study. None of it is a result of the class project.'],
+          body: ['Everything below, down to the two shorter studies at the end, comes from amr-traffic-lab, my own simulation study. None of it is a result of the class project.'],
         },
         {
           kind: 'figures',
@@ -1033,6 +1034,24 @@ const en: SiteContent = {
           caption:
             'Orders delivered per hour (top) and gridlocked runs out of 20 (bottom) against fleet size, for the open floor, the narrow aisles and the single corridor. Line: mean of 20 seeded one-hour runs. Band: minimum to maximum. Drawn by scripts/reproduce.py.',
         },
+        {
+          kind: 'text',
+          title: 'Two shorter studies on the same theme',
+          body: [
+            'usine40-cell-pipeline sends a simulated production cell through OPC UA, MQTT, PostgreSQL and Grafana and checks the OEE (overall equipment effectiveness) on the dashboard against the simulator’s own event log. visual-quality-gate re-implements PaDiM and PatchCore on five MVTec AD categories and asks what a visual quality gate costs once its threshold has to be chosen.',
+            'Both are personal side projects of October 2026, independent of the class project. One result of each:',
+          ],
+        },
+        {
+          kind: 'table',
+          caption:
+            'A simulated cell and a public image benchmark, not factory data. The numbers are rewritten by a script of each repository and checked against its README.',
+          head: ['What was measured', 'Value', 'How to read it'],
+          rows: [
+            ['usine40-cell-pipeline: largest gap between the OEE stored by the pipeline and the OEE of the event log, over 3,600 station-windows of 30 s', '0.000 pp', 'Nothing is lost or invented between the simulated PLC and the dashboard; it does not show that OEE is the right KPI. A 60 s broker outage at QoS 0 leaves 45 of 240 windows with a wrong OEE.'],
+            ['visual-quality-gate: good parts refused by PatchCore WR50-10% when the threshold, set from held-out good parts, aims at 5%', '43 / 408 (10.5%)', 'Over 3 seeds, 2.1 times the target, while 85 of 1,353 defective parts (6.3%) still get through.'],
+          ],
+        },
       ],
 
       failed: [
@@ -1055,6 +1074,7 @@ const en: SiteContent = {
             { title: 'A grid world.', text: 'Moves take one tick on a 4-connected grid: no acceleration, turning time, robot footprint or localisation error. Reserved paths are executed perfectly, whereas a real fleet needs margins or replanning when a robot is late.' },
             { title: 'Endless demand, no batteries, no machines.', text: 'Chargers are parking bays, stations are always ready and orders are an endless backlog. The study measures capacity, not the waiting time of an order in a queue.' },
             { title: 'Three hand-drawn layouts, fleets up to 16.', text: 'On the open floor and the narrow aisles the best fleet is a lower bound, since the curve is still rising at 16 robots, the most the chargers can park. One-way aisles, the usual engineering fix, are not studied.' },
+            { title: 'The two shorter studies are small.', text: 'usine40-cell-pipeline runs a simulated cell, and a zero OEE error shows that nothing is lost or invented on the way, not that OEE is the right KPI. visual-quality-gate covers five of the fifteen MVTec AD categories, and its PatchCore threshold refused good parts at about twice the target rate.' },
           ],
         },
       ],
@@ -1064,6 +1084,7 @@ const en: SiteContent = {
           kind: 'list',
           items: [
             { text: 'amr-traffic-lab is a personal side project written in October 2026 with AI assistance: its commits carry a Co-Authored-By trailer. Every number on this page is regenerated by a committed script, and a second script checks the README against the results.' },
+            { text: 'usine40-cell-pipeline and visual-quality-gate are personal side projects of October 2026 too, written with AI assistance and committed with a Co-Authored-By trailer; their numbers are regenerated by committed scripts.' },
             { text: 'The grid A* of the study is new code, not the planner of the AIST internship.' },
             { text: 'The methods come from the literature: space-time A* with a reservation table (Silver, 2005), Conflict-Based Search (Sharon, Stern, Felner and Sturtevant, 2015), and the lifelong, well-formed setting (Ma, Li, Kumar and Koenig, 2017; Čáp, Vokřínek and Kleiner, 2015).' },
           ],
@@ -1073,6 +1094,8 @@ const en: SiteContent = {
       links: [
         { label: 'amr-traffic-lab: the simulation study (repository)', href: 'https://github.com/guilhem0908/amr-traffic-lab' },
         { label: 'The same study on the lab page, with its clip', href: '/lab/#amr-traffic-lab' },
+        { label: 'usine40-cell-pipeline: the simulated cell, from OPC UA to Grafana (repository)', href: 'https://github.com/guilhem0908/usine40-cell-pipeline' },
+        { label: 'visual-quality-gate: PaDiM and PatchCore as a quality gate (repository)', href: 'https://github.com/guilhem0908/visual-quality-gate' },
         { label: 'nav_3dgs_pano: the single-robot A* planner of the AIST internship', href: 'https://github.com/guilhem0908/nav_3dgs_pano' },
         { label: 'KachakaNavigation: the ROS 2 interface prepared for the Kachaka robot', href: 'https://github.com/guilhem0908/KachakaNavigation' },
       ],
@@ -1097,6 +1120,7 @@ const en: SiteContent = {
           meaning: 'Seam step ratio under a ±5% exposure mismatch between views, strict cube against 96° faces with feathering (mean over 3 seeds, 1 = invisible). Feathering hides the mismatch rather than fixing it: WS-PSNR stays at 35.5 dB.',
         },
         extends: 'The internship stitched six pinhole views into panoramas with an overlapped cubemap. Face size, overlap and feather width are settings whose cost this project quantifies, with its own code and generated images.',
+        short: '360° image geometry in NumPy: 96° feathered faces cut the seam step ratio from 5.6 to 1.06 under a ±5% exposure mismatch.',
       },
       microsplat: {
         what: '3D Gaussian Splatting small enough to read in one sitting: a NumPy reference rasteriser, a differentiable PyTorch twin, and tests that pin every equation.',
@@ -1118,6 +1142,29 @@ const en: SiteContent = {
           meaning: 'Splat standard deviation at which the projection error passes half a pixel (2-Wasserstein) at 45° off-axis in a pinhole camera: EWA with the exact Jacobian, then the unscented transform with 3DGUT’s sigma points.',
         },
         extends: 'Most Gaussian renderers assume a perspective camera, which is why the internship rendered six pinhole views and stitched them. This project measures what each approximation costs, in pixels, including near the poles of a panorama.',
+        short: 'Pinhole camera, 45° off-axis: the projection error passes half a pixel at a splat deviation of 18 px with EWA and 44 px with the unscented transform.',
+      },
+      'splat-navmap': {
+        what: 'A study of when an occupancy grid sliced from a 3D Gaussian Splatting scene makes an A* planner drive through walls or refuse a doorway, on synthetic flats whose true geometry is known.',
+        shows: 'The opacity threshold swept from 0.05 to 0.95 on one flat (seed 4) and one start-goal pair chosen by hand. For centre counting and for footprint accumulation: the Gaussians seen from above, the extracted grid with its phantom and missing cells, and the A* path, with red crosses where it enters real geometry. The Gaussians are synthetic surfels with modelled defects, not trained splats.',
+        result: {
+          from: '28.8',
+          value: '1.6',
+          unit: '%',
+          meaning: 'Paths that enter real geometry at an opacity threshold of 0.5, with moderate defects: centre counting, then footprint accumulation (1,000 start-goal pairs on 10 synthetic flats). The map with the lower IoU plans better (0.652 against 0.663).',
+        },
+        extends: 'My internship report derived an occupancy grid from a slice of a supplied 3DGS scene and planned on it with A*, and noted that how Gaussian opacity relates to collision geometry was only partly validated. This project studies it on synthetic flats whose geometry is known. Nothing from the internship is reused.',
+      },
+      'cone-ekf-slam': {
+        what: 'EKF localisation and EKF-SLAM on simulated Formula Student cone tracks seen through a limited field of view, with the consistency tests (NEES, NIS) that show when the filter’s own uncertainty can no longer be trusted.',
+        shows: 'A closed cone track from above: the true path in grey, the EKF-SLAM estimate in red, the sensor sector and the 99% ellipses of the pose and of every mapped cone. The pose uncertainty grows to 0.65 m before the first cones are seen again at t = 37.5 s, then drops to 0.03 m, and the ellipses of the cones out of view shrink with it (track seed 7, 1.3 laps). Two strip charts below follow the pose NEES and the uncertainties.',
+        result: {
+          from: '17 / 50',
+          value: '1 / 50',
+          meaning: 'runs in which nearest-neighbour association matched a wrong cone, with a sensor range of 4 m (that of the original 2D simulator, 1.1 cones per scan) then 15 m (6.4 cones per scan). 5 tracks, 10 noise seeds each.',
+        },
+        extends: 'In the TLSe Racing driverless team my part is the simulator and the field-of-view sensor model that picks the cones the car can see; the planners are my teammates’ work. This project studies the stage between the two: estimating where the car and the cones are from noisy detections. Simulation only: it has never run on a car and shares no code or track with the team’s repositories.',
+        short: 'Cone tracks seen through a limited field of view: nearest-neighbour association picks a wrong cone in 17 of 50 runs at 4 m of sensor range, in 1 of 50 at 15 m.',
       },
       'amr-traffic-lab': {
         what: 'A seeded simulation study of Industry 4.0 smart-factory (Usine 4.0) intralogistics: how many autonomous mobile robots a factory aisle can take before it jams, with the no-collision invariant checked on every tick.',
@@ -1127,6 +1174,28 @@ const en: SiteContent = {
           meaning: 'one-hour runs gridlocked with the reservation manager, over three layouts. On the open floor it also delivers 24% more orders per hour than the naive manager with 16 robots (528.9 against 427.2).',
         },
         extends: 'The internship planner moved one robot on an empty map. This project adds time, a reservation table and Conflict-Based Search, and measures the fleet. It is independent of the final-year class project on Usine 4.0.',
+      },
+      'usine40-cell-pipeline': {
+        what: 'A simulated Industry 4.0 (Usine 4.0) production cell sent through OPC UA, MQTT, PostgreSQL and Grafana, with the OEE (overall equipment effectiveness) on the dashboard checked against the simulator’s own event log, and every latency and loss measured.',
+        shows: 'The live Grafana dashboard during a scripted scenario: nominal production, an injected breakdown that fires the fault alert, a gateway kill that turns the timeline to NO DATA and fires the stale-data alert, then the recovery. The frames are real screenshots of the provisioned dashboard; only the caption strip is added.',
+        result: {
+          value: '0.000',
+          unit: 'pp',
+          meaning: 'Largest gap between the OEE stored by the pipeline and the OEE recomputed from the simulator’s event log, over 3,600 station-windows of 30 s. The only way I found to break it is to lose samples: a 60 s broker outage at QoS 0 leaves 45 of 240 windows with a wrong OEE.',
+        },
+        extends: 'At AIST I prepared a ROS 2 interface with stale-frame rejection, velocity clamps and a dead-man timer. Here I wanted the same discipline on the machine side of a factory: stamp every value at the source, never trust a message because it arrived, count what is lost. It is independent of the final-year class project on Usine 4.0.',
+        short: 'A simulated cell through OPC UA, MQTT, PostgreSQL and Grafana: the stored OEE matches the event log in every window compared, largest error 0.000 pp.',
+      },
+      'visual-quality-gate': {
+        what: 'A training-free visual quality gate for an Industry 4.0 (Usine 4.0) line: PaDiM and PatchCore re-implemented in PyTorch, measured on five MVTec AD categories and judged on a line manager’s question: how many good parts do I refuse to stop how many defects?',
+        shows: 'Five test parts scored by PatchCore WR50-10% (seed 0), each with its anomaly heat map, score, threshold and OK or NOK verdict: the median caught defect, the median accepted good part, the caught defect closest to the threshold, the worst escape (a defective part that passed) and the worst false reject (a good part refused).',
+        credit: 'Images: MVTec AD (Bergmann et al., CVPR 2019), CC BY-NC-SA 4.0.',
+        result: {
+          value: '10.5',
+          unit: '%',
+          meaning: 'of good parts refused by PatchCore WR50-10% when its threshold, set from held-out good parts, aims at 5%: 43 of 408 over 3 seeds, 2.1 times the target, while 6.3% of defective parts (85 of 1,353) still get through.',
+        },
+        extends: 'In my first year of the engineering cycle I co-wrote with Alec Bossard a colour-ball detector in plain C, which works when the thing to find is a colour you can name in advance. This project is its learned-feature successor: the detector only sees good parts, and the threshold is set from good parts too. It is independent of the Usine 4.0 class project.',
       },
     },
     outro: 'A question about one of them? Write to me.',

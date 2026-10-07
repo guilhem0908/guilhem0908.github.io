@@ -38,6 +38,7 @@ const projects = publishedSide
             <figure class="labp__fig" style={`--ar:${media[p.visual!].w / media[p.visual!].h}`}>
               <Media name={p.visual!} alt={p.copy!.shows} vt={`lab-${p.name}`} eager={i === 0} />
             </figure>
+            {p.copy!.credit && <p class="small hz labp__credit">{p.copy!.credit}</p>}
           </div>
         </div>
         <div class="page labp__body">

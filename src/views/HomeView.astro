@@ -30,6 +30,9 @@ const codeOf = (room: RoomId) => caseStudies[slugOfRoom(room)].code;
 const side = publishedSide
   .map((p) => ({ ...p, copy: t.lab.projects[p.name] ?? en.lab.projects[p.name] }))
   .filter((p) => p.copy);
+// the strongest are cards with their clip (the only videos of the section); the others are one line each
+const cards = side.filter((p) => p.card);
+const rows = side.filter((p) => !p.card);
 
 const waypoints: [string, string][] = [
   ['hero', h.waypoints.hero], ['aist', h.waypoints.aist], ['tlse', h.waypoints.tlse], ['usine', h.waypoints.usine], ['pfr', h.waypoints.pfr],
@@ -271,7 +274,7 @@ const zero = n1.format(0);
         <p><a class="btn" href={labHref}>{h.lab.more} <span aria-hidden="true">→</span></a></p>
       </header>
       <ul class="labcards">
-        {side.map((p) => (
+        {cards.map((p) => (
           <li class="labcard" data-rise>
             <a class="labcard__media" href={`${labHref}#${p.name}`} tabindex="-1" aria-hidden="true">
               <Media name={p.visual!} alt="" vt={`lab-${p.name}`} />
@@ -280,11 +283,25 @@ const zero = n1.format(0);
               <h3 class="labcard__name"><a href={`${labHref}#${p.name}`}>{p.name}</a></h3>
               <p class="small labcard__what">{p.copy!.what}</p>
               <BigFigure figure={p.copy!.result} size="m" />
+              {p.copy!.credit && <p class="small labcard__credit">{p.copy!.credit}</p>}
               <p class="labcard__links"><a class="lnk" href={repos[p.repo!]} rel="noopener">{t.ui.repository}</a></p>
             </div>
           </li>
         ))}
       </ul>
+      {rows.length > 0 && (
+        <div class="labmore" data-rise>
+          <h3 class="read labmore__h">{h.lab.others}</h3>
+          <ul class="labrows">
+            {rows.map((p) => (
+              <li class="labrow">
+                <h4 class="labrow__name"><a href={`${labHref}#${p.name}`}>{p.name}</a></h4>
+                <p class="small labrow__line">{p.copy!.short ?? p.copy!.what}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   </section>
 

@@ -22,7 +22,7 @@ const fr: SiteContent = {
       'Étudiant ingénieur en robotique en dernière année à Toulouse, stagiaire à l’AIST (Japon) en 2026 : 3D Gaussian Splatting, navigation de robots, Usine 4.0.',
     labTitle: 'Labo : projets personnels | Guilhem Carmouze',
     labDescription:
-      'Quatre projets personnels : géométrie d’images 360°, 3D Gaussian Splatting, erreur de projection, et trafic de robots dans une usine connectée (Usine 4.0).',
+      'Huit projets personnels : 3D Gaussian Splatting, géométrie 360°, cartes de navigation, SLAM sur cônes, et robots, données et inspection d’une usine connectée (Usine 4.0).',
     ogAlt: 'Le nom Guilhem Carmouze sur un bâtiment fait de splats gaussiens, dessiné comme un plan technique (blueprint), avec un chemin rouge planifié qui traverse une porte',
   },
 
@@ -224,8 +224,9 @@ const fr: SiteContent = {
 
     lab: {
       title: 'Labo : projets personnels',
-      text: 'Quatre projets personnels qui prolongent des thèmes du travail ci-dessus. Réalisés en octobre 2026 avec l’aide d’une IA ; chaque chiffre est reproduit par un script de son dépôt.',
+      text: 'Huit projets personnels qui prolongent des thèmes du travail ci-dessus. Réalisés en octobre 2026 avec l’aide d’une IA ; chaque chiffre est reproduit par un script de son dépôt.',
       more: 'Ouvrir le labo',
+      others: 'Aussi au labo',
     },
 
     index: {
@@ -915,17 +916,17 @@ const fr: SiteContent = {
     'usine-4-0': {
       metaTitle: 'Usine 4.0, projet d’usine connectée | Guilhem Carmouze',
       metaDescription:
-        'Usine 4.0, mon projet d’équipe de dernière année sur l’usine connectée (Industrie 4.0), est en cours. Avec lui : une étude personnelle du trafic de robots.',
+        'Usine 4.0, mon projet d’équipe de dernière année sur l’usine connectée (Industrie 4.0), est en cours. Avec lui : des études personnelles sur le trafic de robots, les données d’usine et l’inspection visuelle.',
       kicker: 'Projet d’équipe de dernière année. 2026-2027. En cours.',
-      title: 'Usine 4.0, en cours, et une étude personnelle du trafic de robots',
+      title: 'Usine 4.0, en cours, et trois études personnelles',
       outcome:
-        'Cette année, ma promotion mène un projet d’équipe sur l’Usine 4.0 (Industrie 4.0, usine connectée). Il est en cours : cette page n’en montre donc rien. Elle montre ce que j’ai étudié de mon côté sur le même thème : combien de robots mobiles une allée d’usine peut accueillir avant de se bloquer.',
+        'Cette année, ma promotion mène un projet d’équipe sur l’Usine 4.0 (Industrie 4.0, usine connectée). Il est en cours : cette page n’en montre donc rien. Elle montre ce que j’ai étudié de mon côté sur le même thème : combien de robots mobiles une allée d’usine peut accueillir avant de se bloquer, et, plus brièvement, jusqu’où faire confiance aux chiffres d’un tableau de bord d’usine et d’un contrôle qualité visuel.',
       meta: {
         role: 'Membre du projet de la promotion. En cours : rien de plus n’est précisé pour l’instant.',
         team: 'Ma promotion de dernière année. Rien de plus n’est précisé ici pour l’instant.',
         period: '2026-2027, en cours',
         organisation: 'UPSSITECH, Université de Toulouse. Cursus Systèmes Robotiques et Interactifs (SRI).',
-        stack: 'Projet de promotion : non précisé. Étude personnelle : Python, pytest, Matplotlib et Pillow.',
+        stack: 'Projet de promotion : non précisé. Études personnelles : Python, pytest, Matplotlib, Pillow, PyTorch, OPC UA, MQTT, PostgreSQL, Grafana et Docker.',
       },
       videoAnchor: 'lead',
       lead: {
@@ -958,7 +959,7 @@ const fr: SiteContent = {
           title: 'Ce que j’ai étudié seul',
           body: [
             'Le thème a soulevé une question que mon travail à l’AIST avait laissée ouverte. J’y ai écrit un planificateur A* pour un seul robot sur une grille d’occupation, et préparé une interface ROS 2 pour Kachaka, un robot mobile qui s’arrime sous une étagère et la transporte. Un seul robot sur une carte vide ne rencontre jamais la première question que l’usine connectée (Usine 4.0) pose à une flotte : que se passe-t-il quand une douzaine de robots partagent une seule allée ?',
-            'amr-traffic-lab est ma réponse, un projet personnel réalisé en octobre 2026 avec l’aide d’une IA, indépendant du projet de promotion. C’est la seule chose de cette page que je peux montrer et mesurer.',
+            'amr-traffic-lab est ma réponse, un projet personnel réalisé en octobre 2026 avec l’aide d’une IA, indépendant du projet de promotion. Deux études personnelles plus courtes sur le même thème viennent juste après, dans les résultats.',
           ],
         },
       ],
@@ -995,7 +996,7 @@ const fr: SiteContent = {
         {
           kind: 'text',
           title: 'Résultats de l’étude personnelle',
-          body: ['Tout ce qui suit vient d’amr-traffic-lab, ma propre étude par simulation. Rien de cela n’est un résultat du projet de promotion.'],
+          body: ['Tout ce qui suit, jusqu’aux deux études plus courtes à la fin, vient d’amr-traffic-lab, ma propre étude par simulation. Rien de cela n’est un résultat du projet de promotion.'],
         },
         {
           kind: 'figures',
@@ -1041,6 +1042,24 @@ const fr: SiteContent = {
           caption:
             'Commandes livrées par heure (haut) et simulations bloquées sur 20 (bas) en fonction de la taille de la flotte, pour l’atelier ouvert, les allées étroites et le couloir unique. Ligne : moyenne de 20 simulations d’une heure à graine fixée. Bande : minimum à maximum. Dessiné par scripts/reproduce.py. Les légendes du graphique sont en anglais : open floor, narrow aisles, single corridor.',
         },
+        {
+          kind: 'text',
+          title: 'Deux études plus courtes sur le même thème',
+          body: [
+            'usine40-cell-pipeline fait passer une cellule de production simulée par OPC UA, MQTT, PostgreSQL et Grafana et compare l’OEE (taux de rendement synthétique) du tableau de bord au journal d’événements du simulateur. visual-quality-gate réimplémente PaDiM et PatchCore sur cinq catégories de MVTec AD et demande ce que coûte un contrôle qualité visuel quand il faut choisir son seuil.',
+            'Ce sont deux projets personnels d’octobre 2026, indépendants du projet de promotion. Un résultat de chacun :',
+          ],
+        },
+        {
+          kind: 'table',
+          caption:
+            'Une cellule simulée et un banc d’essai d’images public, pas des données d’usine. Les nombres sont réécrits par un script de chaque dépôt et vérifiés contre son README.',
+          head: ['Ce qui a été mesuré', 'Valeur', 'Comment le lire'],
+          rows: [
+            ['usine40-cell-pipeline : plus grand écart entre l’OEE stocké par le pipeline et l’OEE du journal d’événements, sur 3 600 fenêtres de station de 30 s', '0,000 pp', 'Rien n’est perdu ni inventé entre l’automate simulé et le tableau de bord ; cela ne montre pas que l’OEE est le bon indicateur. Une coupure du broker de 60 s en QoS 0 laisse 45 fenêtres sur 240 avec un OEE faux.'],
+            ['visual-quality-gate : bonnes pièces refusées par PatchCore WR50-10% quand le seuil, fixé sur des bonnes pièces mises de côté, vise 5 %', '43 / 408 (10,5 %)', 'Sur 3 graines, soit 2,1 fois la cible, alors que 85 pièces défectueuses sur 1 353 (6,3 %) passent quand même.'],
+          ],
+        },
       ],
 
       failed: [
@@ -1063,6 +1082,7 @@ const fr: SiteContent = {
             { title: 'Un monde de grille.', text: 'Les déplacements prennent un pas de temps sur une grille 4-connexe : pas d’accélération, de temps de rotation, d’empreinte de robot ni d’erreur de localisation. Les chemins réservés sont exécutés parfaitement, alors qu’une vraie flotte a besoin de marges ou de replanification quand un robot est en retard.' },
             { title: 'Une demande sans fin, ni batteries, ni machines.', text: 'Les chargeurs sont des places de stationnement, les stations sont toujours prêtes et la file de commandes ne se vide jamais. L’étude mesure la capacité, pas le temps d’attente d’une commande dans une file.' },
             { title: 'Trois plans dessinés à la main, des flottes jusqu’à 16.', text: 'Dans l’atelier ouvert et les allées étroites, la meilleure flotte est une borne inférieure, puisque la courbe monte encore à 16 robots, le maximum que les chargeurs peuvent garer. Les allées à sens unique, la solution d’ingénierie habituelle, ne sont pas étudiées.' },
+            { title: 'Les deux études plus courtes sont petites.', text: 'usine40-cell-pipeline fait tourner une cellule simulée, et une erreur d’OEE nulle montre que rien n’est perdu ni inventé en chemin, pas que l’OEE est le bon indicateur. visual-quality-gate couvre cinq des quinze catégories de MVTec AD, et son seuil PatchCore a refusé des bonnes pièces environ deux fois plus souvent que la cible.' },
           ],
         },
       ],
@@ -1072,6 +1092,7 @@ const fr: SiteContent = {
           kind: 'list',
           items: [
             { text: 'amr-traffic-lab est un projet personnel écrit en octobre 2026 avec l’aide d’une IA : ses commits portent la mention Co-Authored-By. Chaque nombre de cette page est régénéré par un script versionné, et un second script vérifie le README contre les résultats.' },
+            { text: 'usine40-cell-pipeline et visual-quality-gate sont aussi des projets personnels d’octobre 2026, écrits avec l’aide d’une IA et versionnés avec une mention Co-Authored-By ; leurs nombres sont régénérés par des scripts versionnés.' },
             { text: 'L’A* sur grille de l’étude est du code nouveau, pas le planificateur du stage à l’AIST.' },
             { text: 'Les méthodes viennent de la littérature : A* espace-temps avec table de réservations (Silver, 2005), Conflict-Based Search (Sharon, Stern, Felner et Sturtevant, 2015), et le cadre en flux continu (lifelong) bien formé (Ma, Li, Kumar et Koenig, 2017 ; Čáp, Vokřínek et Kleiner, 2015).' },
           ],
@@ -1081,6 +1102,8 @@ const fr: SiteContent = {
       links: [
         { label: 'amr-traffic-lab : l’étude par simulation (dépôt)', href: 'https://github.com/guilhem0908/amr-traffic-lab' },
         { label: 'La même étude sur la page du labo, avec sa vidéo', href: '/fr/labo/#amr-traffic-lab' },
+        { label: 'usine40-cell-pipeline : la cellule simulée, d’OPC UA à Grafana (dépôt)', href: 'https://github.com/guilhem0908/usine40-cell-pipeline' },
+        { label: 'visual-quality-gate : PaDiM et PatchCore comme contrôle qualité (dépôt)', href: 'https://github.com/guilhem0908/visual-quality-gate' },
         { label: 'nav_3dgs_pano : le planificateur A* à un seul robot du stage à l’AIST', href: 'https://github.com/guilhem0908/nav_3dgs_pano' },
         { label: 'KachakaNavigation : l’interface ROS 2 préparée pour le robot Kachaka', href: 'https://github.com/guilhem0908/KachakaNavigation' },
       ],
@@ -1105,6 +1128,7 @@ const fr: SiteContent = {
           meaning: 'Rapport de saut à la couture avec un écart d’exposition de ±5 % entre les vues, cube strict contre faces de 96° avec feathering (moyenne sur 3 graines aléatoires, 1 = invisible). Le feathering masque l’écart plutôt qu’il ne le corrige : le WS-PSNR reste à 35,5 dB.',
         },
         extends: 'Le stage assemblait six vues pinhole en panoramas avec une cubemap à recouvrement. La taille des faces, le recouvrement et la largeur du fondu (feathering) sont des réglages dont ce projet quantifie le coût, avec son propre code et ses propres images.',
+        short: 'Géométrie d’images 360° en NumPy : des faces de 96° avec feathering ramènent le rapport de saut à la couture de 5,6 à 1,06 pour un écart d’exposition de ±5 %.',
       },
       microsplat: {
         what: 'Du 3D Gaussian Splatting assez court pour se lire d’une traite : un rasteriseur de référence en NumPy, son jumeau différentiable en PyTorch, et des tests qui verrouillent chaque équation.',
@@ -1126,6 +1150,29 @@ const fr: SiteContent = {
           meaning: 'Écart type du splat à partir duquel l’erreur de projection dépasse un demi-pixel (2-Wasserstein) à 45° hors axe dans une caméra pinhole : EWA avec le jacobien exact, puis la transformée unscented avec les points sigma de 3DGUT.',
         },
         extends: 'La plupart des moteurs de rendu gaussiens supposent une caméra en perspective, c’est pourquoi le stage rendait six vues pinhole et les assemblait. Ce projet mesure ce que coûte chaque approximation, en pixels, y compris près des pôles d’un panorama.',
+        short: 'Caméra pinhole, 45° hors axe : l’erreur de projection dépasse un demi-pixel à un écart type de splat de 18 px avec EWA et de 44 px avec la transformée unscented.',
+      },
+      'splat-navmap': {
+        what: 'Une étude de ce qui arrive quand une grille d’occupation découpée dans une scène de 3D Gaussian Splatting pousse un planificateur A* à traverser des murs ou à refuser une porte, sur des appartements synthétiques dont la vraie géométrie est connue.',
+        shows: 'Le seuil d’opacité balayé de 0,05 à 0,95 sur un appartement (graine 4) et une paire départ-arrivée choisie à la main. Pour le comptage des centres et pour l’accumulation d’empreintes : les gaussiennes vues de dessus, la grille extraite avec ses cellules fantômes et manquantes, et le chemin A*, avec des croix rouges là où il entre dans la géométrie réelle. Les gaussiennes sont des surfels synthétiques avec des défauts modélisés, pas des splats entraînés.',
+        result: {
+          from: '28,8',
+          value: '1,6',
+          unit: '%',
+          meaning: 'Part des chemins qui entrent dans la géométrie réelle à un seuil d’opacité de 0,5, avec des défauts modérés : comptage des centres, puis accumulation d’empreintes (1 000 paires départ-arrivée sur 10 appartements synthétiques). La carte qui a le plus faible IoU planifie mieux (0,652 contre 0,663).',
+        },
+        extends: 'Mon rapport de stage dérivait une grille d’occupation d’une tranche d’une scène 3DGS fournie et planifiait dessus avec A*, en notant que le lien entre l’opacité des gaussiennes et la géométrie de collision n’était validé que partiellement. Ce projet l’étudie sur des appartements synthétiques à la géométrie connue. Rien du stage n’est réutilisé.',
+      },
+      'cone-ekf-slam': {
+        what: 'Localisation EKF et EKF-SLAM sur des pistes de cônes de Formula Student simulées, vues à travers un champ de vision limité, avec les tests de cohérence (NEES, NIS) qui montrent quand l’incertitude annoncée par le filtre n’est plus fiable.',
+        shows: 'Une piste de cônes fermée vue de dessus : le chemin réel en gris, l’estimation d’EKF-SLAM en rouge, le secteur du capteur et les ellipses à 99 % de la pose et de chaque cône cartographié. L’incertitude de pose monte à 0,65 m avant que les premiers cônes soient revus à t = 37,5 s, puis retombe à 0,03 m, et les ellipses des cônes hors de vue rétrécissent avec elle (graine de piste 7, 1,3 tour). Deux courbes en dessous suivent le NEES de la pose et les incertitudes.',
+        result: {
+          from: '17 / 50',
+          value: '1 / 50',
+          meaning: 'simulations où l’association au plus proche voisin a retenu un mauvais cône, avec une portée de capteur de 4 m (celle du simulateur 2D d’origine, 1,1 cône par scan) puis de 15 m (6,4 cônes par scan). 5 pistes, 10 graines de bruit chacune.',
+        },
+        extends: 'Dans l’équipe driverless de TLSe Racing, ma part est le simulateur et le modèle de capteur à champ de vision qui choisit les cônes visibles par la voiture ; les planificateurs sont le travail de mes coéquipiers. Ce projet étudie l’étape entre les deux : estimer où sont la voiture et les cônes à partir de détections bruitées. Simulation uniquement : il n’a jamais tourné sur une voiture et ne partage ni code ni piste avec les dépôts de l’équipe.',
+        short: 'Pistes de cônes vues à travers un champ de vision limité : l’association au plus proche voisin retient un mauvais cône dans 17 simulations sur 50 avec 4 m de portée, dans 1 sur 50 avec 15 m.',
       },
       'amr-traffic-lab': {
         what: 'Une étude par simulation (graines aléatoires fixées) de l’intralogistique de l’usine connectée (Usine 4.0, Industrie 4.0) : combien de robots mobiles autonomes une allée d’usine peut accueillir avant de se bloquer, avec l’invariant « zéro collision » vérifié à chaque pas de temps.',
@@ -1135,6 +1182,28 @@ const fr: SiteContent = {
           meaning: 'simulations d’une heure bloquées avec le gestionnaire à réservation, sur trois plans. Dans l’atelier ouvert, il livre aussi 24 % de commandes de plus par heure que le gestionnaire naïf avec 16 robots (528,9 contre 427,2).',
         },
         extends: 'Le planificateur du stage déplaçait un robot sur une carte vide. Ce projet ajoute le temps, une table de réservations et du Conflict-Based Search, et mesure la flotte. Il est indépendant du projet de promotion de dernière année sur l’Usine 4.0.',
+      },
+      'usine40-cell-pipeline': {
+        what: 'Une cellule de production simulée de l’Usine 4.0 (Industrie 4.0) qui traverse OPC UA, MQTT, PostgreSQL et Grafana, avec l’OEE (taux de rendement synthétique) du tableau de bord vérifié contre le journal d’événements du simulateur, et chaque latence et chaque perte mesurées.',
+        shows: 'Le tableau de bord Grafana en direct pendant un scénario scripté : production nominale, une panne injectée qui déclenche l’alerte de défaut, un arrêt de la passerelle qui fait passer la frise à NO DATA et déclenche l’alerte de données périmées, puis la reprise. Les images sont de vraies captures du tableau de bord provisionné ; seule la bande de légende est ajoutée.',
+        result: {
+          value: '0,000',
+          unit: 'pp',
+          meaning: 'Plus grand écart entre l’OEE stocké par le pipeline et l’OEE recalculé à partir du journal d’événements du simulateur, sur 3 600 fenêtres de station de 30 s. Le seul moyen que j’ai trouvé de le casser est de perdre des échantillons : une coupure du broker de 60 s en QoS 0 laisse 45 fenêtres sur 240 avec un OEE faux.',
+        },
+        extends: 'À l’AIST, j’ai préparé une interface ROS 2 avec rejet des images périmées, limites de vitesse et minuterie de sécurité (dead-man). Ici, je voulais la même rigueur côté machines d’une usine : horodater chaque valeur à la source, ne jamais faire confiance à un message parce qu’il est arrivé, compter ce qui se perd. Il est indépendant du projet de promotion de dernière année sur l’Usine 4.0.',
+        short: 'Une cellule simulée à travers OPC UA, MQTT, PostgreSQL et Grafana : l’OEE stocké égale celui du journal d’événements dans chaque fenêtre comparée, écart maximal 0,000 pp.',
+      },
+      'visual-quality-gate': {
+        what: 'Un contrôle qualité visuel sans entraînement pour une ligne de l’Usine 4.0 (Industrie 4.0) : PaDiM et PatchCore réimplémentés en PyTorch, mesurés sur cinq catégories de MVTec AD et jugés sur la question d’un responsable de ligne : combien de bonnes pièces je refuse pour arrêter combien de défauts ?',
+        shows: 'Cinq pièces de test notées par PatchCore WR50-10% (graine 0), chacune avec sa carte d’anomalie, son score, son seuil et son verdict OK ou NOK : le défaut attrapé médian, la bonne pièce acceptée médiane, le défaut attrapé le plus proche du seuil, la pire fuite (une pièce défectueuse acceptée) et le pire faux rejet (une bonne pièce refusée).',
+        credit: 'Images : MVTec AD (Bergmann et al., CVPR 2019), CC BY-NC-SA 4.0.',
+        result: {
+          value: '10,5',
+          unit: '%',
+          meaning: 'des bonnes pièces refusées par PatchCore WR50-10% quand son seuil, fixé sur des bonnes pièces mises de côté, vise 5 % : 43 sur 408 sur 3 graines, soit 2,1 fois la cible, alors que 6,3 % des pièces défectueuses (85 sur 1 353) passent quand même.',
+        },
+        extends: 'Pendant ma première année du cycle ingénieur, j’ai co-écrit avec Alec Bossard un détecteur de balles de couleur en C pur, qui marche quand ce qu’on cherche est une couleur qu’on sait nommer d’avance. Ce projet en est le successeur à caractéristiques apprises : le détecteur ne voit que des bonnes pièces, et le seuil est lui aussi fixé sur des bonnes pièces. Il est indépendant du projet de promotion sur l’Usine 4.0.',
       },
     },
     outro: 'Une question sur l’un d’eux ? Mon e-mail est en bas de la page.',

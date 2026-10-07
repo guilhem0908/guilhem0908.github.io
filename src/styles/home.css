@@ -75,6 +75,15 @@ html.rm .cue { display: flex; margin-top: 0.4rem; }
 .labcard__what { color: var(--haze); }
 .labcard .bigfig--m { grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.9rem; align-items: start; padding-top: 0.6rem; border-top: 1px solid var(--hair); }
 .labcard .bigfig__num { color: var(--paper); line-height: 1; }
+.labcard__credit { color: var(--haze); }
+.labmore { margin-top: 1.2rem; display: grid; gap: 0.5rem; }
+.labmore__h { color: var(--haze); font-size: 0.72rem; }
+.labrows { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 0.6rem 1.2rem; }
+.labrow { background: var(--plate); padding: 0.7rem 0.95rem 0.8rem; display: grid; gap: 0.25rem; align-content: start; }
+.labrow__name { margin: 0; font-size: clamp(1.05rem, 1.5vw, 1.3rem); font-stretch: 112%; font-weight: 740; letter-spacing: -0.02em; line-height: 1.1; overflow-wrap: anywhere; }
+.labrow__name a { text-decoration: underline; text-decoration-color: var(--fil); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+.labrow__name a:hover { color: var(--cone); }
+.labrow__line { color: var(--haze); }
 
 /* project index */
 .index__head { display: grid; gap: 0.3rem; }
@@ -193,6 +202,9 @@ html.gl .hint__feed { color: var(--haze); }
 html.gl .sec--lab { padding: 34vh calc(var(--pad) + 210px) 16vh var(--pad); overflow-x: clip; }
 html.gl .labhome__head { background: var(--plate); padding: 1rem 1.2rem 1.1rem; max-width: 40rem; }
 html.gl .labcards { margin-top: 1.4rem; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 68rem; }
+html.gl .labmore { margin-top: 1.2rem; max-width: 68rem; }
+html.gl .labmore__h { background: var(--plate); padding: 0.3rem 0.6rem; justify-self: start; }
+html.gl .labrows { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 html.gl .sec--index { padding: 12vh calc(var(--pad) + 210px) 22vh var(--pad); }
 html.gl .index__head { background: var(--plate); padding: 0.9rem 1.2rem 1rem; display: table; }
 html.gl .index__list { max-width: min(46rem, 100%); }
@@ -385,6 +397,7 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .contact .d-l { max-width: none; background: var(--plate); padding: 0.12em 0.2em 0.06em; margin-left: -0.2em; }
   html.gl .sec--lab { padding: 30vh 10px 12vh; }
   html.gl .labcards { grid-template-columns: 1fr; }
+  html.gl .labrows { grid-template-columns: 1fr; }
   html.gl .sec--index { padding: 8vh 10px 18vh; }
 }
 

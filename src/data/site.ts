@@ -40,6 +40,10 @@ export const repos = {
   erpkit: GH + 'erpkit',
   microsplat: GH + 'microsplat',
   'gaussian-projection-bench': GH + 'gaussian-projection-bench',
+  'splat-navmap': GH + 'splat-navmap',
+  'cone-ekf-slam': GH + 'cone-ekf-slam',
+  'usine40-cell-pipeline': GH + 'usine40-cell-pipeline',
+  'visual-quality-gate': GH + 'visual-quality-gate',
 } as const;
 export type RepoKey = keyof typeof repos;
 
@@ -102,6 +106,10 @@ export const media = {
   labMicrosplat: vid('lab/microsplat', 808, 238),
   labProjection: vid('lab/gaussian-projection-bench', 900, 440),
   labAmr: vid('lab/amr-traffic-lab', 896, 276),
+  labSplatNavmap: vid('lab/splat-navmap', 900, 600),
+  labConeEkf: vid('lab/cone-ekf-slam', 800, 912),
+  labUsineCell: vid('lab/usine40-cell-pipeline', 900, 626),
+  labQualityGate: vid('lab/visual-quality-gate', 900, 390),
   // case studies: TLSe Racing, Projet Fil Rouge, Usine 4.0
   tlseClosedLoop: vid('tlse-closed-loop', 960, 380),
   tlsePlanners: vid('tlse-planners', 890, 300),
@@ -121,27 +129,41 @@ export const ogImage = (lang: Lang): ImageAsset => (lang === 'fr' ? media.ogFr :
 // ------------------------------------------------------------------ side projects
 
 /** Names of the side projects whose repository is public: the keys of `lab.projects` in the language files. */
-export const SIDE_NAMES = ['erpkit', 'microsplat', 'gaussian-projection-bench', 'amr-traffic-lab'] as const;
+export const SIDE_NAMES = [
+  'erpkit', 'microsplat', 'gaussian-projection-bench', 'splat-navmap', 'cone-ekf-slam',
+  'amr-traffic-lab', 'usine40-cell-pipeline', 'visual-quality-gate',
+] as const;
 export type SideName = (typeof SIDE_NAMES)[number];
 
-export interface SideProject { name: string; published: boolean; repo?: RepoKey; visual?: MediaKey; stack: string[] }
+export interface SideProject {
+  name: string;
+  published: boolean;
+  repo?: RepoKey;
+  visual?: MediaKey;
+  stack: string[];
+  /** home page: a card with its clip (true), or one line in the compact list that follows the cards (false) */
+  card?: boolean;
+}
 
 /**
  * published: false keeps a project in the data and renders nothing for it.
- * This file is public with the site, so a project whose repository is not public yet is not named
- * here: it lives in side.local.ts, next to this file and ignored by git (same shape, default export,
- * published: false), and is merged in below when that file exists.
- * Publishing one = move its entry here with published: true, a repo, a visual and a stack, add its
- * name to SIDE_NAMES and its copy under `lab.projects` in en.ts.
+ * Publishing one = add its entry here with published: true, a repo, a visual and a stack, add its
+ * name to SIDE_NAMES and its copy under `lab.projects` in en.ts and fr.ts. A project whose repository
+ * is not public yet is not named in this public repository: keep it out until it is.
+ * Order = order of the lab page (by theme: 3D Gaussian Splatting, navigation, Usine 4.0).
+ * card: the home page shows four cards with a clip (they need no extra copy); the others are
+ * one-line rows that link to the lab page and need `short` in their copy.
  */
-const listed: SideProject[] = [
+export const sideProjects: SideProject[] = [
   { name: 'erpkit', published: true, repo: 'erpkit', visual: 'labErpkit', stack: ['Python', 'NumPy', 'Pillow', 'pytest'] },
-  { name: 'microsplat', published: true, repo: 'microsplat', visual: 'labMicrosplat', stack: ['Python', 'NumPy', 'PyTorch', 'pytest'] },
+  { name: 'microsplat', published: true, repo: 'microsplat', visual: 'labMicrosplat', stack: ['Python', 'NumPy', 'PyTorch', 'pytest'], card: true },
   { name: 'gaussian-projection-bench', published: true, repo: 'gaussian-projection-bench', visual: 'labProjection', stack: ['Python', 'NumPy', 'Matplotlib', 'pytest'] },
-  { name: 'amr-traffic-lab', published: true, repo: 'amr-traffic-lab', visual: 'labAmr', stack: ['Python', 'pytest', 'Matplotlib'] },
+  { name: 'splat-navmap', published: true, repo: 'splat-navmap', visual: 'labSplatNavmap', stack: ['Python', 'NumPy', 'SciPy', 'Matplotlib', 'pytest'], card: true },
+  { name: 'cone-ekf-slam', published: true, repo: 'cone-ekf-slam', visual: 'labConeEkf', stack: ['Python', 'NumPy', 'SciPy', 'Matplotlib', 'pytest'] },
+  { name: 'amr-traffic-lab', published: true, repo: 'amr-traffic-lab', visual: 'labAmr', stack: ['Python', 'pytest', 'Matplotlib'], card: true },
+  { name: 'usine40-cell-pipeline', published: true, repo: 'usine40-cell-pipeline', visual: 'labUsineCell', stack: ['Python', 'OPC UA', 'MQTT', 'PostgreSQL', 'Grafana', 'Docker', 'pytest'] },
+  { name: 'visual-quality-gate', published: true, repo: 'visual-quality-gate', visual: 'labQualityGate', stack: ['Python', 'PyTorch', 'NumPy', 'pytest'], card: true },
 ];
-const local = import.meta.glob<{ default: SideProject[] }>('./side.local.ts', { eager: true });
-export const sideProjects: SideProject[] = [...listed, ...Object.values(local).flatMap((m) => m.default ?? [])];
 
 const isSideName = (name: string): name is SideName => (SIDE_NAMES as readonly string[]).includes(name);
 /** The ones that are rendered: published, with a repository, a visual and a public name. */

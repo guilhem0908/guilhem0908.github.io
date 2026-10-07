@@ -66,6 +66,10 @@ export interface SideCopy {
   result: BigFigure;
   /** which part of the real work it extends */
   extends: string;
+  /** home page, for a project listed in one line rather than as a card: what it is and its result, in one sentence */
+  short?: string;
+  /** licence line of third-party images in the clip, shown under it */
+  credit?: string;
 }
 
 export interface SiteContent {
@@ -130,7 +134,7 @@ export interface SiteContent {
     tlse: Room & { marquee: string; mine: string; team: string; also: string; demo: string; range: string; opening: string; selected: string };
     usine: Room & { status: string; text: string; note: string };
     pfr: Room & { mine: string; team: string; before: string; feedWall: string; feed: string; hmi: string; demo: string; robotAlt: string };
-    lab: { title: string; text: string; more: string };
+    lab: { title: string; text: string; more: string; others: string };
     index: { title: string; text: string; rows: Record<CaseSlug, { when: string; name: string; line: string }>; room: string };
     contact: { title: string };
   };
