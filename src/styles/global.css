@@ -194,10 +194,11 @@ a:focus-visible, button:focus-visible { box-shadow: 0 0 0 5px var(--deep); }
 .media { width: 100%; height: auto; background: var(--deep); outline: 1px solid rgb(244 246 255 / 0.25); outline-offset: -1px; }
 .media--paper { background: var(--paper); padding: clamp(0.4rem, 1.2vw, 1rem); outline: 0; }
 
-.cmp { display: grid; gap: 0.6rem; }
+/* the stills are small: the frame never grows past the width given by the component, so they stay sharp */
+.cmp { display: grid; gap: 0.6rem; max-width: var(--cmp-max, none); }
 .cmp__frame { position: relative; display: grid; gap: 0.6rem; }
 .cmp__layer { position: relative; overflow: hidden; }
-.cmp__layer img, .cmp__video { display: block; width: 100%; height: auto; }
+.cmp__layer img { display: block; width: 100%; height: auto; }
 .cmp__tag { position: absolute; z-index: 2; left: 0.6rem; top: 0.6rem; max-width: 44%; background: var(--paper); color: var(--deep); padding: 0.3rem 0.5rem; }
 @media (max-width: 640px) { .cmp__tag { left: 0.35rem; top: 0.35rem; font-size: 0.6rem; padding: 0.22rem 0.35rem; } .cmp.is-live .cmp__tag--after { right: 0.35rem; } }
 .cmp__bar, .cmp__ctl { display: none; }
@@ -214,10 +215,6 @@ a:focus-visible, button:focus-visible { box-shadow: 0 0 0 5px var(--deep); }
 }
 .cmp.is-live .cmp__ctl { display: flex; flex-wrap: wrap; gap: 0.6rem 1.2rem; align-items: center; }
 .cmp__range { flex: 1 1 14rem; }
-/* the video is twice as wide as the frame: each layer shows one half, the baked label bar is cropped */
-.cmp__video { position: absolute; left: 0; bottom: 0; width: 200%; max-width: none; height: auto; opacity: 0; transition: opacity 300ms var(--ease-snap); }
-.cmp__layer--after .cmp__video { left: -100%; }
-.cmp.has-video .cmp__video { opacity: 1; }
 
 input[type='range'] {
   -webkit-appearance: none; appearance: none; width: 100%; height: 28px; background: transparent; cursor: pointer; margin: 0;

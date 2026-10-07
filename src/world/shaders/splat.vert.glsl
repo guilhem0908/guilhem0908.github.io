@@ -29,6 +29,8 @@ uniform float uCeil;
 uniform float uPathS;
 uniform float uPathLen;
 uniform float uPathReveal;
+uniform float uInvite;      // 0..1: pulses of light run forward along the planned path (before the first scroll)
+uniform vec2 uThin;         // share of the surface Gaussians kept, and the size the rest takes to cover for them
 uniform float uFogNear;
 uniform float uFogFar;
 uniform float uSensor;
@@ -147,6 +149,11 @@ void main() {
     pos += 0.22 * vec3(sin(uTime * 0.11 + seed * 50.0), sin(uTime * 0.07 + seed * 31.0), cos(uTime * 0.09 + seed * 17.0));
   }
   if ((flags & 1) != 0) alpha *= uCeil;
+  // quality governor, last resort: surfaces are tiled by fewer, slightly larger Gaussians
+  if ((flags & 32) != 0 && uThin.x < 0.999) {
+    alpha *= 1.0 - smoothstep(uThin.x - 0.06, uThin.x, seed);
+    scl.xy *= uThin.y;
+  }
 
   // colour of the settled Gaussian
   vec3 rgb;
@@ -176,6 +183,15 @@ void main() {
     float head = smoothstep(0.012, 0.0, abs(frac - uPathS));
     rgb = mix(rgb, uPaper, head * 0.85);
     scl.xy *= 1.0 + head * 0.8;
+    // the invitation: a light leaves the camera every 2.4 m and runs down the path, its tail towards the visitor
+    if (uInvite > 0.001) {
+      float m = (frac - uPathS) * uPathLen;
+      float w = fract(uTime * 0.62 - m / 2.4);
+      float pulse = uInvite * exp(-w * 6.5) * smoothstep(0.15, 0.7, m) * (1.0 - smoothstep(5.5, 9.5, m)) * step(frac, uPathReveal);
+      alpha = max(alpha, pulse * 0.98);
+      rgb = mix(rgb, uPaper, pulse * 0.8);
+      scl.xy *= 1.0 + pulse * 1.1;
+    }
   }
 
   // cones lit by the field-of-view sensor model
@@ -210,6 +226,8 @@ void main() {
 
   vec4 cam = uView * vec4(pos, 1.0);
   float depth = -cam.z;
+  // a Gaussian about to touch the lens fades out instead of covering the screen
+  alpha *= smoothstep(0.1, 0.34, depth);
   if (depth < 0.1 || alpha < 0.004) { cull(); return; }
   vec4 clip = uProj * cam;
   float lim = 1.4 * clip.w;
@@ -241,8 +259,10 @@ void main() {
   float l1 = mid + rad;
   float l2 = max(mid - rad, 0.08);
   vec2 dv = abs(b) < 1e-5 ? (a >= d ? vec2(1.0, 0.0) : vec2(0.0, 1.0)) : normalize(vec2(b, l1 - a));
-  vec2 major = min(sqrt(2.0 * l1), 640.0) * dv;
-  vec2 minor = min(sqrt(2.0 * l2), 640.0) * vec2(-dv.y, dv.x);
+  // no quad larger than the screen is tall
+  float maxR = 0.25 * uViewport.y;
+  vec2 major = min(sqrt(2.0 * l1), maxR) * dv;
+  vec2 minor = min(sqrt(2.0 * l2), maxR) * vec2(-dv.y, dv.x);
 
   // fog to the ground colour
   float f = smoothstep(uFogNear, uFogFar, depth);

@@ -38,10 +38,10 @@ export interface CaseStudy {
   /** optional display word shown as a window onto real media */
   window?: { word: string; media: MediaKey };
   meta: { role: string; team: string; period: string; organisation: string; stack: string };
-  /** where the Video button points (an id on the page), if the page has a video */
+  /** where the Video button points (an id on the page), if the lead of the page is a clip */
   videoAnchor?: string;
   lead:
-    | { kind: 'compare'; before: MediaKey; after: MediaKey; video?: MediaKey; beforeLabel: string; afterLabel: string; alt: string; caption: string; play: string; pause: string; slider: string }
+    | { kind: 'compare'; before: MediaKey; after: MediaKey; beforeLabel: string; afterLabel: string; alt: string; caption: string; slider: string }
     | { kind: 'media'; media: MediaKey; alt: string; caption: string };
   summary: { problem: string; built: string; result: string };
   context: Block[];
@@ -96,6 +96,8 @@ export interface SiteContent {
   seeking: { tag: string; short: string; long: string; fields: string };
   home: {
     heroLinks: { cv: string; github: string; linkedin: string; email: string; skip: string };
+    /** the invitation at the start of the run: what to do (wheel, touch), and the button that does it */
+    cue: { scroll: string; swipe: string; start: string };
     posterAlt: string;
     start3d: string;
     run: {
@@ -107,23 +109,22 @@ export interface SiteContent {
       view: { prefix: string; colour: string; depth: string; ellipsoids: string };
       lens: { depth: string; ellipsoids: string };
       bearing: string;
+      /** the instrument panel behind ?perf=1 */
+      perf: { title: string; frame: string; gpu: string; scale: string; level: string; splats: string; sort: string; long: string; device: string; none: string; auto: string; script: string; browser: string };
     };
     waypoints: { hero: string; aist: string; tlse: string; usine: string; pfr: string; lab: string; work: string; contact: string };
+    /** one stage, as long as the other rooms: the detail is on the case-study page */
     aist: Room & {
       host: string;
       giant: string;
-      inputTag: string; goal: string; input: string;
-      /** shown only in the 3D run: what hangs on the wall of the vestibule */
-      inputWall: string;
-      problemTitle: string; problem: string;
-      /** shown only in the 3D run, where the visitor stands in that room */
-      problemRoom: string;
-      unwrapTitle: string; rawLabel: string; fixedLabel: string;
-      /** which run the picture comes from; captionMore: what it shows (dropped on small screens of the run) */
-      caption: string; captionMore: string;
-      figures: { rig: BigFigure; warp: BigFigure; depth: BigFigure; failed: BigFigure };
-      endTitle: string; end: string;
-      fallbackAlt: string;
+      /** the one stage inside the room: a title and two or three sentences */
+      stageTitle: string; text: string[];
+      /** the before / after still: its labels, which run it comes from, its alt text and the name of its slider */
+      rawLabel: string; fixedLabel: string; caption: string; stillAlt: string; slider: string;
+      /** shown only in the 3D run, where the visitor stands in the room built from that still */
+      roomNote: string;
+      /** two figures, each with its exact meaning */
+      figures: { rig: BigFigure; depth: BigFigure };
     };
     svlr: { title: string; text: string; link: string };
     tlse: Room & { marquee: string; mine: string; team: string; also: string; demo: string; range: string; opening: string; selected: string };

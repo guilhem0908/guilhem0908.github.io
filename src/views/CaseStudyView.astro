@@ -50,7 +50,7 @@ const sections: [string, string, typeof c.context][] = [
         <ul class="links case__btns">
           {code && <li><a class="btn btn--solid" href={repos[code]} rel="noopener">{t.ui.code}</a></li>}
           {cfg.report && <li><a class="btn" href={cfg.report} rel="noopener">{t.ui.report}</a></li>}
-          {c.videoAnchor && <li><a class="btn" href={`#${c.videoAnchor}`} data-play-target={c.videoAnchor}>{t.ui.video}</a></li>}
+          {c.videoAnchor && <li><a class="btn" href={`#${c.videoAnchor}`}>{t.ui.video}</a></li>}
         </ul>
       )}
     </header>
@@ -60,12 +60,11 @@ const sections: [string, string, typeof c.context][] = [
         <p class="window d-xl" aria-hidden="true" style={`--win:url(${win.src}); --win-ratio:${win.w / win.h}`}>{c.window.word}</p>
       )}
       <div class="page">
-        <figure class:list={['lead-media', c.lead.kind === 'media' && 'lead-media--fit']}
+        <figure class:list={['lead-media', c.lead.kind === 'media' ? 'lead-media--fit' : 'lead-media--still']}
           style={c.lead.kind === 'media' ? `--ar:${media[c.lead.media].w / media[c.lead.media].h}` : undefined}>
           {c.lead.kind === 'compare' ? (
-            <Compare id="lead" before={c.lead.before} after={c.lead.after} video={c.lead.video}
-              beforeLabel={c.lead.beforeLabel} afterLabel={c.lead.afterLabel} alt={c.lead.alt}
-              play={c.lead.play} pause={c.lead.pause} slider={c.lead.slider} />
+            <Compare id="lead" before={c.lead.before} after={c.lead.after} max={880}
+              beforeLabel={c.lead.beforeLabel} afterLabel={c.lead.afterLabel} alt={c.lead.alt} slider={c.lead.slider} />
           ) : (
             <div id="lead"><Media name={c.lead.media} alt={c.lead.alt} eager /></div>
           )}

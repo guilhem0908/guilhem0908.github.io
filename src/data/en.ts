@@ -82,6 +82,7 @@ const en: SiteContent = {
 
   home: {
     heroLinks: { cv: 'CV', github: 'GitHub', linkedin: 'LinkedIn', email: 'Email', skip: 'Skip the run: project index' },
+    cue: { scroll: 'Scroll to move forward', swipe: 'Swipe up to move forward', start: 'Start the run' },
     posterAlt: 'A building made of Gaussian splats, drawn like a blueprint, with a red planned path leading through a doorway',
     start3d: 'Start the 3D run',
 
@@ -114,6 +115,21 @@ const en: SiteContent = {
       view: { prefix: 'View:', colour: 'colour', depth: 'depth', ellipsoids: 'ellipsoids' },
       lens: { depth: 'Lens: depth (L)', ellipsoids: 'Lens: raw ellipsoids (L)' },
       bearing: 'Ball bearing',
+      perf: {
+        title: 'Performance',
+        frame: 'Frame',
+        gpu: 'GPU time',
+        scale: 'Render scale',
+        level: 'level',
+        splats: 'Gaussians drawn',
+        sort: 'Depth sort',
+        long: 'Last long frame',
+        device: 'GPU',
+        none: 'none',
+        auto: 'Auto',
+        script: 'script',
+        browser: 'browser',
+      },
     },
 
     waypoints: {
@@ -132,40 +148,28 @@ const en: SiteContent = {
       title: 'Creation of a 360-degree navigation dataset using 3D Gaussian Splatting',
       host: 'Computer Vision Research Team, Artificial Intelligence Research Center, AIST (National Institute of Advanced Industrial Science and Technology).',
       giant: '360°',
-      inputTag: 'Input',
-      goal: 'The goal: produce 360° equirectangular observations, with poses and commands, for robot visual navigation, from scenes represented with 3D Gaussian Splatting.',
-      input: 'It starts from a plain pinhole video. COLMAP recovers the camera poses, then the scene is trained as 3D Gaussians.',
-      inputWall: 'On the wall: a pinhole view cut out of the raw 3DGRUT render. The video itself is third-party footage and is not shown.',
-      problemTitle: 'The source camera sees about 12% of the sphere per pose.',
-      problem: 'Rendered as a full panorama, everything the camera never looked at comes out as floaters and needles.',
-      problemRoom: 'This room is built from that raw 3DGRUT render.',
-      unwrapTitle: 'Unwrap it. Repair it.',
-      rawLabel: 'Raw 3DGRUT render, equirectangular',
-      fixedLabel: 'After the first ArtiFixer3D+ run',
-      caption: 'Real output of an early run on a 154-frame clip: not the 117-frame run behind the figures below, and no gate verdict is recorded for it.',
-      captionMore: 'Most holes and splatting noise are removed; residual warping remains, and regions the camera never saw are generated, not observed.',
+      stageTitle: 'The source camera sees about 12% of the sphere per pose.',
+      text: [
+        'A visual navigation model needs 360° observations. A scene rebuilt from a plain video only holds what the camera saw: rendered as a full panorama, the rest comes out as floaters and needles.',
+        'ArtiFixer-360, my extension of NVIDIA’s ArtiFixer, repairs the views jointly with a video diffusion model and distils them back into the 3D scene.',
+        'The full 154-frame run failed my own acceptance gates, which led to a geometry-first redesign.',
+      ],
+      rawLabel: 'Raw 3DGRUT render',
+      fixedLabel: 'After ArtiFixer3D+',
+      caption: 'Real output of an early run on a 154-frame clip. No gate verdict is recorded for it.',
+      stillAlt: '360-degree panorama of a living room. Left of the divider: raw 3DGRUT render full of floaters and needles. Right: the repaired output.',
+      slider: 'Position of the divider between the raw and the repaired panorama',
+      roomNote: 'The room around you is built from this panorama.',
       figures: {
         rig: {
           value: '14',
-          meaning: 'overlapping 110° views per pose, in a world-locked rig that follows the real camera path. The 14 streams are repaired jointly by NVIDIA’s ArtiFixer video diffusion model, which this pipeline extends (Apache-2.0).',
-        },
-        warp: {
-          from: '0.037',
-          value: '0.020',
-          meaning: 'Temporal warp MAE, raw renders against the output, on the 117-frame reference run (14 views, 1,638 renders). Any smoothing lowers this metric: the edge strength kept is 0.49.',
+          meaning: 'overlapping 110° views per pose, in a rig that follows the real camera path, repaired jointly by NVIDIA’s 14B video diffusion model.',
         },
         depth: {
           value: '−27%',
-          meaning: 'Cross-view depth-overlap MAE of the repaired views with depth-aware synchronisation (0.0340 to 0.0247), measured before distillation. The gain did not clearly survive distillation.',
-        },
-        failed: {
-          value: '154',
-          meaning: 'frames in the full 14-direction run. Coverage was complete, and the run failed my own visual and temporal acceptance gates. That led to a geometry-first redesign.',
+          meaning: 'cross-view depth error of the repaired views (MAE 0.0340 to 0.0247) with depth-aware synchronisation, before distillation. The gain did not clearly survive distillation.',
         },
       },
-      endTitle: 'Five phases, three repositories.',
-      end: 'The repair pipeline is a derivative of NVIDIA’s ArtiFixer. Before it: A* navigation and six-view panoramas in simulation, then a ROS 2 interface prepared for a visual navigation model on the Kachaka robot. On main the model inference is not wired, and no run on the real robot is claimed.',
-      fallbackAlt: '360-degree panorama of a living room. Left: raw 3DGRUT render full of floaters and needles. Right: the repaired output.',
     },
 
     // CONFIRM: rests on Guilhem's word only. One short, team-framed entry. No metric.
@@ -265,19 +269,15 @@ const en: SiteContent = {
         organisation: 'AIST, National Institute of Advanced Industrial Science and Technology, Tsukuba, Japan',
         stack: 'Python, PyTorch, 3DGRUT, Splatfacto, COLMAP, DISCOVERSE, MuJoCo, ArtiFixer (video diffusion), ROS 2 Humble, PBS and Singularity on the ABCI cluster, pytest',
       },
-      videoAnchor: 'lead',
       lead: {
         kind: 'compare',
         before: 'panoRaw',
         after: 'panoRepaired',
-        video: 'panoPair',
         beforeLabel: 'Raw 3DGRUT render',
         afterLabel: 'After the first ArtiFixer3D+ run',
         alt: '360-degree equirectangular panorama of a living room, shown twice. Raw render: floaters, needles and holes wherever the camera never looked. Repaired: the same view with most of them gone.',
         caption:
-          'Raw 3DGRUT render of the reconstructed scene, projected to an equirectangular panorama, and the same 154 frames after the first ArtiFixer3D+ run. Most holes and splatting noise are removed; residual warping and duplicated structures remain, and regions the camera never saw are generated, not observed. This early run is neither the 117-frame reference run that passed the gates nor the later run that failed them.',
-        play: 'Play the 10 s video',
-        pause: 'Pause the video',
+          'One frame of the raw 3DGRUT render of the reconstructed scene, projected to an equirectangular panorama, and the same frame after the first ArtiFixer3D+ run on that 154-frame clip. Most holes and splatting noise are removed; residual warping and duplicated structures remain, and regions the camera never saw are generated, not observed. This early run is neither the 117-frame reference run that passed the gates nor the later run that failed them.',
         slider: 'Position of the divider between the raw and the repaired panorama',
       },
       summary: {
@@ -469,6 +469,7 @@ const en: SiteContent = {
         { label: 'nav_3dgs_pano: navigation and panoramas in simulation', href: 'https://github.com/guilhem0908/nav_3dgs_pano' },
         { label: 'KachakaNavigation: ROS 2 interface for the Kachaka robot', href: 'https://github.com/guilhem0908/KachakaNavigation' },
         { label: 'Internship report, 29 pages (PDF)', href: 'https://github.com/guilhem0908/artifixer-360-pipeline/blob/main/docs/assets/readme/Rapport_de_stage_2026_CARMOUZE_Guilhem.pdf' },
+        { label: 'Comparison video, raw render against repaired output (10 s, in the repository)', href: 'https://github.com/guilhem0908/artifixer-360-pipeline#final-report-and-qualitative-comparison' },
       ],
     },
 

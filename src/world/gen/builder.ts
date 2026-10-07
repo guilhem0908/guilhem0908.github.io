@@ -2,7 +2,8 @@
 // real 3D Gaussians (centre, anisotropic scale, rotation quaternion, colour, opacity).
 
 export const KIND = { STRUCT: 0, PHOTO: 1, FIL: 2, CONE: 3, ARTEFACT: 4, DUST: 5 } as const;
-export const FLAG = { CEIL: 1, PATH: 2, TAG: 4, GLOW: 8, FAN: 16 } as const;
+// SURF: one of many Gaussians that tile a surface (floor, wall, panorama): the quality governor may thin these
+export const FLAG = { CEIL: 1, PATH: 2, TAG: 4, GLOW: 8, FAN: 16, SURF: 32 } as const;
 export const TEX_W = 1024;
 
 export type V3 = [number, number, number];
@@ -133,7 +134,7 @@ export class Builder {
     this.n++;
   }
 
-  private emit(p: V3, s: V3, q: [number, number, number, number], smp: Sample, defA = 0.9) {
+  private emit(p: V3, s: V3, q: [number, number, number, number], smp: Sample, defA = 0.9, extra = 0) {
     const k = smp.k ?? KIND.STRUCT;
     let r: number, g: number, b: number;
     if (smp.c) { r = smp.c[0]; g = smp.c[1]; b = smp.c[2]; }
@@ -142,7 +143,7 @@ export class Builder {
       r = g = b = Math.round(l * 255);
     }
     const al = smp.alt ?? [r, g, b];
-    this.push(p, s, q, r, g, b, smp.a ?? defA, k, smp.f ?? 0, al[0], al[1], al[2]);
+    this.push(p, s, q, r, g, b, smp.a ?? defA, k, (smp.f ?? 0) | extra, al[0], al[1], al[2]);
   }
 
   /**
@@ -168,7 +169,7 @@ export class Builder {
         const rv: V3 = [-uh[0] * s + vh[0] * c, -uh[1] * s + vh[1] * c, -uh[2] * s + vh[2] * c];
         const sx = cu * (0.44 + 0.3 * this.rnd());
         const sy = cv * (0.44 + 0.3 * this.rnd());
-        this.emit(p, [sx, sy, thick], basisQuat(ru, rv, n), smp);
+        this.emit(p, [sx, sy, thick], basisQuat(ru, rv, n), smp, 0.9, sp > 0.045 ? FLAG.SURF : 0);
       }
     }
   }

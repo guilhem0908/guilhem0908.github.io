@@ -6,15 +6,14 @@ import {
   BufferAttribute, BufferGeometry, Mesh, RawShaderMaterial, DataTexture, RGBAFormat, FloatType,
   UnsignedByteType, NearestFilter, LinearFilter, GLSL3, CustomBlending, OneFactor,
   OneMinusSrcAlphaFactor, AddEquation, DynamicDrawUsage, Vector2, Vector3, Vector4, Quaternion,
-  Matrix4, Color, Texture, DoubleSide, Sphere, VideoTexture, ClampToEdgeWrapping, NoColorSpace,
+  Matrix4, Color, Texture, DoubleSide, Sphere, VideoTexture, NoColorSpace,
 } from 'three';
 import splatVert from './shaders/splat.vert.glsl?raw';
 import splatFrag from './shaders/splat.frag.glsl?raw';
-import panoVert from './shaders/pano.vert.glsl?raw';
-import panoFrag from './shaders/pano.frag.glsl?raw';
-import { AIST_C, CELLS, GROUP, PEN, SCREEN } from './layout';
+import { AIST_C, CELLS, GROUP, PEN, SCREEN, newSight, sightFrom } from './layout';
 import { Traffic } from './traffic';
 import { F, GpuTimer, perf } from './perf';
+import { Governor, deviceTier, type Tier } from './quality';
 import type { Img } from './gen/scene';
 
 export interface WorldState {
@@ -25,8 +24,9 @@ export interface WorldState {
   top: number;
   train: number; pathReveal: number;
   photo: number; repair: number; artefact: number; ceil: number;
-  pano: number; unwrap: number; wipe: number;
   sensor: number;
+  /** lights running forward along the planned path: the invitation to scroll */
+  invite: number;
   fogNear: number; fogFar: number;
   [k: string]: number;
 }
@@ -59,25 +59,30 @@ export const PALETTE = {
   cone: '#FFD326',
 };
 
-const DAMP: Record<string, number> = { s: 7, camH: 5, pitch: 5, yawOff: 5, fov: 5, top: 9, head: 6, headMix: 6, offX: 5, offZ: 5 };
+const DAMP: Record<string, number> = { s: 7, camH: 5, pitch: 5, yawOff: 5, fov: 5, top: 9, head: 6, headMix: 6, offX: 5, offZ: 5, invite: 3 };
 
-function loadImage(url: string, w: number, h: number): Promise<Img | null> {
+function image(url: string): Promise<HTMLImageElement | null> {
   return new Promise((res) => {
     const im = new Image();
     im.decoding = 'async';
-    im.onload = () => {
-      try {
-        const c = document.createElement('canvas');
-        c.width = w; c.height = h;
-        const ctx = c.getContext('2d', { willReadFrequently: true })!;
-        ctx.drawImage(im, 0, 0, w, h);
-        const d = ctx.getImageData(0, 0, w, h);
-        res({ w, h, data: d.data });
-      } catch { res(null); }
-    };
+    im.onload = () => res(im);
     im.onerror = () => res(null);
     im.src = url;
   });
+}
+
+/** pixels of one or several images drawn side by side, each at w x h */
+async function loadPixels(urls: string[], w: number, h: number): Promise<Img | null> {
+  const ims = await Promise.all(urls.map(image));
+  if (ims.some((im) => !im)) return null;
+  try {
+    const c = document.createElement('canvas');
+    c.width = w * urls.length; c.height = h;
+    const ctx = c.getContext('2d', { willReadFrequently: true })!;
+    ims.forEach((im, i) => ctx.drawImage(im!, i * w, 0, w, h));
+    const d = ctx.getImageData(0, 0, c.width, h);
+    return { w: c.width, h, data: d.data };
+  } catch { return null; }
 }
 
 export class World {
@@ -90,12 +95,16 @@ export class World {
   mobile: boolean;
   density: number;
   dprCap: number;
+  /** what the GPU says it is, and the class the quality governor starts from */
+  gpuName = '';
+  tier: Tier = 'unknown';
+  gov = new Governor();
 
   // director writes targets, the world damps towards them
   target: WorldState = {
     s: 0, camH: 1.25, pitch: -0.02, yawOff: 0, fov: 58, head: 0, headMix: 0, offX: 0, offZ: 0, top: 1,
     train: 0, pathReveal: 0, photo: 0, repair: 0, artefact: 1, ceil: 0,
-    pano: 0, unwrap: 0, wipe: 0, sensor: 0, fogNear: 7, fogFar: 19,
+    sensor: 0, invite: 0, fogNear: 7, fogFar: 19,
   };
   cur: WorldState = { ...this.target };
   pose: Pose = { x: 0, z: 0, y: 1.25, yaw: 0 };
@@ -115,12 +124,14 @@ export class World {
   pointerActive = false;
   ballTarget: [number, number] | null = null;
   inPfr = false;
+  /** the camera travelled during the last frame (a change of render scale cannot be seen) */
+  moving = false;
 
   private mat!: RawShaderMaterial;
-  private panoMat!: RawShaderMaterial;
   private geo!: InstancedBufferGeometry;
   private order!: InstancedBufferAttribute;
   private mesh!: Mesh;
+  private feed!: Mesh;
   private sorting = false;
   private sortId = 0;
   private recycle: ArrayBuffer | undefined;
@@ -130,23 +141,36 @@ export class World {
   private topQ = new Quaternion();
   private fpQ = new Quaternion();
   private m4 = new Matrix4();
-  private video: HTMLVideoElement | null = null;
-  private videoTex: VideoTexture | null = null;
-  private stillTex: Texture | null = null;
-  private videoWanted = false;
+  private v3a = new Vector3();
+  private v3b = new Vector3();
+  private v3c = new Vector3();
+  private pa: [number, number] = [0, 0];
+  private pb: [number, number] = [0, 0];
+  private pp: [number, number] = [0, 0];
   private robot = { x: 17.2, z: 19.7, th: 0 };
   private ball = { x: 18.4, z: 19.3 };
   private traffic = new Traffic(GROUP.AMR_N);
   private feedMat: RawShaderMaterial | null = null;
   private feedVideo: HTMLVideoElement | null = null;
-  private feedWanted = false;
+  private feedStill = false;
   private bg = new Color();
   private lost = false;
   private gpu!: GpuTimer;
+  private frameNo = 0;
+  private baseDpr = 1;
+  private keepCur = 1;
+  // depth sort: what the last request was made with
   private sortAt = 0;
+  private sortView = new Float32Array(16);
+  private sortKey = '';
+  private viewMsg = new Float32Array(16);
+  private sight = newSight();
+  private camMove = 0;
   private seenPrograms = 0;
   private seenTextures = 0;
   onLost: (() => void) | null = null;
+  /** called when the governor changes the level (the overlay, the recorder) */
+  onQuality: (() => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, opts: { mobile: boolean }) {
     this.canvas = canvas;
@@ -158,25 +182,34 @@ export class World {
       powerPreference: 'high-performance', premultipliedAlpha: true,
     });
     this.renderer.autoClear = true;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.dprCap));
     this.bg.set(PALETTE.void);
     this.renderer.setClearColor(this.bg, 1);
+    const gl = this.renderer.getContext() as WebGL2RenderingContext;
+    const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+    this.gpuName = String((dbg && gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) || gl.getParameter(gl.RENDERER) || '');
+    this.gpu = new GpuTimer(gl);
     this.worker = new Worker(new URL('./world.worker.ts', import.meta.url), { type: 'module' });
     for (let i = 0; i < GROUP.COUNT; i++) this.groupVecs.push(new Vector4());
-    this.gpu = new GpuTimer(this.renderer.getContext() as WebGL2RenderingContext);
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
       this.lost = true;
       this.running = false;
       this.onLost?.();
     });
+    // starting level: a pixel budget for the kind of GPU this is; the governor corrects it within a second
+    const { tier, megapixels } = deviceTier(this.gpuName);
+    this.tier = tier;
+    const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
+    this.gov.start(w * h * dpr * dpr, megapixels * (opts.mobile ? 0.8 : 1));
     this.resize();
   }
 
   async init(): Promise<SceneInfo> {
+    // the AIST room is made from the two stills of the before / after frame (raw | repaired)
     const [pano, input] = await Promise.all([
-      loadImage('/media/pano-still.jpg', 1024, 256),
-      loadImage('/media/aist-pinhole.jpg', 320, 176),
+      loadPixels(['/media/pano-raw.jpg', '/media/pano-repaired.jpg'], 512, 234),
+      loadPixels(['/media/aist-pinhole.jpg'], 320, 176),
     ]);
     const data: any = await new Promise((resolve, reject) => {
       this.worker.onmessage = (e) => { if (e.data.type === 'scene') resolve(e.data); };
@@ -193,19 +226,6 @@ export class World {
     };
     this.build(data);
     this.worker.onmessage = (e) => { if (e.data.type === 'sorted') this.onSorted(e.data); };
-    // still frame of the panorama, used until the video plays
-    const still = new Image();
-    still.src = '/media/pano-still.jpg';
-    still.decode?.().then(() => {
-      const t = new Texture(still);
-      t.minFilter = LinearFilter; t.magFilter = LinearFilter; t.generateMipmaps = false;
-      t.wrapS = t.wrapT = ClampToEdgeWrapping; t.colorSpace = NoColorSpace; t.needsUpdate = true;
-      this.stillTex = t;
-      if (!this.videoTex) {
-        this.panoMat.uniforms.tPano.value = t; this.panoMat.uniforms.uFlipY.value = 1;
-        this.panoMat.uniforms.uTex.value.set(still.naturalWidth || 2048, still.naturalHeight || 512);
-      }
-    }).catch(() => {});
     return this.info;
   }
 
@@ -243,7 +263,8 @@ export class World {
         uTime: { value: 0 }, uTrain: { value: 0 },
         uCloudC: { value: new Vector3(10, 1.6, 12.5) }, uCloudS: { value: new Vector3(24, 5, 29) },
         uPhoto: { value: 0 }, uRepair: { value: 0 }, uArtefact: { value: 1 }, uCeil: { value: 0 },
-        uPathS: { value: 0 }, uPathLen: { value: d.pathLen }, uPathReveal: { value: 0 },
+        uPathS: { value: 0 }, uPathLen: { value: d.pathLen }, uPathReveal: { value: 0 }, uInvite: { value: 0 },
+        uThin: { value: new Vector2(1, 1) },
         uFogNear: { value: 7 }, uFogFar: { value: 19 },
         uSensor: { value: 0 }, uSensorPose: { value: new Vector4() }, uSensorParams: { value: new Vector2(6.5, 0.87) },
         uDepthRange: { value: 14 },
@@ -261,35 +282,7 @@ export class World {
     this.mesh = new Mesh(geo, this.mat);
     this.mesh.frustumCulled = false;
     this.scene.add(this.mesh);
-
-    // full-screen pass for the panorama
-    const tri = new BufferGeometry();
-    tri.setAttribute('position', new BufferAttribute(new Float32Array([-1, -1, 0, 3, -1, 0, -1, 3, 0]), 3));
-    this.panoMat = new RawShaderMaterial({
-      glslVersion: GLSL3,
-      vertexShader: panoVert,
-      fragmentShader: panoFrag,
-      uniforms: {
-        tPano: { value: null }, uRes: { value: new Vector2(1, 1) },
-        uAmt: { value: 0 }, uUnwrap: { value: 0 }, uWipe: { value: 0 },
-        uYaw: { value: 0 }, uPitch: { value: 0 }, uTanHalf: { value: 0.5 },
-        uBand: { value: this.mobile ? 0.94 : 0.74 }, uBandY: { value: this.mobile ? 0.3 : 0.1 },
-        uTime: { value: 0 }, uFlipY: { value: 0 }, uTex: { value: new Vector2(2048, 512) },
-        uDeep: { value: hex(PALETTE.deep) }, uPaper: { value: hex(PALETTE.paper) }, uFil: { value: hex(PALETTE.fil) },
-      },
-      depthTest: false, depthWrite: false, transparent: true, side: DoubleSide,
-      blending: CustomBlending, blendEquation: AddEquation,
-      blendSrc: OneFactor, blendDst: OneMinusSrcAlphaFactor,
-      blendSrcAlpha: OneFactor, blendDstAlpha: OneMinusSrcAlphaFactor,
-    });
     this.buildFeed();
-    tri.boundingSphere = new Sphere(new Vector3(), 10);
-    const pm = new Mesh(tri, this.panoMat);
-    pm.frustumCulled = false;
-    pm.renderOrder = 10;
-    pm.visible = false;
-    pm.name = 'pano';
-    this.scene.add(pm);
     this.resize();
   }
 
@@ -335,23 +328,33 @@ void main() {
     const mesh = new Mesh(g, this.feedMat);
     mesh.frustumCulled = false;
     mesh.renderOrder = -10;
-    mesh.name = 'feed';
-    mesh.visible = false;
+    // visible from the first frame, with nothing to show yet: its shader is compiled while the scene
+    // is still being trained, not when the last room comes into view
+    mesh.visible = true;
     this.scene.add(mesh);
+    this.feed = mesh;
   }
 
-  private ensureFeed() {
-    if (this.feedVideo || !this.feedWanted || !this.feedMat) return;
+  /** The still of the camera feed, uploaded ahead of time (called when the browser is idle). */
+  warmFeed() {
+    if (this.feedStill || !this.feedMat || this.lost) return;
+    this.feedStill = true;
     const mat = this.feedMat;
-    const still = new Image();
-    still.src = '/media/pfr-ball.jpg';
-    still.decode?.().then(() => {
-      if (mat.uniforms.uHas.value > 0.5) return;
+    image('/media/pfr-ball.jpg').then((still) => {
+      if (!still || mat.uniforms.uHas.value > 0.5) return;
       const t = new Texture(still);
       t.minFilter = LinearFilter; t.magFilter = LinearFilter; t.generateMipmaps = false;
       t.colorSpace = NoColorSpace; t.needsUpdate = true;
+      this.renderer.initTexture(t);
       mat.uniforms.tFeed.value = t; mat.uniforms.uHas.value = 1;
-    }).catch(() => {});
+    });
+  }
+
+  /** The video of the camera feed: fetched when the last room is near, played only inside it. */
+  private ensureFeedVideo() {
+    if (this.feedVideo || !this.feedMat) return;
+    this.warmFeed();
+    const mat = this.feedMat;
     const v = document.createElement('video');
     v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
     v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
@@ -365,41 +368,31 @@ void main() {
     this.feedVideo = v;
   }
 
-  /** Lazily fetch and start the real panorama video. */
-  private ensureVideo() {
-    if (this.video || !this.videoWanted) return;
-    const v = document.createElement('video');
-    v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto';
-    v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
-    const add = (src: string, type: string) => {
-      const s = document.createElement('source'); s.src = src; s.type = type; v.appendChild(s);
-    };
-    add('/media/pano.webm', 'video/webm');
-    add('/media/pano.mp4', 'video/mp4');
-    v.addEventListener('playing', () => {
-      perf.event('video', 'panorama playing');
-      const t = new VideoTexture(v);
-      t.minFilter = LinearFilter; t.magFilter = LinearFilter; t.generateMipmaps = false;
-      t.colorSpace = NoColorSpace; t.wrapS = t.wrapT = ClampToEdgeWrapping;
-      this.videoTex = t;
-      this.panoMat.uniforms.tPano.value = t;
-      this.panoMat.uniforms.uFlipY.value = 1;
-      this.panoMat.uniforms.uTex.value.set(v.videoWidth || 1792, v.videoHeight || 448);
-    }, { once: true });
-    this.video = v;
-    v.play().catch(() => {});
-  }
-
   resize() {
     const w = this.canvas.clientWidth || window.innerWidth;
     const h = this.canvas.clientHeight || window.innerHeight;
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.dprCap));
+    this.baseDpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
+    this.renderer.setPixelRatio(this.baseDpr * this.gov.scale);
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     const dpr = this.renderer.getPixelRatio();
-    if (this.mat) this.mat.uniforms.uViewport.value.set(w * dpr, h * dpr);
-    if (this.panoMat) this.panoMat.uniforms.uRes.value.set(w * dpr, h * dpr);
+    if (this.mat) this.mat.uniforms.uViewport.value.set(Math.floor(w * dpr), Math.floor(h * dpr));
+    this.sortKey = '';
+  }
+
+  /** the governor changed the level: a new drawing buffer, same picture */
+  private applyQuality() {
+    perf.event('quality', `level ${this.gov.level} (x${this.gov.scale.toFixed(2)}, keep ${this.gov.keep}): ${this.gov.reason}`);
+    this.resize();
+    this.onQuality?.();
+  }
+
+  /** pin the quality level (overlay, tests); -1 hands it back to the governor */
+  setLevel(level: number) {
+    if (level < 0) this.gov.auto = true;
+    else this.gov.force(level);
+    this.applyQuality();
   }
 
   /** x, z on the path at s metres. */
@@ -415,31 +408,49 @@ void main() {
   private onSorted(d: { id: number; order: Float32Array; n: number; ms?: number }) {
     const t0 = performance.now();
     this.sorting = false;
-    this.order.array.set(d.order.subarray(0, d.n));
+    // the worker's array becomes the attribute's array (same length): nothing is copied on this thread,
+    // and the array that was drawn until now goes back to the worker for the next sort
+    const prev = this.order.array as Float32Array;
+    this.order.array = d.order;
     this.order.clearUpdateRanges();
     this.order.addUpdateRange(0, d.n);
     this.order.needsUpdate = true;
     this.geo.instanceCount = d.n;
     this.visibleCount = d.n;
-    this.recycle = d.order.buffer as ArrayBuffer;
+    this.recycle = prev.buffer as ArrayBuffer;
     if (perf.on) {
       const t1 = performance.now();
       perf.set(F.SORT, d.ms ?? 0); perf.add(F.APPLY, t1 - t0); perf.set(F.LAT, t1 - this.sortAt); perf.add(F.UPLOAD, d.n * 4);
     }
   }
 
-  private requestSort() {
+  /**
+   * Ask the worker for a new order. The order only changes when the camera moves or when a moving
+   * group moves: while the camera travels every frame asks (one request in flight at a time, the frame
+   * never waits for it); at rest twenty sorts a second are plenty for the robots.
+   */
+  private requestSort(now: number) {
     if (this.sorting || this.lost) return;
+    const cam = this.camera, c = this.cur;
+    const e = cam.matrixWorldInverse.elements;
+    const tanY = Math.tan((cam.fov * Math.PI) / 360);
+    const far = c.fogFar * 1.14 + 1;
+    const key = `${far.toFixed(2)} ${tanY.toFixed(4)} ${cam.aspect.toFixed(3)} ${this.sensorRange} ${this.sensorHalf.toFixed(3)} ${this.keepCur.toFixed(3)} ${c.top > 0.001 || c.train < 0.999 ? 1 : 0}`;
+    if (key === this.sortKey && this.camMove < 0.004 && now - this.sortAt < 50) return;
+    this.sortKey = key;
     this.sorting = true;
-    this.sortAt = performance.now();
-    const tanY = Math.tan((this.camera.fov * Math.PI) / 360);
+    this.sortAt = now;
+    this.sortView.set(e);
+    this.viewMsg.set(e);
+    // from above, and while the scene is being trained, every room is in view
+    const all = c.top > 0.001 || c.train < 0.999;
     const msg: any = {
       type: 'sort', id: ++this.sortId,
-      view: Array.from(this.camera.matrixWorldInverse.elements),
-      groups: this.groups.slice(),
-      fan: [this.sensorRange, this.sensorHalf],
-      tanX: tanY * this.camera.aspect, tanY,
-      far: this.cur.fogFar * 1.14 + 1,
+      view: this.viewMsg, groups: this.groups,
+      fanR: this.sensorRange, fanA: this.sensorHalf,
+      tanX: tanY * cam.aspect, tanY, far,
+      sight: all ? null : sightFrom(cam.position.x, cam.position.z, this.sight),
+      keep: this.keepCur,
     };
     if (this.recycle) {
       msg.recycle = this.recycle;
@@ -459,13 +470,15 @@ void main() {
 
     // mobile robots on the one-way lanes, and the arm of each workstation
     this.traffic.step(dt);
-    this.traffic.bots.forEach((b, r) => this.setGroup(GROUP.AMR0 + r, b.x, b.z, b.yaw, 0));
-    CELLS.forEach((c, i) => {
+    const bots = this.traffic.bots;
+    for (let r = 0; r < bots.length; r++) this.setGroup(GROUP.AMR0 + r, bots[r].x, bots[r].z, bots[r].yaw, 0);
+    for (let i = 0; i < CELLS.length; i++) {
+      const c = CELLS[i];
       // slow pick-and-place swing between the part on the bed and the dock side
       const w = Math.sin(t * 0.55 + i * 1.7);
       const swing = Math.sign(w) * Math.pow(Math.abs(w), 0.45) * 1.05;
       this.setGroup(GROUP.ARM0 + i, c.x - 0.15, c.z - c.face * 0.12, c.face * Math.PI / 2 + swing, 0);
-    });
+    }
 
     // the ball and the robot that keeps it centred
     const cx = (PEN.x0 + PEN.x1) / 2, cz = (PEN.z0 + PEN.z1) / 2;
@@ -501,9 +514,11 @@ void main() {
 
   frame(dtRaw: number) {
     if (!this.mat || this.lost) return;
-    const t0 = perf.on ? performance.now() : 0;
+    const now = performance.now();
+    const t0 = now;
     const dt = Math.min(0.05, dtRaw);
     this.time += dt;
+    this.frameNo++;
     const c = this.cur, tg = this.target;
     for (const key in tg) {
       const l = DAMP[key];
@@ -511,11 +526,16 @@ void main() {
       else c[key] = tg[key];
     }
 
+    // quality: one decision per frame, applied before anything is drawn at the new size
+    if (this.gov.tick(dtRaw * 1000, this.moving || c.train < 0.999)) this.applyQuality();
+    const keep = this.gov.keep;
+    if (Math.abs(keep - this.keepCur) > 0.0005) this.keepCur += Math.sign(keep - this.keepCur) * Math.min(Math.abs(keep - this.keepCur), dt * 0.35);
+
     // pose on the path
     const info = this.info;
     const s = Math.max(0, Math.min(info.pathLen, c.s));
-    const p = this.pathAt(s);
-    const a = this.pathAt(Math.max(0, s - 0.25)), b = this.pathAt(Math.min(info.pathLen, s + 1.1));
+    const p = this.pathAt(s, this.pp);
+    const a = this.pathAt(Math.max(0, s - 0.25), this.pa), b = this.pathAt(Math.min(info.pathLen, s + 1.1), this.pb);
     let yawPath = Math.atan2(b[1] - a[1], b[0] - a[0]);
     while (yawPath - this.pathYaw > Math.PI) yawPath -= Math.PI * 2;
     while (yawPath - this.pathYaw < -Math.PI) yawPath += Math.PI * 2;
@@ -545,9 +565,9 @@ void main() {
     if (c.top > 0.0005) {
       const landscape = cam.aspect > 1;
       // plan view: on wide screens the long axis of the building lies horizontally
-      const right = landscape ? new Vector3(0, 0, 1) : new Vector3(1, 0, 0);
-      const up = landscape ? new Vector3(1, 0, 0) : new Vector3(0, 0, -1);
-      const back = new Vector3(0, 1, 0);
+      const right = landscape ? this.v3a.set(0, 0, 1) : this.v3a.set(1, 0, 0);
+      const up = landscape ? this.v3b.set(1, 0, 0) : this.v3b.set(0, 0, -1);
+      const back = this.v3c.set(0, 1, 0);
       this.m4.makeBasis(right, up, back);
       this.topQ.setFromRotationMatrix(this.m4);
       const tanY = Math.tan((c.fov * Math.PI) / 360);
@@ -557,7 +577,7 @@ void main() {
       // the plan sits right of centre on wide screens (the type takes the left third),
       // above centre on phones; planShift lets the intro keep it centred
       const shift = this.planShift;
-      const tx = landscape ? 10 : 10, tz = landscape ? 12.5 - 5.2 * shift : 12.5 + 5 * shift;
+      const tx = 10, tz = landscape ? 12.5 - 5.2 * shift : 12.5 + 5 * shift;
       const Hs = H * (1 + 0.16 * shift);
       cam.position.set(px + (tx - px) * e, c.camH + (Hs - c.camH) * e, pz + (tz - pz) * e);
       cam.quaternion.copy(this.fpQ).slerp(this.topQ, e);
@@ -565,6 +585,12 @@ void main() {
     if (Math.abs(cam.fov - c.fov) > 0.01) { cam.fov = c.fov; cam.updateProjectionMatrix(); }
     cam.updateMatrixWorld(true);
     cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
+    // how far the view moved since the last sort was asked for
+    const ve = cam.matrixWorldInverse.elements, sv = this.sortView;
+    let move = 0;
+    for (let i = 0; i < 16; i++) move += Math.abs(ve[i] - sv[i]);
+    this.camMove = move;
+    this.moving = move > 0.004;
 
     this.simulate(dt);
     // sensor fan rides with the camera along the path heading
@@ -576,7 +602,8 @@ void main() {
     u.uTime.value = this.time;
     u.uTrain.value = c.train;
     u.uPhoto.value = c.photo; u.uRepair.value = c.repair; u.uArtefact.value = c.artefact; u.uCeil.value = c.ceil;
-    u.uPathS.value = s / info.pathLen; u.uPathReveal.value = c.pathReveal;
+    u.uPathS.value = s / info.pathLen; u.uPathReveal.value = c.pathReveal; u.uInvite.value = c.invite;
+    u.uThin.value.set(this.keepCur, Math.pow(this.keepCur, -0.25));
     u.uFogNear.value = c.fogNear; u.uFogFar.value = c.fogFar;
     u.uDepthRange.value = Math.max(8, c.fogFar * 0.8);
     u.uSensor.value = c.sensor;
@@ -584,7 +611,7 @@ void main() {
     u.uSensorParams.value.set(this.sensorRange, this.sensorHalf);
     const dpr = this.renderer.getPixelRatio();
     const lensR = (this.mobile ? 0 : 150) * dpr;
-    const lensOk = this.lensOn && this.pointerActive && c.pano < 0.5 && c.train > 0.999;
+    const lensOk = this.lensOn && this.pointerActive && c.train > 0.999;
     u.uLens.value.set(this.pointerPx.x * dpr, (this.canvas.clientHeight - this.pointerPx.y) * dpr, lensR, lensOk ? this.lensMode : 0);
     u.uModeAll.value = this.modeAll;
 
@@ -604,60 +631,39 @@ void main() {
 
     // the screen of the Fil rouge room
     const nearPen = Math.abs(s - info.pathLen) < 9 || c.top > 0.02;
-    if (nearPen) { this.feedWanted = true; this.ensureFeed(); }
-    const feed = this.scene.getObjectByName('feed') as Mesh;
+    if (nearPen && c.train > 0.999) this.ensureFeedVideo();
     if (this.feedMat) {
       const fu = this.feedMat.uniforms;
-      const on = c.train > 0.999 && fu.uHas.value > 0.5 && c.top < 0.98 ? 1 : 0;
+      const on = c.train > 0.999 && fu.uHas.value > 0.5 && c.top < 0.98 && nearPen ? 1 : 0;
       fu.uOn.value += (on - fu.uOn.value) * (1 - Math.exp(-dt * 5));
       fu.uFogNear.value = c.fogNear; fu.uFogFar.value = c.fogFar;
-      feed.visible = fu.uOn.value > 0.01 && c.pano < 0.999;
+      // drawn (with nothing in it) during the first frames, so that its shader is ready long before the room
+      this.feed.visible = fu.uOn.value > 0.01 || this.frameNo < 4;
     }
     if (this.feedVideo) {
       if (this.inPfr && this.feedVideo.paused) this.feedVideo.play().catch(() => {});
       else if (!this.inPfr && !this.feedVideo.paused) this.feedVideo.pause();
     }
 
-    // panorama pass
-    const pm = this.scene.getObjectByName('pano') as Mesh;
-    const pu = this.panoMat.uniforms;
-    const showPano = c.pano > 0.001 && !!pu.tPano.value;
-    pm.visible = showPano;
-    if (c.pano > 0.001 || Math.abs(s - info.marks.aist) < 6) { this.videoWanted = true; this.ensureVideo(); }
-    if (showPano) {
-      pu.uAmt.value = c.pano; pu.uUnwrap.value = c.unwrap; pu.uWipe.value = c.wipe;
-      pu.uYaw.value = yaw; pu.uPitch.value = pitch; pu.uTanHalf.value = Math.tan((c.fov * Math.PI) / 360);
-      pu.uTime.value = this.time;
-    }
-    if (this.video) {
-      if (c.pano > 0.02 && this.video.paused) this.video.play().catch(() => {});
-      else if (c.pano <= 0.02 && !this.video.paused) this.video.pause();
-    }
-    // splats are hidden when the panorama covers everything
-    this.mesh.visible = !(c.pano > 0.999);
-
-    if (this.mesh.visible) this.requestSort();
+    this.requestSort(now);
     const rec = perf.on;
     const t1 = rec ? performance.now() : 0;
-    if (rec) { perf.set(F.SIM, t1 - t0); this.gpu.poll((tag, ms) => perf.late(tag, F.GPU, ms)); this.gpu.begin(perf.frames); }
+    // GPU time of the frame: every frame while recording, one frame in four for the governor
+    this.gpu.poll((tag, ms, level) => { if (tag >= 0) perf.late(tag, F.GPU, ms); this.gov.gpuSample(ms, level); });
+    if (rec) { perf.set(F.SIM, t1 - t0); this.gpu.begin(perf.frames, this.gov.level); }
+    else if ((this.frameNo & 3) === 0) this.gpu.begin(-1, this.gov.level);
     this.renderer.render(this.scene, cam);
+    this.gpu.end();
     if (rec) {
-      this.gpu.end();
       perf.set(F.DRAW, performance.now() - t1);
-      perf.set(F.SPLATS, this.mesh.visible ? this.geo.instanceCount : 0);
-      perf.set(F.SCALE, this.renderer.getPixelRatio());
+      perf.set(F.SPLATS, this.geo.instanceCount);
+      perf.set(F.SCALE, dpr);
       // a shader program or a texture that reaches the GPU for the first time during the run
       const inf = this.renderer.info;
       const np = inf.programs?.length ?? 0, nt = inf.memory.textures;
       if (np !== this.seenPrograms) { perf.event('program', `${this.seenPrograms} -> ${np}`); this.seenPrograms = np; }
       if (nt !== this.seenTextures) { perf.event('texture', `${this.seenTextures} -> ${nt}`); this.seenTextures = nt; }
     }
-  }
-
-  setBand(band: number, y: number) {
-    if (!this.panoMat) return;
-    this.panoMat.uniforms.uBand.value = band;
-    this.panoMat.uniforms.uBandY.value = y;
   }
 
   /**
@@ -689,7 +695,7 @@ void main() {
   /** Pointer ray onto the floor (for the ball). */
   floorHit(nx: number, ny: number): [number, number] | null {
     const cam = this.camera;
-    const v = new Vector3(nx, ny, 0.5).unproject(cam).sub(cam.position).normalize();
+    const v = this.v3a.set(nx, ny, 0.5).unproject(cam).sub(cam.position).normalize();
     if (v.y > -0.02) return null;
     const t = -cam.position.y / v.y;
     return [cam.position.x + v.x * t, cam.position.z + v.z * t];
@@ -698,7 +704,6 @@ void main() {
   dispose() {
     this.running = false;
     this.worker.terminate();
-    this.video?.pause();
     this.feedVideo?.pause();
     this.renderer.dispose();
   }

@@ -14,9 +14,13 @@ export interface Img {
 export interface GenInput {
   density: number;
   seed: number;
-  pano: Img | null; // 2:1 x2 side by side: raw | repaired
+  /** the two stills side by side, raw | repaired: each half is the panorama below its first rows (PANO_TOP) */
+  pano: Img | null;
   input: Img | null; // pinhole view cut out of the raw 3DGRUT panorama (tools/pinhole.py)
 }
+
+/** share of the panorama height that the stills leave out at the top (512 rows, 44 cropped) */
+export const PANO_TOP = 44 / 512;
 
 type Light = { p: V3; i: number; r: number };
 type Shade = (p: V3, n: V3) => number;
@@ -248,7 +252,8 @@ function aist(B: Builder, pano: Img | null) {
   }
   const hw = pano.w / 2;
   const sample = (u: number, v: number, half: number): V3 => {
-    const vv = Math.max(0.094, Math.min(0.995, v));
+    // rows above the first one of the stills do not exist: the ceiling repeats the top row
+    const vv = (Math.max(PANO_TOP + 0.008, Math.min(0.995, v)) - PANO_TOP) / (1 - PANO_TOP);
     const px = Math.min(hw - 1, Math.max(0, Math.floor(u * hw))) + half * hw;
     const py = Math.min(pano.h - 1, Math.floor(vv * pano.h));
     const i = (py * pano.w + px) * 4;
@@ -287,7 +292,7 @@ function aist(B: Builder, pano: Img | null) {
       const ru: V3 = [a[0] * ca + b[0] * sa, a[1] * ca + b[1] * sa, a[2] * ca + b[2] * sa];
       const rv: V3 = [-a[0] * sa + b[0] * ca, -a[1] * sa + b[1] * ca, -a[2] * sa + b[2] * ca];
       const clean = sample(u, v, 1), raw = sample(u, v, 0);
-      const flags = face === 1 && d[1] > 0 ? FLAG.CEIL : 0;
+      const flags = (face === 1 && d[1] > 0 ? FLAG.CEIL : 0) | FLAG.SURF;
       B.push(p, [s * (0.85 + 0.4 * B.rnd()), s * (0.85 + 0.4 * B.rnd()), 0.01], basisQuat(ru, rv, n),
         clean[0], clean[1], clean[2], 0.94, KIND.PHOTO, flags, raw[0], raw[1], raw[2]);
     }

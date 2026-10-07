@@ -10,13 +10,6 @@ initCompare();
 autoplayVideos();
 nameCaseTitleOnClick();
 
-// the "Video" button scrolls to the lead frame and starts the video there
-document.querySelectorAll<HTMLAnchorElement>('a[data-play-target]').forEach((a) => {
-  a.addEventListener('click', () => {
-    document.getElementById(a.dataset.playTarget!)?.dispatchEvent(new CustomEvent('compare:play'));
-  });
-});
-
 // blocks arrive once, when they enter the viewport (same curve as everything that arrives)
 const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const items = Array.from(document.querySelectorAll<HTMLElement>('.rv'));

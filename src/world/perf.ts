@@ -20,7 +20,8 @@ export const F = {
   GPU: 13,    // GPU time of the frame (EXT_disjoint_timer_query_webgl2), -1 when unknown
   SPLATS: 14, // Gaussians drawn
   SCALE: 15,  // device pixels per CSS pixel of the canvas
-  N: 16,
+  TWEEN: 16,  // text and interface animations that run before the frame callback (GSAP)
+  N: 17,
 } as const;
 
 export interface PerfEvent { t: number; y: number; kind: string; detail: string }
@@ -114,7 +115,7 @@ class Perf {
       const o = (i % CAP) * F.N;
       rows.push(Array.from(this.buf!.subarray(o, o + F.N), (v) => Math.round(v * 100) / 100));
     }
-    return { fields: Object.keys(F).slice(0, F.N), rows, events: this.events };
+    return { fields: Object.keys(F).filter((k) => k !== 'N'), rows, events: this.events };
   }
 
   /** the last k rows, newest last, without copying (for the overlay) */
@@ -139,7 +140,7 @@ export class GpuTimer {
   /** last resolved measurement (ms), -1 until one arrives */
   lastMs = -1;
   private ext: any;
-  private pending: { q: WebGLQuery; tag: number }[] = [];
+  private pending: { q: WebGLQuery; tag: number; aux: number }[] = [];
   private free: WebGLQuery[] = [];
   private active: WebGLQuery | null = null;
 
@@ -148,13 +149,14 @@ export class GpuTimer {
     this.ok = !!this.ext;
   }
 
-  begin(tag: number) {
+  /** tag and aux come back with the result: the frame it belongs to, the quality level it was drawn at */
+  begin(tag: number, aux = 0) {
     if (!this.ok || this.active || this.pending.length > 8) return;
     const q = this.free.pop() ?? this.gl.createQuery();
     if (!q) return;
     this.gl.beginQuery(this.ext.TIME_ELAPSED_EXT, q);
     this.active = q;
-    this.pending.push({ q, tag });
+    this.pending.push({ q, tag, aux });
   }
 
   end() {
@@ -163,8 +165,8 @@ export class GpuTimer {
     this.active = null;
   }
 
-  /** collect finished queries; fn(tag, ms) for each */
-  poll(fn?: (tag: number, ms: number) => void) {
+  /** collect finished queries; fn(tag, ms, aux) for each */
+  poll(fn?: (tag: number, ms: number, aux: number) => void) {
     if (!this.ok || !this.pending.length) return;
     const gl = this.gl;
     const disjoint = gl.getParameter(this.ext.GPU_DISJOINT_EXT);
@@ -176,7 +178,7 @@ export class GpuTimer {
       if (!disjoint) {
         const ms = (gl.getQueryParameter(p.q, gl.QUERY_RESULT) as number) / 1e6;
         this.lastMs = ms;
-        fn?.(p.tag, ms);
+        fn?.(p.tag, ms, p.aux);
       }
       this.free.push(p.q);
     }

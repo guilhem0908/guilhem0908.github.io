@@ -1,22 +1,23 @@
 ---
 // Before / after panorama. Without JavaScript: the two images, one above the other.
-// With JavaScript (scripts/page.ts adds .is-live): one frame, a draggable divider, and a
-// button that swaps the stills for the real side-by-side video (left half raw, right half repaired).
+// With JavaScript (scripts/compare.ts adds .is-live): one frame and a draggable divider.
+// The stills are 1024 px wide: the frame is never laid out wider than `max` CSS pixels, so that
+// they stay sharp (one image pixel for at most one screen pixel on a standard display).
 import { media, type MediaKey } from '../data/site';
 interface Props {
-  before: MediaKey; after: MediaKey; video?: MediaKey;
-  beforeLabel: string; afterLabel: string; alt: string; play?: string; pause?: string; slider: string;
+  before: MediaKey; after: MediaKey;
+  beforeLabel: string; afterLabel: string; alt: string; slider: string;
   id?: string;
+  /** largest width of the frame, in CSS pixels (default: the width of the stills) */
+  max?: number;
 }
-const { before, after, video, beforeLabel, afterLabel, alt, play, pause, slider, id } = Astro.props;
+const { before, after, beforeLabel, afterLabel, alt, slider, id, max } = Astro.props;
 const b = media[before], a = media[after];
-const v = video ? media[video] : null;
 if (b.kind !== 'image' || a.kind !== 'image') throw new Error('Compare needs two images');
-const mp4 = v && v.kind === 'video' ? v.mp4 : undefined;
-const webm = v && v.kind === 'video' ? v.webm : undefined;
+const width = Math.min(max ?? b.w, b.w);
 ---
 
-<div class="cmp" id={id} data-compare style={`--ratio:${b.w}/${b.h}`} data-video-mp4={mp4} data-video-webm={webm}>
+<div class="cmp" id={id} data-compare style={`--ratio:${b.w}/${b.h}; --cmp-max:${width}px`}>
   <div class="cmp__frame" role="img" aria-label={alt}>
     <div class="cmp__layer cmp__layer--after">
       <img src={a.src} width={a.w} height={a.h} alt="" loading="eager" decoding="async" />
@@ -30,6 +31,5 @@ const webm = v && v.kind === 'video' ? v.webm : undefined;
   </div>
   <div class="cmp__ctl">
     <input class="cmp__range" type="range" min="0" max="100" step="0.5" value="50" aria-label={slider} />
-    {mp4 && play && <button class="btn cmp__play" type="button" data-play={play} data-pause={pause} aria-pressed="false">{play}</button>}
   </div>
 </div>

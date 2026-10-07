@@ -14,12 +14,28 @@ html.rm .rm-only { display: block; margin-top: 1.5rem; }
 .sec .beat + .beat, .sec .beat + figure, .sec figure + .beat { margin-top: 1.6rem; }
 .sec .plate { max-width: 44rem; }
 .beat__cta { margin-top: 1rem; }
-.cap { display: none; }
-.cap__note { margin-top: 0.5rem; }
 .beat--hint { display: none; }
-.beat--fig { max-width: 60rem; }
-.beat--failed.plate { max-width: 60rem; }
 .host { color: var(--haze); margin-top: 1rem; }
+
+/* AIST: the proof of the room, a small sharp still (two 1024 px panoramas) and two figures */
+.aist__still { max-width: 32rem; }
+.aist__still figcaption { margin-top: 0.55rem; }
+.aist__figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); gap: 1.2rem 2rem; margin-top: 1.4rem; max-width: 46rem; }
+.aist__figs .bigfig { grid-template-columns: 1fr; gap: 0.35rem; align-items: start; }
+.aist__figs .bigfig__num { font-size: clamp(3.2rem, 7vw, 6.4rem); font-weight: 300; line-height: 0.86; }
+.aist__figs .bigfig__meaning { font-size: 0.86rem; line-height: 1.45; max-width: 36ch; }
+
+/* the invitation to scroll. Static page: shown under reduced motion only, as a plain line */
+.cue { display: none; }
+html.rm .cue { display: flex; margin-top: 0.4rem; }
+.cue__hint { display: inline-flex; align-items: center; gap: 0.6rem; color: var(--paper); }
+.cue__start, .cue__touch { display: none; }
+.cue__mark { position: relative; flex: none; width: 2px; height: 22px; background: var(--fil); }
+.cue__mark::after { content: ''; position: absolute; left: -4px; top: 6px; width: 10px; height: 10px; background: var(--paper); border: 1.5px solid var(--deep); box-sizing: border-box; }
+@media (hover: none) and (pointer: coarse) {
+  .cue__wheel { display: none; }
+  .cue__touch { display: inline; }
+}
 
 .hero { display: grid; gap: 1.6rem; }
 .hero__name .ln { display: block; }
@@ -36,7 +52,6 @@ html.rm .rm-only { display: block; margin-top: 1.5rem; }
 .skiprun:hover { color: var(--cone); }
 .skiprun span { color: var(--fil); font-weight: 800; }
 
-.fallback-wipe { margin: 1.6rem 0; max-width: 72rem; }
 .pfr__static { margin-top: 1.6rem; }
 .sec--pfr img.static-only { margin-top: 1.6rem; max-width: 44rem; width: 100%; height: auto; }
 .feed { width: min(100%, 420px); height: auto; outline: 1px solid rgb(244 246 255 / 0.35); outline-offset: -1px; background: var(--deep); }
@@ -104,7 +119,7 @@ html.gl .stage {
   padding: 5rem var(--pad) calc(var(--pad) + 0.5rem);
 }
 html.gl .sec--hero { height: 190vh; }
-html.gl .sec--aist { height: 1050vh; }
+html.gl .sec--aist { height: 450vh; }
 html.gl .sec--svlr { height: 150vh; }
 html.gl .sec--tlse { height: 430vh; }
 html.gl .sec--usine { height: 430vh; }
@@ -133,27 +148,19 @@ html.gl .giant {
   transform-origin: 100% 100%; pointer-events: none;
 }
 
-/* panorama beats: --band-* are measured in main.ts and shared with the shader */
-html.gl .beat--pano-top { left: 0; right: 0; top: auto; bottom: calc(100vh - var(--band-t, 15vh) + 0.7rem); text-align: center; }
-html.gl .beat--pano-bottom {
-  left: var(--band-l, 13vw); right: max(var(--band-l, 13vw), calc(var(--pad) + 196px)); top: calc(var(--band-b, 70vh) + 0.55rem);
-  display: grid; grid-template-columns: 1fr 1fr; gap: 0.15rem 1rem;
-}
-html.gl .cap { display: block; }
-/* the repair front travels left to right: repaired on the left, raw on the right */
-html.gl .cap--fix { order: 1; }
-html.gl .cap--raw { order: 2; text-align: right; }
-html.gl .cap__note { order: 3; grid-column: 1 / -1; font-size: 0.8rem; line-height: 1.4; max-width: 92ch; margin-top: 0.1rem; }
-/* one giant figure at a time under the panorama */
-html.gl .beat--fig { left: var(--band-l, 13vw); right: max(var(--band-l, 13vw), calc(var(--pad) + 196px)); bottom: calc(var(--pad) + 0.2rem); max-width: none; }
-html.gl .beat--fig .bigfig { align-items: end; }
-/* as large as the band allows while its meaning keeps a readable column beside it */
-html.gl .beat--fig { container-type: inline-size; }
-html.gl .beat--fig .bigfig__num { font-size: clamp(3rem, min(16cqw, 18vh), 10.4rem); line-height: 0.82; }
-html.gl .beat--fig .bigfig__meaning { font-size: 0.86rem; line-height: 1.42; max-width: 44ch; padding-bottom: 0.3rem; }
-html.gl .beat--failed { max-width: min(46rem, 60vw); padding: 1rem 1.25rem 1.1rem; }
-html.gl .beat--failed .bigfig__num { color: var(--fil); font-size: clamp(3.4rem, 9vw, 9rem); line-height: 0.82; }
-html.gl .beat--failed .bigfig__meaning { font-size: 0.95rem; line-height: 1.45; max-width: 34ch; }
+/* AIST, one stage: the copy bottom left, the proof top right on a darkroom mat (real media sits on --deep),
+   left of the instruments so that the two never meet whatever the height of the window */
+html.gl .aist__copy { max-width: min(34rem, 36vw); }
+html.gl .aist__copy > .t { font-size: clamp(1.3rem, 2.05vw, 2rem); max-width: 24ch; margin-bottom: 0.75rem; }
+html.gl .aist__copy .body { font-size: 0.95rem; line-height: 1.52; }
+html.gl .aist__copy .body + .body { margin-top: 0.55rem; }
+html.gl .aist__proof { right: calc(var(--pad) + 208px); top: 5.6rem; width: min(30rem, 33vw); background: var(--deep); padding: 0.7rem 0.7rem 0.85rem; }
+html.gl .aist__still { max-width: none; }
+html.gl .aist__still figcaption { font-size: 0.78rem; line-height: 1.4; margin-top: 0.35rem; }
+html.gl .aist__proof .cmp { gap: 0.2rem; }
+html.gl .aist__figs { grid-template-columns: 1fr 1fr; gap: 0.8rem 1.1rem; margin-top: 0.7rem; padding-top: 0.75rem; border-top: 1px solid var(--hair); max-width: none; }
+html.gl .aist__figs .bigfig__num { font-size: clamp(2.8rem, min(6vw, 9.5vh), 6.2rem); }
+html.gl .aist__figs .bigfig__meaning { font-size: 0.8rem; line-height: 1.42; }
 
 /* headlines sit on the world: a soft ground keeps them readable over bright splats */
 html.gl .beat .t-xl, html.gl .beat > .t, html.gl .usine__title, html.gl .hero__name, html.gl .contact .d-l { text-shadow: 0 0 0.5em rgb(6 11 58 / 0.5), 0 0.03em 0.1em rgb(6 11 58 / 0.55); }
@@ -171,7 +178,8 @@ html.gl .sensor { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.2
 
 /* Usine */
 html.gl .beat--usine { left: var(--pad); top: 5.6rem; }
-html.gl .usine__title { font-size: clamp(3.6rem, 15.5vw, 17rem); white-space: nowrap; transform-origin: 0 0; }
+/* its own layer: the crane scales it on every frame, and a layer is scaled by the compositor instead of being painted again */
+html.gl .usine__title { font-size: clamp(3.6rem, 15.5vw, 17rem); white-space: nowrap; transform-origin: 0 0; will-change: transform; }
 
 /* Fil rouge */
 html.gl .beat--hmi { right: var(--pad); top: 5.6rem; width: min(168px, 13vw, 15vh); background: var(--plate); padding: 0.45rem 0.45rem 0.55rem; }
@@ -199,11 +207,48 @@ html.gl .contact__fine { background: var(--plate); padding: 0.6rem 0.9rem; margi
 html.gl .hero { display: block; }
 html.gl .sec--hero { padding-top: 0; }
 /* the name is sized from the width, and from the height on short windows so that it never climbs into the plate above it */
-html.gl .hero__name { position: absolute; left: var(--pad); bottom: calc(var(--pad) - 0.04em); font-size: clamp(3.4rem, min(11.6vw, 18.6vh), 12.6rem); }
+html.gl .hero { --name: clamp(3.4rem, min(11.6vw, 18.6vh), 12.6rem); }
+html.gl .hero__name { position: absolute; left: var(--pad); bottom: calc(var(--pad) - 0.04em); font-size: var(--name); transform-origin: 0 100%; }
+/* it opens from condensed to wide as it arrives (the compositor scales it; the letters are not laid out again) */
+html.gl .hero__name.is-opening { animation: name-open 1.5s var(--ease-converge) both; }
+@keyframes name-open { from { scale: 0.62 1; } to { scale: 1 1; } }
 html.gl .hero__side { position: absolute; left: var(--pad); top: 5.6rem; max-width: 27rem; gap: 0.9rem; }
 html.gl .hero__intro.plate { background: var(--plate); padding: 1.05rem 1.15rem 1.1rem; }
 html.gl .skiprun { background: var(--plate); padding: 0 0.8rem; }
 html.gl.booting .hero__side, html.gl.booting .hero__name, html.gl.booting .hud { opacity: 0; }
+
+/* the invitation: on the floor beside the path, in the gap the first line of the name leaves.
+   It arrives with the hero and leaves at the first scroll (html.cue-on, set by main.ts). */
+html.gl .cue {
+  display: grid; justify-items: start; gap: 0.45rem; position: absolute; z-index: 3; margin: 0;
+  left: calc(var(--pad) + 5.16 * var(--name)); bottom: calc(var(--pad) + 0.9 * var(--name));
+  opacity: 0; visibility: hidden; transform: translate3d(0, 14px, 0);
+  transition: opacity 300ms var(--ease-snap), transform 500ms var(--ease-converge), visibility 0s linear 300ms;
+}
+html.gl.cue-on .cue { opacity: 1; visibility: visible; transform: none; transition: opacity 420ms var(--ease-snap) 380ms, transform 800ms var(--ease-converge) 380ms, visibility 0s linear 0s; }
+html.gl .cue__hint { background: var(--plate); min-height: 40px; padding: 0 0.85rem 0 0.8rem; white-space: nowrap; }
+html.gl .cue__start { display: inline-flex; white-space: nowrap; }
+html.gl .cue__start span { font-weight: 800; }
+html.gl .cue__mark::after { animation: cue-run 1.5s var(--ease-plan) infinite; }
+@keyframes cue-run {
+  0% { transform: translate3d(0, -13px, 0); opacity: 0; }
+  22% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { transform: translate3d(0, 13px, 0); opacity: 0; }
+}
+/* a finger moves the other way */
+@keyframes cue-swipe {
+  0% { transform: translate3d(0, 13px, 0); opacity: 0; }
+  22% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { transform: translate3d(0, -13px, 0); opacity: 0; }
+}
+@media (hover: none) and (pointer: coarse) { html.gl .cue__mark::after { animation-name: cue-swipe; } }
+@media (prefers-reduced-motion: reduce) { html.gl .cue__mark::after { animation: none; } html.gl .cue, html.gl.cue-on .cue { transition: none; transform: none; } }
+/* a window too narrow for the gap beside the name: the cue goes under the header, above the instruments */
+@media (min-width: 761px) and (max-width: 1279px) {
+  html.gl .cue { left: auto; right: var(--pad); bottom: auto; top: 5.6rem; justify-items: end; }
+}
 
 /* ----------------------------------------------------------------- HUD */
 
@@ -263,13 +308,12 @@ html.gl .intro {
 .intro__skip { position: absolute; right: var(--pad); top: calc(var(--top-h) + 1.1rem); background: var(--paper); color: var(--deep); padding: 0.4rem 0.6rem; }
 html.gl.intro-done .intro { opacity: 0; }
 
-/* letters used by the convergence animation */
-.cv-char { display: inline-block; will-change: transform, opacity, filter; }
+/* letters used by the convergence animation (no will-change: a letter is a layer only while it moves) */
+.cv-char { display: inline-block; }
 .cv-word { display: inline-block; white-space: nowrap; }
 
 /* short desktop windows: the caption keeps its first sentence (which run this is), the rest is in the case study */
 @media (max-height: 800px) {
-  html.gl .cap__more { display: none; }
   html.gl .hero__line { font-size: 1.06rem; line-height: 1.36; }
   html.gl .hero__side { gap: 0.7rem; }
 }
@@ -308,18 +352,20 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .beat .body { font-size: 0.9rem; line-height: 1.48; }
   html.gl .beat .small { font-size: 0.78rem; }
   html.gl .giant { right: 6px; bottom: 150px; font-size: 46vw; -webkit-text-stroke-width: 1px; }
-  html.gl .beat--pano-top { padding: 0 10px; }
-  html.gl .cap__note { font-size: 0.74rem; }
-  /* the band, its caption and a giant figure share one phone screen: the second sentence waits for the case study */
-  html.gl .cap__more { display: none; }
-  html.gl .beat--pano-bottom { right: 10px; left: 10px; }
-  html.gl .beat--fig { left: 10px; right: 10px; top: calc(var(--band-b, 46vh) + 6.4rem); bottom: auto; }
-  html.gl .beat--fig .bigfig, html.gl .beat--failed .bigfig { grid-template-columns: 1fr; }
-  html.gl .beat--fig .bigfig__num { font-size: clamp(4rem, 21vw, 5.4rem); }
-  html.gl .beat--fig .bigfig__meaning { font-size: 0.86rem; line-height: 1.42; padding: 0; max-width: 34ch; }
-  html.gl .beat--failed { max-width: none; }
-  html.gl .beat--failed .bigfig__num { font-size: 4.4rem; }
-  html.gl .beat--failed .bigfig__meaning { font-size: 0.84rem; }
+  /* AIST on a phone: the copy, then the proof, one after the other (main.ts), each with the whole width:
+     the instruments step aside for this stage */
+  html.gl .aist__copy { left: 10px; right: 10px; bottom: 10px; max-width: none; }
+  html.gl .aist__copy > .t { font-size: 1.3rem; max-width: none; margin-bottom: 0.6rem; }
+  html.gl .aist__copy .body { font-size: 0.9rem; line-height: 1.46; }
+  html.gl .aist__proof { left: 10px; right: 10px; top: 4.4rem; width: auto; padding: 0.5rem 0.5rem 0.7rem; }
+  html.gl .aist__still figcaption { font-size: 0.74rem; }
+  html.gl .aist__figs { gap: 0.6rem 0.9rem; }
+  html.gl .aist__figs .bigfig__num { font-size: clamp(2.8rem, 15vw, 3.8rem); }
+  html.gl .aist__figs .bigfig__meaning { font-size: 0.76rem; line-height: 1.4; }
+  /* the invitation sits under the name, left of the map, where the path leaves the screen */
+  html.gl .cue { left: 10px; right: 124px; bottom: 10px; gap: 0.35rem; }
+  html.gl .cue__hint { white-space: normal; min-height: 38px; padding: 0.3rem 0.6rem; line-height: 1.25; }
+  html.gl .cue__start { min-height: 42px; padding: 0 0.8rem; font-size: 0.92rem; }
   html.gl .marquee { top: 12vh; }
   html.gl .sensor { grid-template-columns: 1fr; }
   html.gl .beat--usine { top: 4.6rem; left: 10px; }
@@ -337,7 +383,6 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .sec--lab { padding: 30vh 10px 12vh; }
   html.gl .labcards { grid-template-columns: 1fr; }
   html.gl .sec--index { padding: 8vh 10px 18vh; }
-  html.gl .sec--aist { height: 950vh; }
 }
 
 /* a short phone screen, which is what a phone browser with its toolbars shows: the hero keeps the line,
@@ -350,6 +395,8 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .hero__seek .hz { display: none; }
   html.gl .hero__links { gap: 0.4rem; }
   html.gl .hero__links .btn, html.gl .skiprun { min-height: 38px; }
+  /* the copy of the AIST stage keeps its title, two sentences and the button */
+  html.gl .aist__copy .body:nth-of-type(3), html.gl .aist__copy .links { display: none; }
 }
 
 @media (max-width: 760px) and (max-height: 600px) {
@@ -364,13 +411,31 @@ html.gl.intro-done .intro { opacity: 0; }
   html.gl .hero__intro { grid-column: 1 / -1; }
   html.gl .hero__line, html.gl .hero__seek { max-width: none; }
   /* the plate ends about 20 rem down: the name takes what is left under it */
-  html.gl .hero__name { font-size: clamp(3.4rem, min(11.6vw, (100vh - 370px) * 0.595), 12.6rem); }
+  html.gl .hero { --name: clamp(3.4rem, min(11.6vw, (100vh - 370px) * 0.595), 12.6rem); }
+  html.gl .aist__copy .body { font-size: 0.9rem; line-height: 1.46; }
+  html.gl .aist__still figcaption .gl-only { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   html:not(.gl) * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
 
+/* ------------------------------------------- instrument panel (?perf=1) */
+
+.perf {
+  position: fixed; left: var(--pad); top: calc(var(--top-h) + 0.6rem); z-index: 60; width: 300px; display: grid; gap: 0.22rem;
+  background: var(--deep); color: var(--paper); padding: 0.55rem 0.6rem 0.6rem; outline: 1px solid var(--hair); outline-offset: -1px;
+}
+.perf__h { color: var(--cone); margin-bottom: 0.15rem; }
+.perf > div { display: flex; justify-content: space-between; gap: 0.8rem; }
+.perf__k { color: var(--haze); white-space: nowrap; }
+.perf__v { text-align: right; text-transform: none; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.perf__strip { width: 100%; height: 36px; margin-top: 0.3rem; background: rgb(244 246 255 / 0.06); }
+.perf__ctl { display: flex; gap: 0.3rem; margin-top: 0.3rem; }
+.perf__ctl button { font: inherit; letter-spacing: inherit; text-transform: inherit; background: var(--paper); color: var(--void); border: 0; min-width: 32px; min-height: 28px; padding: 0 0.5rem; cursor: pointer; }
+.perf__ctl button:hover { background: var(--cone); color: var(--deep); }
+@media (max-width: 760px) { .perf { left: 10px; right: 10px; width: auto; top: 4.2rem; } }
+
 @media print {
-  #world, .hud, .intro, .lens { display: none !important; }
+  #world, .hud, .intro, .lens, .perf, .cue { display: none !important; }
 }

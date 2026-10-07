@@ -90,6 +90,7 @@ const fr: SiteContent = {
 
   home: {
     heroLinks: { cv: 'CV', github: 'GitHub', linkedin: 'LinkedIn', email: 'E-mail', skip: 'Passer le parcours : index des projets' },
+    cue: { scroll: 'Faire défiler pour avancer', swipe: 'Glisser vers le haut pour avancer', start: 'Commencer le parcours' },
     posterAlt: 'Un bâtiment fait de splats gaussiens, dessiné comme un plan technique (blueprint), avec un chemin rouge planifié qui traverse une porte',
     start3d: 'Lancer le parcours 3D',
 
@@ -122,6 +123,21 @@ const fr: SiteContent = {
       view: { prefix: 'Vue :', colour: 'couleur', depth: 'profondeur', ellipsoids: 'ellipsoïdes' },
       lens: { depth: 'Loupe : profondeur (L)', ellipsoids: 'Loupe : ellipsoïdes bruts (L)' },
       bearing: 'Direction de la balle',
+      perf: {
+        title: 'Performances',
+        frame: 'Image',
+        gpu: 'Temps GPU',
+        scale: 'Échelle de rendu',
+        level: 'niveau',
+        splats: 'Gaussiennes dessinées',
+        sort: 'Tri en profondeur',
+        long: 'Dernière image longue',
+        device: 'GPU',
+        none: 'aucune',
+        auto: 'Auto',
+        script: 'script',
+        browser: 'navigateur',
+      },
     },
 
     waypoints: {
@@ -140,40 +156,28 @@ const fr: SiteContent = {
       title: 'Création d’un jeu de données de navigation à 360° avec le 3D Gaussian Splatting',
       host: 'Computer Vision Research Team (équipe de vision par ordinateur), Artificial Intelligence Research Center, AIST (National Institute of Advanced Industrial Science and Technology).',
       giant: '360°',
-      inputTag: 'Entrée',
-      goal: 'L’objectif : produire des observations équirectangulaires à 360°, avec poses et commandes, pour la navigation visuelle de robots, à partir de scènes représentées en 3D Gaussian Splatting.',
-      input: 'Le point de départ est une simple vidéo pinhole (caméra classique, à perspective). COLMAP retrouve les poses de la caméra, puis la scène est entraînée sous forme de gaussiennes 3D.',
-      inputWall: 'Sur le mur : une vue pinhole découpée dans le rendu 3DGRUT brut. La vidéo elle-même vient d’un tiers et n’est pas montrée.',
-      problemTitle: 'La caméra source ne voit qu’environ 12 % de la sphère par pose.',
-      problem: 'Rendu en panorama complet, tout ce que la caméra n’a jamais regardé ressort en floaters (artefacts flottants) et en aiguilles.',
-      problemRoom: 'Cette salle est construite à partir de ce rendu 3DGRUT brut.',
-      unwrapTitle: 'Le déplier. Le réparer.',
-      rawLabel: 'Rendu 3DGRUT brut, équirectangulaire',
-      fixedLabel: 'Après le premier passage d’ArtiFixer3D+',
-      caption: 'Sortie réelle d’un premier essai sur un clip de 154 images : ce n’est pas l’essai de 117 images dont viennent les chiffres ci-dessous, et aucun verdict d’acceptation n’est enregistré pour lui.',
-      captionMore: 'La plupart des trous et du bruit de splatting disparaissent ; des déformations résiduelles restent, et les zones que la caméra n’a jamais vues sont générées, pas observées.',
+      stageTitle: 'La caméra source ne voit qu’environ 12 % de la sphère par pose.',
+      text: [
+        'Un modèle de navigation visuelle a besoin d’observations à 360°. Une scène reconstruite à partir d’une simple vidéo ne contient que ce que la caméra a vu : rendu en panorama complet, le reste ressort en floaters (artefacts flottants) et en aiguilles.',
+        'ArtiFixer-360, mon extension de l’ArtiFixer de NVIDIA, répare les vues ensemble avec un modèle de diffusion vidéo, puis les distille dans la scène 3D.',
+        'L’essai complet de 154 images a échoué à mes propres critères d’acceptation, ce qui a mené à une refonte qui part de la géométrie.',
+      ],
+      rawLabel: 'Rendu 3DGRUT brut',
+      fixedLabel: 'Après ArtiFixer3D+',
+      caption: 'Sortie réelle d’un premier essai sur un clip de 154 images. Aucun verdict d’acceptation n’est enregistré pour lui.',
+      stillAlt: 'Panorama à 360° d’un salon. À gauche du séparateur : rendu 3DGRUT brut plein de floaters et d’aiguilles. À droite : la sortie réparée.',
+      slider: 'Position du séparateur entre le panorama brut et le panorama réparé',
+      roomNote: 'La salle autour de vous est construite à partir de ce panorama.',
       figures: {
         rig: {
           value: '14',
-          meaning: 'vues de 110° qui se recouvrent, par pose, dans un rig ancré dans le monde qui suit la trajectoire réelle de la caméra. Les 14 flux sont réparés ensemble par ArtiFixer, le modèle de diffusion vidéo de NVIDIA, que ce pipeline prolonge (Apache-2.0).',
-        },
-        warp: {
-          from: '0,037',
-          value: '0,020',
-          meaning: 'MAE de recalage temporel (temporal warp), rendus bruts contre sortie, sur l’essai de référence de 117 images (14 vues, 1 638 rendus). Tout lissage fait baisser cette métrique : l’intensité des contours conservée est de 0,49.',
+          meaning: 'vues de 110° qui se recouvrent, par pose, dans un rig qui suit la trajectoire réelle de la caméra, réparées ensemble par le modèle de diffusion vidéo 14B de NVIDIA.',
         },
         depth: {
           value: '−27 %',
-          meaning: 'MAE de recouvrement de profondeur entre vues, sur les vues réparées, avec la synchronisation tenant compte de la profondeur (0,0340 à 0,0247), mesuré avant la distillation. Le gain n’a pas clairement survécu à la distillation.',
-        },
-        failed: {
-          value: '154',
-          meaning: 'images dans l’essai complet à 14 directions. La couverture était complète, et l’essai a échoué à mes propres critères d’acceptation visuels et temporels. Cela a mené à une refonte qui part de la géométrie.',
+          meaning: 'd’erreur de profondeur entre vues, sur les vues réparées (MAE de 0,0340 à 0,0247), avec la synchronisation tenant compte de la profondeur, avant la distillation. Le gain n’a pas clairement survécu à la distillation.',
         },
       },
-      endTitle: 'Cinq phases, trois dépôts.',
-      end: 'Le pipeline de réparation est un dérivé de l’ArtiFixer de NVIDIA. Avant lui : navigation A* et panoramas à six vues en simulation, puis une interface ROS 2 préparée pour un modèle de navigation visuelle sur le robot Kachaka. Sur main, l’inférence du modèle n’est pas branchée, et aucun essai sur le vrai robot n’est revendiqué.',
-      fallbackAlt: 'Panorama à 360° d’un salon. À gauche : rendu 3DGRUT brut plein de floaters et d’aiguilles. À droite : la sortie réparée.',
     },
 
     // CONFIRM : repose sur la parole de Guilhem seule. Une entrée courte, formulée en équipe. Aucune mesure.
@@ -273,19 +277,15 @@ const fr: SiteContent = {
         organisation: 'AIST, National Institute of Advanced Industrial Science and Technology, Tsukuba, Japon',
         stack: 'Python, PyTorch, 3DGRUT, Splatfacto, COLMAP, DISCOVERSE, MuJoCo, ArtiFixer (diffusion vidéo), ROS 2 Humble, PBS et Singularity sur le cluster ABCI, pytest',
       },
-      videoAnchor: 'lead',
       lead: {
         kind: 'compare',
         before: 'panoRaw',
         after: 'panoRepaired',
-        video: 'panoPair',
         beforeLabel: 'Rendu 3DGRUT brut',
         afterLabel: 'Après le premier passage d’ArtiFixer3D+',
         alt: 'Panorama équirectangulaire à 360° d’un salon, montré deux fois. Rendu brut : floaters, aiguilles et trous partout où la caméra n’a jamais regardé. Réparé : la même vue, dont la plupart ont disparu.',
         caption:
-          'Rendu 3DGRUT brut de la scène reconstruite, projeté en panorama équirectangulaire, et les mêmes 154 images après le premier passage d’ArtiFixer3D+. La plupart des trous et du bruit de splatting disparaissent ; des déformations résiduelles et des structures dupliquées restent, et les zones que la caméra n’a jamais vues sont générées, pas observées. Ce premier essai n’est ni l’essai de référence de 117 images, qui a satisfait les critères d’acceptation, ni l’essai ultérieur, qui ne les a pas satisfaits.',
-        play: 'Lire la vidéo de 10 s',
-        pause: 'Mettre la vidéo en pause',
+          'Une image du rendu 3DGRUT brut de la scène reconstruite, projeté en panorama équirectangulaire, et la même image après le premier passage d’ArtiFixer3D+ sur ce clip de 154 images. La plupart des trous et du bruit de splatting disparaissent ; des déformations résiduelles et des structures dupliquées restent, et les zones que la caméra n’a jamais vues sont générées, pas observées. Ce premier essai n’est ni l’essai de référence de 117 images, qui a satisfait les critères d’acceptation, ni l’essai ultérieur, qui ne les a pas satisfaits.',
         slider: 'Position du séparateur entre le panorama brut et le panorama réparé',
       },
       summary: {
@@ -477,6 +477,7 @@ const fr: SiteContent = {
         { label: 'nav_3dgs_pano : navigation et panoramas en simulation', href: 'https://github.com/guilhem0908/nav_3dgs_pano' },
         { label: 'KachakaNavigation : interface ROS 2 pour le robot Kachaka', href: 'https://github.com/guilhem0908/KachakaNavigation' },
         { label: 'Rapport de stage, 29 pages (PDF, en anglais)', href: 'https://github.com/guilhem0908/artifixer-360-pipeline/blob/main/docs/assets/readme/Rapport_de_stage_2026_CARMOUZE_Guilhem.pdf' },
+        { label: 'Vidéo de comparaison, rendu brut contre sortie réparée (10 s, dans le dépôt)', href: 'https://github.com/guilhem0908/artifixer-360-pipeline#final-report-and-qualitative-comparison' },
       ],
     },
 

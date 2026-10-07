@@ -92,7 +92,6 @@ export const media = {
   ogFr: img('og-fr.jpg', 1200, 630),
   panoRaw: img('pano-raw.jpg', 1024, 468),
   panoRepaired: img('pano-repaired.jpg', 1024, 468),
-  panoPair: { kind: 'video', mp4: '/media/pano.mp4', webm: '/media/pano.webm', poster: '/media/pano-still.jpg', w: 1792, h: 448 } as VideoAsset,
   aistOutput: img('aist-erp-025.jpg', 1024, 512),
   aistRigCoverage: img('aist-rig-coverage.webp', 1640, 562, true),
   aistDistill: img('aist-distill-compare.jpg', 928, 466),

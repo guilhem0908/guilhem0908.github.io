@@ -40,6 +40,9 @@ html.js .rv.is-in { opacity: 1; transform: none; }
 @keyframes window-pan { to { background-position: -4.4em 46%; } }
 @media (prefers-reduced-motion: reduce) { .window { animation: none; } }
 .lead-media figcaption { margin-top: 0.9rem; max-width: 96ch; }
+/* a before / after still: 1024 px of picture, shown no wider than 768 so that it stays sharp */
+.lead-media--still { max-width: 768px; margin-inline: auto; }
+.lead-media--still .cmp { --cmp-max: 768px; }
 /* a lead clip that is not a wide strip keeps to its own resolution and a readable height */
 .lead-media--fit .media { max-width: calc(min(66vh, 42rem) * var(--ar, 2)); margin-inline: auto; }
 

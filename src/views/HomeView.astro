@@ -120,14 +120,22 @@ const zero = n1.format(0);
         </ul>
         <p class="hero__skip"><a class="skiprun" href="#work">{h.heroLinks.skip} <span aria-hidden="true">↓</span></a></p>
       </div>
+      <!-- the invitation: what to do, and a button that does it; gone after the first scroll -->
+      <div class="cue">
+        <p class="cue__hint read">
+          <span class="cue__mark" aria-hidden="true"></span>
+          <span class="cue__wheel">{h.cue.scroll}</span><span class="cue__touch">{h.cue.swipe}</span>
+        </p>
+        <button class="btn btn--solid cue__start" type="button" data-start>{h.cue.start} <span aria-hidden="true">↓</span></button>
+      </div>
       <img class="hero__poster static-only" src={media.poster.src} width={media.poster.w} height={media.poster.h} loading="lazy" alt={h.posterAlt} />
     </div>
   </section>
 
-  <!-- 2. AIST flagship -->
+  <!-- 2. AIST flagship: a title on the way in, then one stage inside the room -->
   <section id="aist" data-sec="aist" class="sec sec--aist" data-case-scope>
     <div class="stage">
-      <div class="beat beat--title" data-in="-0.05" data-out="0.105">
+      <div class="beat beat--title" data-in="-0.05" data-out="0.3">
         <p class="kick">{h.aist.kicker}</p>
         <h2 class="t-xl" data-converge data-case-title>{h.aist.title}</h2>
         <p class="body plate host">{h.aist.host}</p>
@@ -135,42 +143,26 @@ const zero = n1.format(0);
       </div>
       <p class="giant fig" aria-hidden="true" data-giant>{h.aist.giant}</p>
 
-      <div class="beat beat--br plate" data-in="0.118" data-out="0.205">
-        <p class="tag">{h.aist.inputTag}</p>
-        <p class="body">{h.aist.goal}</p>
-        <p class="body hz">{h.aist.input} <span class="gl-only">{h.aist.inputWall}</span></p>
-      </div>
-
-      <div class="beat beat--bl plate" data-in="0.235" data-out="0.345">
-        <h3 class="t" data-converge>{h.aist.problemTitle}</h3>
-        <p class="body">{h.aist.problem} <span class="gl-only">{h.aist.problemRoom}</span></p>
-      </div>
-
-      <div class="beat beat--pano-top" data-in="0.47" data-out="0.775">
-        <h3 class="t" data-converge>{h.aist.unwrapTitle}</h3>
-      </div>
-      <figure class="static-only fallback-wipe">
-        <Compare before="panoRaw" after="panoRepaired" beforeLabel={h.aist.rawLabel} afterLabel={h.aist.fixedLabel}
-          alt={h.aist.fallbackAlt} slider={h.aist.fallbackAlt} />
-      </figure>
-      <div class="beat beat--pano-bottom" data-in="0.495" data-out="0.775">
-        <p class="cap cap--raw read" data-raw>{h.aist.rawLabel}</p>
-        <p class="cap cap--fix read" data-fix>{h.aist.fixedLabel}</p>
-        <p class="small hz cap__note">{h.aist.caption} <span class="cap__more">{h.aist.captionMore}</span></p>
-      </div>
-      <div class="beat beat--fig" data-in="0.478" data-out="0.54"><BigFigure figure={f.rig} size="l" /></div>
-      <div class="beat beat--fig" data-in="0.55" data-out="0.675"><BigFigure figure={f.warp} size="l" /></div>
-      <div class="beat beat--fig" data-in="0.685" data-out="0.775"><BigFigure figure={f.depth} size="l" /></div>
-
-      <div class="beat beat--bl beat--failed plate" data-in="0.8" data-out="0.9"><BigFigure figure={f.failed} size="l" /></div>
-
-      <div class="beat beat--br plate" data-in="0.915" data-out="1.03">
-        <h3 class="t-s">{h.aist.endTitle}</h3>
-        <p class="body">{h.aist.end}</p>
+      <!-- on a phone the copy and the proof follow each other (data-*-s); on a wider screen they share the stage -->
+      <div class="beat beat--bl plate aist__copy" data-in="0.38" data-out="0.93" data-in-s="0.38" data-out-s="0.64">
+        <h3 class="t" data-converge>{h.aist.stageTitle}</h3>
+        {h.aist.text.map((line) => <p class="body">{line}</p>)}
         {aistCase && <p class="beat__cta"><a class="btn btn--solid" href={aistCase.href} data-case={aistCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
         <ul class="links links--inline">
           {codeOf('aist').map((r) => <li><a class="lnk" href={repos[r]} rel="noopener">{r}</a></li>)}
         </ul>
+      </div>
+
+      <div class="beat aist__proof" data-in="0.4" data-out="0.93" data-in-s="0.66" data-out-s="0.93">
+        <figure class="aist__still">
+          <Compare before="panoRaw" after="panoRepaired" beforeLabel={h.aist.rawLabel} afterLabel={h.aist.fixedLabel}
+            alt={h.aist.stillAlt} slider={h.aist.slider} max={512} />
+          <figcaption class="small hz">{h.aist.caption} <span class="gl-only">{h.aist.roomNote}</span></figcaption>
+        </figure>
+        <div class="aist__figs">
+          <BigFigure figure={f.rig} size="m" />
+          <BigFigure figure={f.depth} size="m" />
+        </div>
       </div>
     </div>
   </section>

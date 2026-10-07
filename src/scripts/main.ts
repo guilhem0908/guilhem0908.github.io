@@ -12,6 +12,7 @@ import { F, perf } from '../world/perf';
 import type { SiteContent } from '../data/types';
 import { Minimap } from './minimap';
 import { autoplayVideos, nameCaseTitleOnClick } from './shared';
+import type { CompareHandle } from './compare';
 
 type RunStrings = SiteContent['home']['run'] & { locale: string };
 
@@ -32,7 +33,7 @@ function staticPage() {
   // no WebGL or reduced motion: the default CSS is already a complete page
   $$<HTMLVideoElement>('video[data-feed]').forEach((v) => { v.controls = true; });
   autoplayVideos();
-  initCompare();
+  import('./compare').then((m) => m.initCompare()).catch(() => {});
   const b = document.querySelector<HTMLButtonElement>('[data-start3d]');
   b?.addEventListener('click', () => {
     try { sessionStorage.setItem('navrun-3d', '1'); } catch { /* private mode */ }
@@ -40,15 +41,10 @@ function staticPage() {
   });
 }
 
-/** the before / after slider of the static page (same markup as on the case-study pages) */
-function initCompare() {
-  import('./compare').then((m) => m.initCompare()).catch(() => {});
-}
-
 if (!html.classList.contains('gl')) staticPage();
 else run().catch((err) => {
   console.warn('[navrun] falling back to the static page:', err);
-  html.classList.remove('gl', 'booting', 'small');
+  html.classList.remove('gl', 'booting', 'small', 'cue-on');
   staticPage();
 });
 
@@ -59,6 +55,8 @@ async function run() {
   CustomEase.create('snap', '0.23,1,0.32,1');
 
   const small = html.classList.contains('small');
+  // a visitor who asked for less motion and still opened the 3D run: nothing moves on its own
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const startY = window.scrollY;
   const lenis = new Lenis({ lerp: 0.11, wheelMultiplier: 0.9, smoothWheel: true, syncTouch: false });
   lenis.on('scroll', ScrollTrigger.update);
@@ -83,26 +81,24 @@ async function run() {
   const mid = (a: string, b: string, t = 0.5) => m[a] + (m[b] - m[a]) * t;
   D.set('s', [
     ['hero', 0, 0], ['hero', 1, 3.2],
-    ['aist', 0.09, m.lobbyDoor - 0.7], ['aist', 0.15, m.vestibule + 0.1], ['aist', 0.2, m.vestibule + 0.45],
-    ['aist', 0.265, m.aist, inOut], ['aist', 0.93, m.aist], ['aist', 1, m.aistExit - 0.7, inOut],
+    // the AIST room: in through the lobby door and the vestibule, one stage in the middle of the room, out by the south door
+    ['aist', 0.14, m.lobbyDoor - 0.7], ['aist', 0.42, m.aist, inOut], ['aist', 0.88, m.aist], ['aist', 1, m.aistExit - 0.7, inOut],
     ['svlr', 1, m.trackIn + 0.5],
     ['tlse', 0.93, m.trackOut], ['tlse', 1, m.factoryDoor - 0.4],
     ['usine', 0.18, m.laneNW - 0.2], ['usine', 0.76, m.laneNE - 0.5], ['usine', 0.9, m.laneE], ['usine', 1, m.pfrDoor - 0.5],
     ['pfr', 0.2, L, inOut], ['pfr', 1, L],
   ] as Key[], linear);
-  D.set('yawOff', [
-    ['aist', 0.1, 0], ['aist', 0.15, -1.22], ['aist', 0.195, -1.22], ['aist', 0.235, 0],
-    ['svlr', 0.1, 0], ['svlr', 0.75, 0.75], ['tlse', 0.06, 0],
-  ]);
+  D.set('yawOff', [['svlr', 0.1, 0], ['svlr', 0.75, 0.75], ['tlse', 0.06, 0]]);
   // absolute heading, used where the camera must look somewhere else than along the path
   const penYaw = small ? 0.16 : 0.0;
   D.set('head', [
-    ['aist', 0.84, 0], ['aist', 0.92, 1.32],
+    // a slow look around the room while its one stage is read, then towards the way out
+    ['aist', 0.4, -0.3], ['aist', 0.8, 0.42], ['aist', 0.9, 1.32],
     ['usine', 0.1, 1.2], ['usine', 0.2, 0.92], ['usine', 0.76, 2.22], ['usine', 0.86, 1.57], ['usine', 0.96, 0],
     ['pfr', 0.01, penYaw],
   ]);
   D.set('headMix', [
-    ['aist', 0.215, 0], ['aist', 0.265, 1], ['aist', 0.94, 1], ['aist', 1, 0],
+    ['aist', 0.33, 0], ['aist', 0.43, 1], ['aist', 0.92, 1], ['aist', 1, 0],
     ['usine', 0.13, 0], ['usine', 0.24, 1], ['usine', 0.95, 1], ['usine', 1, 0],
     ['pfr', 0.06, 0], ['pfr', 0.18, 1],
   ]);
@@ -110,73 +106,89 @@ async function run() {
   D.set('offZ', [['usine', 0.16, 0], ['usine', 0.42, -2.25], ['usine', 0.76, -2.25], ['usine', 0.9, 0]]);
   D.set('offX', [['usine', 0.16, 0], ['usine', 0.3, 0]]);
   D.set('camH', [
-    ['aist', 0.2, 1.25], ['aist', 0.265, 1.35], ['aist', 0.93, 1.35], ['aist', 1, 1.25],
+    ['aist', 0.3, 1.25], ['aist', 0.42, 1.35], ['aist', 0.88, 1.35], ['aist', 1, 1.25],
     ['tlse', 0, 1.25], ['tlse', 0.08, 1.05], ['tlse', 0.9, 1.05], ['tlse', 1, 1.25],
     ['usine', 0.14, 1.25], ['usine', 0.42, 5.3], ['usine', 0.76, 5.3], ['usine', 0.95, 1.3],
     ['pfr', 0.05, 1.3], ['pfr', 0.2, 1.62],
   ]);
   D.set('pitch', [
     ['hero', 0, 0.0], ['hero', 1, -0.03],
-    ['aist', 0.12, -0.03], ['aist', 0.16, 0.04], ['aist', 0.22, -0.02],
     ['tlse', 0, -0.03], ['tlse', 0.08, -0.13], ['tlse', 0.9, -0.13], ['tlse', 1, -0.03],
     ['usine', 0.14, -0.03], ['usine', 0.42, -0.84], ['usine', 0.76, -0.8], ['usine', 0.95, -0.03],
     ['pfr', 0.05, -0.03], ['pfr', 0.2, small ? -0.2 : -0.27],
   ]);
   D.set('fov', [
     ['hero', 0, small ? 74 : 60], ['hero', 1, small ? 72 : 58],
-    ['aist', 0.22, small ? 72 : 58], ['aist', 0.3, small ? 82 : 68],
-    // on a phone the panorama seen from inside is a narrow, heavily magnified slice: pull back while it is on screen
-    ...(small ? [['aist', 0.33, 82], ['aist', 0.4, 98], ['aist', 0.84, 98]] as Key[] : []),
-    ['aist', 0.92, small ? 82 : 68], ['aist', 1, small ? 72 : 58],
+    ['aist', 0.32, small ? 72 : 58], ['aist', 0.46, small ? 84 : 68],
+    ['aist', 0.88, small ? 84 : 68], ['aist', 1, small ? 72 : 58],
     ['usine', 0.14, small ? 72 : 58], ['usine', 0.42, small ? 84 : 66], ['usine', 0.76, small ? 84 : 66], ['usine', 0.95, small ? 72 : 58],
     ['pfr', 0.2, small ? 70 : 60],
   ]);
   D.set('top', [['lab', 0.02, 0], ['lab', 0.62, 1, inOut3], ['contact', 0, 1]]);
   D.set('fogNear', [['hero', 0, 7], ['tlse', 1, 7], ['usine', 0.3, 11], ['usine', 0.9, 11], ['pfr', 0.1, 6]]);
   D.set('fogFar', [['hero', 0, 20], ['tlse', 1, 20], ['usine', 0.3, 30], ['usine', 0.9, 30], ['pfr', 0.1, 17]]);
-  D.set('photo', [['aist', 0.105, 0], ['aist', 0.15, 1], ['svlr', 0.3, 1], ['svlr', 0.9, 0]]);
-  D.set('artefact', [['aist', 0.5, 1], ['aist', 0.6, 0]]);
-  D.set('repair', [['aist', 0.5, 0], ['aist', 0.6, 1]]);
-  D.set('ceil', [['aist', 0.2, 0], ['aist', 0.25, 1], ['aist', 0.97, 1], ['svlr', 0.2, 0]]);
-  D.set('pano', [['aist', 0.33, 0], ['aist', 0.395, 1], ['aist', 0.84, 1], ['aist', 0.905, 0]]);
-  D.set('unwrap', [['aist', 0.41, 0], ['aist', 0.5, 1], ['aist', 0.76, 1], ['aist', 0.84, 0]]);
-  D.set('wipe', [['aist', 0.545, 0], ['aist', 0.675, 1]], linear);
+  // the room develops from the blueprint print into true colour on the way in, then its raw render is repaired
+  D.set('photo', [['aist', 0.16, 0], ['aist', 0.3, 1], ['svlr', 0.3, 1], ['svlr', 0.9, 0]]);
+  // (on a phone the still that shows the repair comes after the copy: the room waits for it)
+  const fix: [number, number] = small ? [0.7, 0.86] : [0.56, 0.76];
+  D.set('artefact', [['aist', fix[0], 1], ['aist', fix[1], 0]]);
+  D.set('repair', [['aist', fix[0], 0], ['aist', fix[1], 1]]);
+  D.set('ceil', [['aist', 0.3, 0], ['aist', 0.4, 1], ['aist', 0.97, 1], ['svlr', 0.2, 0]]);
   D.set('sensor', [['tlse', 0.03, 0], ['tlse', 0.09, 1], ['tlse', 0.9, 1], ['tlse', 0.96, 0]]);
   D.layout();
 
-  // --------------------------------------------------------------- beats
-  interface Beat { el: HTMLElement; sec: string; a: number; b: number; on: boolean; conv: HTMLElement[]; feed: HTMLVideoElement | null }
-  const splits = new Map<HTMLElement, HTMLElement[]>();
-  const charsOf = (el: HTMLElement) => {
-    let c = splits.get(el);
-    if (!c) {
-      const s = SplitText.create(el, { type: 'words,chars', charsClass: 'cv-char', wordsClass: 'cv-word', aria: 'auto' });
-      c = s.chars as HTMLElement[];
-      splits.set(el, c);
-    }
-    return c;
-  };
-  const converge = (el: HTMLElement, delay = 0) => {
-    const chars = charsOf(el);
-    const big = el.classList.contains('d-xl') || el.classList.contains('d-l');
-    gsap.killTweensOf(chars);
-    gsap.fromTo(chars, {
+  // ------------------------------------------------- letters that converge
+  // Every title is split once and its animation is built once, when the browser has time: showing a
+  // title during the run only restarts a ready animation. Letters move and fade; they are not blurred
+  // (a blur per letter makes the browser compile a shader per radius, which costs frames).
+  const tweens = new Map<HTMLElement, gsap.core.Tween>();
+  const prepare = (el: HTMLElement) => {
+    let tw = tweens.get(el);
+    if (tw) return tw;
+    const split = SplitText.create(el, { type: 'words,chars', charsClass: 'cv-char', wordsClass: 'cv-word', aria: 'auto' });
+    const chars = split.chars as HTMLElement[];
+    const big = el.classList.contains('d-xl') || el.classList.contains('d-l') || !!el.closest('.d-xl, .d-l');
+    const k = big ? 1.6 : 1;
+    tw = gsap.fromTo(chars, {
       opacity: 0,
-      x: () => gsap.utils.random(-70, 70) * (big ? 1.6 : 1),
-      y: () => gsap.utils.random(-46, 46) * (big ? 1.6 : 1),
+      x: () => gsap.utils.random(-70, 70) * k,
+      y: () => gsap.utils.random(-46, 46) * k,
       scale: () => gsap.utils.random(1.3, 2.1),
       rotation: () => gsap.utils.random(-14, 14),
-      filter: 'blur(14px)',
     }, {
-      opacity: 1, x: 0, y: 0, scale: 1, rotation: 0, filter: 'blur(0px)',
-      duration: big ? 1.35 : 1.05, ease: 'converge', delay,
+      opacity: 1, x: 0, y: 0, scale: 1, rotation: 0,
+      duration: big ? 1.35 : 1.05, ease: 'converge',
       stagger: { each: big ? 0.028 : 0.014, from: 'random' },
-      clearProps: 'filter',
+      paused: true, immediateRender: false, clearProps: 'transform,opacity',
     });
+    tw.progress(1); // builds the animation now and leaves the letters where they belong
+    tweens.set(el, tw);
+    return tw;
   };
+  const converge = (el: HTMLElement, delay = 0) => {
+    if (calm) return;
+    const tw = prepare(el);
+    tw.delay(delay);
+    tw.restart(true);
+  };
+  const idle = (fn: () => void) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 60));
+  /** split the titles one by one while the visitor is reading the hero */
+  const prepareAll = () => {
+    const queue = $$('[data-converge]').filter((el) => !tweens.has(el) && !el.querySelector('.ln'));
+    const step = () => {
+      const el = queue.shift();
+      if (!el) { idle(() => world.warmFeed()); return; }
+      if (!calm) prepare(el);
+      idle(step);
+    };
+    idle(step);
+  };
+
+  // --------------------------------------------------------------- beats
+  interface Beat { el: HTMLElement; sec: string; a: number; b: number; on: boolean; conv: HTMLElement[]; feed: HTMLVideoElement | null }
   const beats: Beat[] = $$('.beat[data-in]').map((el) => ({
     el, sec: el.closest<HTMLElement>('[data-sec]')!.dataset.sec!,
-    a: parseFloat(el.dataset.in!), b: parseFloat(el.dataset.out!), on: false,
+    a: parseFloat((small && el.dataset.inS) || el.dataset.in!), b: parseFloat((small && el.dataset.outS) || el.dataset.out!), on: false,
     conv: $$('[data-converge]', el), feed: el.querySelector<HTMLVideoElement>('video[data-feed]'),
   }));
   const setBeat = (bt: Beat, on: boolean) => {
@@ -192,24 +204,14 @@ async function run() {
   const giant = $('[data-giant]');
   const heroName = $('.hero__name'), heroSide = $('.hero__side');
   const usineTitle = $('.usine__title');
-  const capRaw = $('[data-raw]'), capFix = $('[data-fix]');
   let marqueeW = 1;
-  const measure = () => {
-    marqueeW = track.scrollWidth / 2;
-    // the unwrapped panorama band, shared with the shader
-    const vw = window.innerWidth, vh = window.innerHeight;
-    // on wide screens the band stays clear of the instruments in the bottom right corner
-    const pad = Math.max(16, Math.min(48, vw * 0.033));
-    const band = small ? 0.94 : Math.min(0.62, (0.94 * vh) / vw, 1 - (2 * (176 + pad + 16)) / vw);
-    const bandY = small ? 0.34 : 0.16;
-    world.setBand(band, bandY);
-    const cx = vw / 2, cy = vh * (0.5 - bandY / 2), bw = band * vw, bh = bw / 2;
-    const st = $('.sec--aist .stage').style;
-    st.setProperty('--band-l', `${cx - bw / 2}px`);
-    st.setProperty('--band-b', `${cy + bh / 2}px`);
-    // the top 9.4% of the panorama is hidden by the label bar of the video: the band starts below it (pano.frag.glsl)
-    st.setProperty('--band-t', `${cy - bh / 2 + 0.094 * bh}px`);
-  };
+  const measure = () => { marqueeW = track.scrollWidth / 2; };
+
+  // the before / after still of the AIST room: the scroll moves its divider with the repair of the room,
+  // until the visitor takes it in hand
+  let aistCmp: CompareHandle | null = null;
+  const aistProof = $('.aist__proof');
+  import('./compare').then((mod) => { aistCmp = mod.initCompare(aistProof)[0] ?? null; }).catch(() => {});
 
   // ----------------------------------------------------------------- HUD
   const map = new Minimap($<HTMLCanvasElement>('#map'), info);
@@ -232,7 +234,7 @@ async function run() {
   };
   // where each anchor lands (a moment that reads well, not the section edge)
   const landing: Record<string, [string, number]> = {
-    hero: ['hero', 0], aist: ['aist', 0.03], svlr: ['svlr', 0.2], tlse: ['tlse', 0.12], usine: ['usine', 0.5],
+    hero: ['hero', 0], aist: ['aist', 0.05], svlr: ['svlr', 0.2], tlse: ['tlse', 0.12], usine: ['usine', 0.5],
     pfr: ['pfr', 0.3], lab: ['lab', 0.06], work: ['index', 0], contact: ['contact', 0],
   };
   const yFor = (id: string) => {
@@ -297,33 +299,73 @@ async function run() {
     if ((e.key === 'l' || e.key === 'L') && !e.metaKey && !e.ctrlKey && !(e.target as HTMLElement).closest('input')) toggleLens();
   });
   window.addEventListener('click', (e) => {
-    if (!fine || (e.target as HTMLElement).closest('a,button,input,label,video,.labcard,.irow')) return;
+    if (!fine || (e.target as HTMLElement).closest('a,button,input,label,video,.labcard,.irow,.cmp')) return;
     toggleLens();
   });
 
   // --------------------------------------------------------------- intro
+  // I.active: the scene is still being trained and the camera is still diving. `open`: the page scrolls.
+  // The two are separate so that a visitor who scrolls, clicks or presses a key during the intro is
+  // never kept waiting: the page opens at once and the scene finishes converging behind the hero.
   const I = { train: 0, top: 1, pathReveal: 0, active: true };
+  let open = false;
+  let heroShown = false;
   const aliveFrac = (t: number) => (t <= 0 ? 0.05 : 0.05 + 0.95 * clamp(Math.pow(clamp((t - 0.05) / 0.65), 1 / 1.15)));
   const residual = world.residualSampler(2400);
-  const introDone = () => {
-    if (!I.active) return;
-    I.active = false; I.train = 1; I.top = 0; I.pathReveal = 1;
+  const heroIn = () => {
+    if (heroShown) return;
+    heroShown = true;
+    perf.event('hero-in');
+    html.classList.remove('booting');
+    if (calm) return;
+    $$('.hero__name .ln').forEach((ln, i) => converge(ln, i * 0.12));
+    // the name opens from condensed to wide: a horizontal scale in CSS, which the compositor animates on its
+    // own (animating the width axis of the font laid the name out again on every frame)
+    heroName.classList.add('is-opening');
+    gsap.from([heroSide.children, '.hud'], { opacity: 0, y: 18, duration: 0.9, ease: 'converge', stagger: 0.07, delay: 0.25, clearProps: 'all' });
+  };
+
+  // ------------------------------------------- the invitation to scroll
+  // When the page opens the visitor must see at once that scrolling moves forward: the cue and its
+  // button on the path, lights running down the planned path, and, if nothing happens for a few
+  // seconds, the camera easing a little way down the path and back. All of it ends at the first scroll.
+  const peek = { v: 0 };
+  let peekTl: gsap.core.Timeline | null = null;
+  let scrolled = startY > 40;
+  const cueOn = () => {
+    if (scrolled) return;
+    html.classList.add('cue-on');
+    if (calm) return;
+    peekTl = gsap.timeline({ repeat: -1, repeatDelay: 4.2, delay: 3.4 })
+      .to(peek, { v: 1.7, duration: 1.5, ease: 'plan' })
+      .to(peek, { v: 0, duration: 1.7, ease: 'plan' }, '+=0.25');
+  };
+  const cueOff = () => {
+    if (scrolled) return;
+    scrolled = true;
+    html.classList.remove('cue-on');
+    html.classList.add('has-scrolled');
+    peekTl?.kill(); peekTl = null;
+    gsap.to(peek, { v: 0, duration: 0.5, ease: 'power2.out', overwrite: true });
+  };
+  $$<HTMLButtonElement>('[data-start]').forEach((b) => b.addEventListener('click', () => { goTo('aist'); }));
+
+  const openPage = () => {
+    if (open) return;
+    open = true;
+    heroIn();
     perf.event('intro-done');
     html.classList.remove('booting');
     html.classList.add('intro-done');
     lenis.start();
     world.lensOn = fine;
+    cueOn();
+    prepareAll();
     try { sessionStorage.setItem('navrun-seen', '1'); } catch { /* private mode */ }
   };
-  let heroShown = false;
-  const heroIn = () => {
-    heroShown = true;
-    perf.event('hero-in');
-    html.classList.remove('booting');
-    $$('.hero__name .ln').forEach((ln, i) => converge(ln, i * 0.12));
-    const w = { v: 75 };
-    gsap.to(w, { v: 125, duration: 1.5, ease: 'converge', onUpdate: () => { heroName.style.fontStretch = `${w.v}%`; }, onComplete: () => { heroName.style.fontStretch = ''; } });
-    gsap.from([heroSide.children, '.hud'], { opacity: 0, y: 18, duration: 0.9, ease: 'converge', stagger: 0.07, delay: 0.25, clearProps: 'all' });
+  const introDone = () => {
+    I.active = false; I.train = 1; I.top = 0; I.pathReveal = 1;
+    openPage();
   };
 
   let seen = false;
@@ -331,29 +373,40 @@ async function run() {
   const q = new URLSearchParams(location.search);
   const hashId = location.hash.slice(1);
   if (startY > 40 || q.has('nointro') || landing[hashId]) {
-    heroIn(); introDone();
+    introDone();
     gsap.set('.intro', { display: 'none' });
     // arriving on an anchor (from the header of another page, or the skip link)
     if (landing[hashId] && hashId !== 'hero') requestAnimationFrame(() => { const y = yFor(hashId); if (y !== null) lenis.scrollTo(y, { immediate: true, force: true }); });
   } else {
     lenis.stop();
     window.scrollTo(0, 0);
+    // the titles the visitor meets first are ready before anything moves
+    if (!calm) { $$('.hero__name .ln').forEach(prepare); $$('.sec--aist .beat--title [data-converge]').forEach(prepare); }
     iStatus.textContent = T9.intro.training;
     iGrid.textContent = T9.intro.pending; iPath.textContent = T9.intro.pending;
+    // 3.2 s: the cloud condenses, the camera dives, the hero arrives while the last Gaussians settle
     const tl = gsap.timeline({ onComplete: introDone });
     (window as any).__intro = tl;
-    tl.to(I, { train: 0.84, duration: 2.7, ease: 'power1.inOut' }, 0)
-      .to(I, { train: 1, duration: 1.5, ease: 'power2.out' }, 2.7)
-      .to(I, { top: 0, duration: 2.4, ease: 'plan' }, 1.85)
-      .add(() => { iStatus.textContent = T9.intro.slicing; iGrid.textContent = `${info.gridW} × ${info.gridH} ${T9.intro.cells}`; }, 2.5)
-      .add(() => { iStatus.textContent = T9.intro.planning; iPath.textContent = `${f1.format(L)} m`; }, 3.15)
-      .to(I, { pathReveal: 1, duration: 1.5, ease: 'power2.inOut' }, 3.15)
-      .to('.intro', { opacity: 0, duration: 0.5, ease: 'snap' }, 3.55)
-      .add(heroIn, 3.6)
-      .add(() => {}, 4.7);
-    if (seen) tl.timeScale(1.8);
-    const skip = () => { if (I.active) tl.timeScale(6); };
-    ['wheel', 'keydown', 'pointerdown', 'touchstart'].forEach((ev) => window.addEventListener(ev, skip, { once: true, passive: true }));
+    tl.to(I, { train: 0.84, duration: 1.9, ease: 'power1.inOut' }, 0)
+      .to(I, { train: 1, duration: 1.3, ease: 'power2.out' }, 1.9)
+      .to(I, { top: 0, duration: 1.9, ease: 'plan' }, 1.15)
+      .add(() => { iStatus.textContent = T9.intro.slicing; iGrid.textContent = `${info.gridW} × ${info.gridH} ${T9.intro.cells}`; }, 1.6)
+      .add(() => { iStatus.textContent = T9.intro.planning; iPath.textContent = `${f1.format(L)} m`; }, 2.05)
+      .to(I, { pathReveal: 1, duration: 1.1, ease: 'power2.inOut' }, 2.05)
+      .to('.intro', { opacity: 0, duration: 0.4, ease: 'snap' }, 2.4)
+      .add(openPage, 2.5)
+      .add(() => {}, 3.2);
+    if (seen) tl.timeScale(1.6);
+    // scroll, click, key or touch: the page opens now and the same gesture already scrolls it
+    // (capture: this runs before the smooth-scroll handler, which would swallow the wheel while it is stopped)
+    const skip = () => {
+      if (open) return;
+      tl.timeScale(7);
+      openPage();
+    };
+    const evs = ['wheel', 'keydown', 'pointerdown', 'touchstart'] as const;
+    const once = () => { skip(); evs.forEach((ev) => window.removeEventListener(ev, once, true)); };
+    evs.forEach((ev) => window.addEventListener(ev, once, { capture: true, passive: true }));
     window.dispatchEvent(new CustomEvent('navrun:intro'));
     (window as any).__introStart = performance.now();
   }
@@ -372,13 +425,18 @@ async function run() {
   $$('[data-on-view]').forEach((el) => {
     ScrollTrigger.create({ trigger: el, start: 'top 92%', onEnter: () => converge(el), onEnterBack: () => converge(el) });
   });
-  autoplayVideos($('main'));
+  // one clip at a time: several videos playing together make the browser halve the frame rate of the page
+  autoplayVideos($('main'), { single: true });
 
   // ---------------------------------------------------------------- loop
   const T: Record<string, number> = {};
   const tgt = world.target as WorldState;
   let hudTick = 0;
   let lastY = -1;
+  let lastHere = '?';
+  let rafStart = 0;
+  let lastTick = 0, lastRender = 0;
+  let giantCss = '';
   const hud = $('.hud');
   // on phones the instruments sit at the bottom of the screen, where the lab enters: they step aside just before it does
   const labHead = $('.labhome');
@@ -386,22 +444,52 @@ async function run() {
   const measureHud = () => {
     hudAwayY = labHead.getBoundingClientRect().top + window.scrollY - window.innerHeight - 40;
   };
-  const frame = (time: number, deltaMs: number) => {
+  // On a 240 Hz screen the world is drawn every second refresh: 120 pictures a second look the same
+  // and the GPU does half the work. `every` is set once the refresh rate has been measured.
+  let every = 1, tickNo = 0;
+  const hz: number[] = [];
+  // runs before GSAP renders its animations: the time between this and the frame callback is theirs
+  gsap.ticker.add(() => { rafStart = performance.now(); }, false, true);
+
+  const frame = (time: number) => {
+    const now = performance.now();
+    if (hz.length < 50 && lastTick) {
+      hz.push(now - lastTick);
+      if (hz.length === 50) {
+        const med = hz.slice().sort((a, b) => a - b)[25];
+        every = med < 5.2 ? Math.max(1, Math.round(1000 / med / 110)) : 1;
+        perf.event('refresh', `${(1000 / med).toFixed(0)} Hz, world every ${every}`);
+      }
+    }
+    lastTick = now;
+    if (every > 1 && ++tickNo % every) { lenis.raf(time * 1000); return; }
+    const deltaMs = lastRender ? now - lastRender : 16.7;
+    lastRender = now;
+
     const rec = perf.on;
-    const p0 = rec ? performance.now() : 0;
-    perf.begin(p0, lastY < 0 ? 0 : lastY);
+    perf.begin(rafStart || now, lastY < 0 ? 0 : lastY);
+    if (rec) perf.set(F.TWEEN, now - rafStart);
     lenis.raf(time * 1000);
     const y = window.scrollY;
     const p1 = rec ? performance.now() : 0;
-    if (rec) { perf.set(F.LENIS, p1 - p0); perf.set(F.Y, y); perf.y = y; }
+    if (rec) { perf.set(F.LENIS, p1 - now); perf.set(F.Y, y); perf.y = y; }
+    if (!scrolled && y > 12) cueOff();
     // lab and index are plain flow: the header gets a ground, the map steps aside on phones
-    const flow = !I.active && D.progress('lab', y) > -0.02 && y < D.yOf('contact', 0) - window.innerHeight * 0.45;
+    const flow = open && D.progress('lab', y) > -0.02 && y < D.yOf('contact', 0) - window.innerHeight * 0.45;
     html.classList.toggle('in-flow', flow);
-    hud.classList.toggle('is-away', small && !I.active && y > hudAwayY && y < D.yOf('contact', 0) - window.innerHeight * 0.45);
+    // on a phone the instruments also step aside for the one stage of the AIST room, which needs the whole screen
+    const ap = D.progress('aist', y);
+    hud.classList.toggle('is-away', small && open && ((ap > 0.36 && ap < 0.95) || (y > hudAwayY && y < D.yOf('contact', 0) - window.innerHeight * 0.45)));
     D.eval(y, T);
     for (const k in T) tgt[k] = T[k];
-    if (I.active) { tgt.train = I.train; tgt.top = I.top; tgt.pathReveal = I.pathReveal; tgt.s = 0; }
-    else { tgt.train = 1; tgt.pathReveal = 1; }
+    if (I.active) {
+      tgt.train = I.train; tgt.pathReveal = I.pathReveal;
+      tgt.top = Math.max(T.top, I.top);
+      if (!open) tgt.s = 0;
+    } else { tgt.train = 1; tgt.pathReveal = 1; }
+    // the invitation: lights on the path and the peek, until the first scroll
+    tgt.invite = open && !scrolled && !calm ? 1 : 0;
+    if (peek.v > 0.0005) tgt.s = T.s + peek.v;
     const te = tgt.top;
     tgt.fogNear = T.fogNear + (80 - T.fogNear) * te;
     tgt.fogFar = T.fogFar + (120 - T.fogFar) * te;
@@ -415,11 +503,11 @@ async function run() {
     // beats
     for (const bt of beats) {
       const p = D.progress(bt.sec, y);
-      setBeat(bt, !I.active && p >= bt.a && p < bt.b);
+      setBeat(bt, open && p >= bt.a && p < bt.b);
     }
     // hero leaves as the run starts
     const hp = D.progress('hero', y);
-    if (hp < 1.6 && heroShown) {
+    if (hp < 1.6 && heroShown && y !== lastY) {
       const o = 1 - sstep(0.18, 0.75, hp);
       heroName.style.opacity = String(o); heroSide.style.opacity = String(1 - sstep(0.05, 0.5, hp));
       heroName.style.transform = `translate3d(0, ${-hp * 90}px, 0)`;
@@ -427,17 +515,21 @@ async function run() {
       heroName.style.visibility = hp > 0.8 ? 'hidden' : 'visible';
     }
     // 360 figure grows as the vestibule approaches
-    const ap = D.progress('aist', y);
-    const go = sstep(-0.03, 0.01, ap) * (1 - sstep(0.075, 0.105, ap));
-    giant.style.opacity = String(go * 0.9);
-    if (go > 0) giant.style.transform = `translate3d(${(-ap * 900).toFixed(1)}px, 0, 0) scale(${(0.82 + ap * 3.4).toFixed(3)})`;
-    // captions follow the repair front
-    const wv = world.cur.wipe;
-    capRaw.style.opacity = String(1 - sstep(0.75, 0.98, wv));
-    capFix.style.opacity = String(sstep(0.04, 0.3, wv));
+    const go = ap > -0.1 && ap < 0.3 ? sstep(-0.08, 0.02, ap) * (1 - sstep(0.2, 0.28, ap)) : 0;
+    const gCss = go > 0 ? `${(go * 0.9).toFixed(3)}|translate3d(${(-ap * 330).toFixed(1)}px, 0, 0) scale(${(0.82 + ap * 1.25).toFixed(3)})` : '0';
+    if (gCss !== giantCss) {
+      giantCss = gCss;
+      const [o, tr] = gCss.split('|');
+      giant.style.opacity = o;
+      if (tr) giant.style.transform = tr;
+    }
+    // the still follows the repair of the room around it
+    if (aistCmp && ap > 0.3 && ap < 1) {
+      if (!aistCmp.touched) aistCmp.set(88 - 76 * world.cur.repair);
+    } else if (aistCmp && aistCmp.touched) aistCmp.touched = false;
     // marquee
     const tp = D.progress('tlse', y);
-    const mOn = tp > 0.02 && tp < 0.95 && !I.active;
+    const mOn = tp > 0.02 && tp < 0.95 && open;
     marquee.classList.toggle('is-on', mOn);
     if (mOn) {
       const x = -(((tp * 2600 + time * 42) % marqueeW) + marqueeW) % marqueeW;
@@ -446,11 +538,11 @@ async function run() {
     }
     // Usine title scales with the crane
     const up = D.progress('usine', y);
-    if (up > -0.1 && up < 1.1) usineTitle.style.transform = `scale(${(1 - 0.5 * sstep(0.16, 0.44, up)).toFixed(3)})`;
+    if (up > -0.1 && up < 1.1 && y !== lastY) usineTitle.style.transform = `scale(${(1 - 0.5 * sstep(0.16, 0.44, up)).toFixed(3)})`;
 
-    // instruments, a few times per second
-    if (time - hudTick > 0.09 || y !== lastY) {
-      hudTick = time; lastY = y;
+    // instruments: fifteen times a second is plenty for numbers and for a dot on a map
+    if (time - hudTick > 0.066) {
+      hudTick = time;
       const pose = world.pose, s = clamp(world.cur.s, 0, L);
       if (I.active) {
         const t = world.cur.train;
@@ -471,14 +563,16 @@ async function run() {
         oBearing.textContent = `${T9.bearing} ${b >= 0 ? '+' : '−'}${f1.format(Math.abs(b)).padStart(4, '0')}°`;
       }
       map.draw(pose, s, world.cur.sensor, world.sensorRange, world.sensorHalf, world.cur.top);
-      lens.classList.toggle('is-on', world.lensOn && world.pointerActive && world.cur.pano < 0.5 && world.modeAll === 0 && world.cur.top < 0.5);
+      lens.classList.toggle('is-on', world.lensOn && world.pointerActive && world.modeAll === 0 && world.cur.top < 0.5);
       const here = world.cur.top > 0.5 ? '' : s < m.lobbyDoor ? 'hero' : s < m.aistExit ? 'aist' : s < m.factoryDoor ? 'tlse' : s < m.pfrDoor ? 'usine' : 'pfr';
-      wpLinks.forEach((a) => a.classList.toggle('is-here', a.dataset.wp === here));
+      if (here !== lastHere) { lastHere = here; wpLinks.forEach((a) => a.classList.toggle('is-here', a.dataset.wp === here)); }
     }
+    lastY = y;
     if (rec) { const p3 = performance.now(); perf.set(F.DOM, p3 - p2); perf.end(p3); }
   };
-  // ?perf records the frames from the first one (tools/perf.py reads them)
+  // ?perf records the frames from the first one (tools/perf.py reads them); ?perf=1 also shows them
   if (q.has('perf')) perf.start();
+  if (q.get('perf') === '1') import('./perf-overlay').then((mod) => mod.perfOverlay(world, D, T9.perf)).catch(() => {});
   gsap.ticker.add(frame);
 
   const onResize = () => {
@@ -499,11 +593,11 @@ async function run() {
   world.onLost = () => {
     gsap.ticker.remove(frame);
     lenis.destroy();
-    html.classList.remove('gl', 'booting', 'small');
+    html.classList.remove('gl', 'booting', 'small', 'cue-on');
     staticPage();
   };
 
-  // test hooks (screenshots, video capture)
+  // test hooks (screenshots, video capture, frame recorder)
   (window as any).__perf = perf;
   (window as any).__navrun = {
     lenis, D, world, info,
