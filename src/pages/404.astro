@@ -1,0 +1,67 @@
+---
+// /404.html: GitHub Pages serves this file for every address that does not exist.
+// A planner that finds no route: the red path stops in front of a wall. Not indexed, not translated.
+import Base from '../layouts/Base.astro';
+import '../styles/notfound.css';
+import { getShell } from '../data/shell';
+import { DEFAULT_LANG } from '../data/site';
+import { cvReady, href } from '../i18n/routes';
+
+const lang = DEFAULT_LANG;
+const nf = getShell(lang).notFound;
+
+// The map: 18 x 12 cells of 20 px. Walls are cells, the path runs through free cells and
+// stops one cell before the wall that closes the corridor.
+const CELL = 20, COLS = 18, ROWS = 12;
+const walls: [number, number][] = [];
+const wall = (c0: number, r0: number, c1: number, r1: number) => {
+  for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) walls.push([c, r]);
+};
+wall(0, 0, 17, 0); wall(0, 11, 17, 11); wall(0, 1, 0, 10); wall(17, 1, 17, 10); // outer ring
+wall(3, 3, 3, 10); wall(3, 3, 6, 3); wall(6, 5, 6, 10); wall(14, 4, 14, 9); // rooms on the way
+wall(11, 1, 11, 10); // the wall that closes the map: the goal behind it cannot be reached
+const at = (c: number, r: number) => `${c * CELL + CELL / 2},${r * CELL + CELL / 2}`;
+const route = [[1, 9], [1, 1], [8, 1], [8, 7], [9, 7]].map(([c, r]) => at(c, r)).join(' ');
+const dead = at(10, 7).split(',').map(Number);
+const goal = [13 * CELL + 3, 3 * CELL + 3];
+---
+
+<Base lang={lang} kind="404" title={nf.title} description={nf.description} footer={false}>
+  <section class="nf">
+    <div class="nf__copy">
+      <p class="read nf__kick">{nf.kicker}</p>
+      <h1 class="d-l nf__title">{nf.heading}</h1>
+      <p class="lead nf__text">{nf.text}</p>
+      <p class="read nf__req" data-requested-row hidden>{nf.requested}: <span data-requested></span></p>
+      <ul class="links nf__links">
+        <li><a class="btn btn--solid" href={href(lang, 'home')}>{nf.actions.home}</a></li>
+        <li><a class="btn" href={`${href(lang, 'home')}#work`}>{nf.actions.index}</a></li>
+        {cvReady(lang) && <li><a class="btn" href={href(lang, 'cv')}>{nf.actions.cv}</a></li>}
+      </ul>
+    </div>
+
+    <svg class="nf__map" viewBox={`0 0 ${COLS * CELL} ${ROWS * CELL}`} role="img" aria-label={nf.mapAlt}>
+      <g class="nf__grid">
+        {Array.from({ length: COLS - 1 }, (_, i) => <line x1={(i + 1) * CELL} y1="0" x2={(i + 1) * CELL} y2={ROWS * CELL} />)}
+        {Array.from({ length: ROWS - 1 }, (_, i) => <line x1="0" y1={(i + 1) * CELL} x2={COLS * CELL} y2={(i + 1) * CELL} />)}
+      </g>
+      <g class="nf__walls">
+        {walls.map(([c, r]) => <rect x={c * CELL} y={r * CELL} width={CELL} height={CELL} />)}
+      </g>
+      <rect class="nf__goal" x={goal[0]} y={goal[1]} width={CELL - 6} height={CELL - 6} />
+      <polyline class="nf__path" points={route} pathLength="1" />
+      <circle class="nf__start" cx={CELL * 1 + CELL / 2} cy={9 * CELL + CELL / 2} r="5" />
+      <g class="nf__stop" stroke-linecap="square">
+        <line x1={dead[0] - 6} y1={dead[1] - 6} x2={dead[0] + 6} y2={dead[1] + 6} />
+        <line x1={dead[0] + 6} y1={dead[1] - 6} x2={dead[0] - 6} y2={dead[1] + 6} />
+      </g>
+    </svg>
+  </section>
+
+  <script slot="scripts" is:inline>
+    // show which address was asked for (textContent: the path is never parsed as HTML)
+    var row = document.querySelector('[data-requested-row]');
+    var out = document.querySelector('[data-requested]');
+    if (row && out) { out.textContent = location.pathname + location.search; row.hidden = false; }
+  </script>
+</Base>

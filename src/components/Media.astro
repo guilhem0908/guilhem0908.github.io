@@ -1,0 +1,20 @@
+---
+// One real media file: an image, or a muted looping video with a poster.
+// Videos start when they enter the viewport (scripts/page.ts) and get controls under reduced motion.
+import { media, type MediaKey } from '../data/site';
+interface Props { name: MediaKey; alt: string; class?: string; eager?: boolean; vt?: string }
+const { name, alt, class: cls, eager = false, vt } = Astro.props;
+const m = media[name];
+const style = vt ? `view-transition-name:${vt}` : undefined;
+---
+
+{m.kind === 'image' ? (
+  <img class:list={['media', m.paper && 'media--paper', cls]} src={m.src} width={m.w} height={m.h} alt={alt}
+    loading={eager ? 'eager' : 'lazy'} decoding="async" style={style} />
+) : (
+  <video class:list={['media', cls]} muted loop playsinline preload="none" poster={m.poster} width={m.w} height={m.h}
+    aria-label={alt} data-autoplay style={style}>
+    {m.webm && <source src={m.webm} type="video/webm" />}
+    <source src={m.mp4} type="video/mp4" />
+  </video>
+)}

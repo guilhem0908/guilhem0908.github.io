@@ -1,0 +1,60 @@
+---
+// Shared document shell: head, header, main, footer. Every page of the site map uses it.
+import '@fontsource-variable/mona-sans/wdth.css';
+import '../styles/global.css';
+import fontUrl from '@fontsource-variable/mona-sans/files/mona-sans-latin-wdth-normal.woff2?url';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Seo from '../components/Seo.astro';
+import { getContent } from '../data';
+import type { CaseSlug, Lang } from '../data/site';
+import type { PageKind } from '../i18n/routes';
+
+interface Props {
+  lang: Lang;
+  kind: PageKind;
+  slug?: CaseSlug;
+  title: string;
+  description: string;
+  /** home keeps its own closing section instead of the shared footer */
+  footer?: boolean;
+}
+const { lang, kind, slug, title, description, footer = true } = Astro.props;
+const t = getContent(lang);
+---
+
+<!doctype html>
+<html lang={t.locale} data-page={kind}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <Seo lang={lang} kind={kind} slug={slug} title={title} description={description} />
+    <link rel="preload" as="font" type="font/woff2" href={fontUrl} crossorigin />
+    <script is:inline>
+      // a page transition that gets skipped (a second click during the first) is a normal outcome, not an error
+      ['pagereveal', 'pageswap'].forEach(function (type) {
+        addEventListener(type, function (e) {
+          var t = e.viewTransition;
+          if (t) { t.ready.catch(function () {}); t.finished.catch(function () {}); }
+        });
+      });
+      // the browser can also drop an incoming transition before the page sees it
+      addEventListener('unhandledrejection', function (e) {
+        var r = e.reason;
+        if (r && r.name === 'AbortError' && /transition/i.test(r.message || '')) e.preventDefault();
+      });
+    </script>
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.ui.skipToContent}</a>
+    <slot name="backdrop" />
+    <Header lang={lang} kind={kind} slug={slug} />
+    <slot name="chrome" />
+    <main id="main">
+      <slot />
+    </main>
+    {footer && <Footer lang={lang} />}
+    <slot name="scripts" />
+  </body>
+</html>

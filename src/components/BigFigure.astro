@@ -1,0 +1,14 @@
+---
+// A measured number set large, its exact meaning in small type. Used sparingly.
+import type { BigFigure } from '../data/types';
+interface Props { figure: BigFigure; size?: 'xl' | 'l' | 'm'; class?: string }
+const { figure: f, size = 'l', class: cls } = Astro.props;
+---
+
+<div class:list={['bigfig', `bigfig--${size}`, cls]}>
+  <p class="bigfig__num fig">
+    {f.from && <><s class="bigfig__from">{f.from}</s><span class="bigfig__arrow">→</span></>}
+    <span class="bigfig__val">{f.value}</span>{f.unit && <span class="bigfig__unit">{f.unit}</span>}
+  </p>
+  <p class="bigfig__meaning small">{f.meaning}</p>
+</div>

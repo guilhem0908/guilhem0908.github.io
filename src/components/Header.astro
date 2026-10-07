@@ -1,0 +1,31 @@
+---
+// The shared header: name (home), Work, Lab, CV, language switch, GitHub.
+// CV and the language switch appear only when their page exists (data/site.ts, data/<lang>.ts).
+import { getContent } from '../data';
+import { person, type CaseSlug, type Lang } from '../data/site';
+import { alternates, cvReady, href, type PageKind } from '../i18n/routes';
+
+interface Props { lang: Lang; kind: PageKind; slug?: CaseSlug }
+const { lang, kind, slug } = Astro.props;
+const t = getContent(lang).ui.nav;
+const home = href(lang, 'home');
+const onHome = kind === 'home';
+// on the home page the run handles these anchors itself (smooth jump along the path)
+const homeHref = onHome ? '#hero' : home;
+const workHref = onHome ? '#work' : `${home}#work`;
+const other = alternates(kind, slug).find((a) => a.lang !== lang);
+---
+
+<header class="top" data-top>
+  <a class="top__name" href={homeHref} aria-label={t.home}>
+    <span class="top__full">{person.name}</span>
+    <span class="top__mono" aria-hidden="true">{person.monogram}</span>
+  </a>
+  <nav class="top__nav" aria-label={t.label}>
+    <a href={workHref} aria-current={kind === 'work' ? 'true' : undefined}>{t.work}</a>
+    <a href={href(lang, 'lab')} aria-current={kind === 'lab' ? 'page' : undefined}>{t.lab}</a>
+    {cvReady(lang) && <a href={href(lang, 'cv')} aria-current={kind === 'cv' ? 'page' : undefined}>{t.cv}</a>}
+    {other && <a class="top__lang" href={other.href} hreflang={other.lang} lang={other.lang} aria-label={t.switchLabel}>{t.switchTo}</a>}
+    <a href={person.github} rel="me noopener">{t.github}</a>
+  </nav>
+</header>

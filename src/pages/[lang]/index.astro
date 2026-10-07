@@ -1,0 +1,13 @@
+---
+// /<lang>/  Home in every language that has a content file besides English (see data/index.ts).
+import HomeView from '../../views/HomeView.astro';
+import { prefixedLangs } from '../../i18n/routes';
+import type { Lang } from '../../data/site';
+
+export function getStaticPaths() {
+  return prefixedLangs().map((lang) => ({ params: { lang } }));
+}
+const { lang } = Astro.params as { lang: Lang };
+---
+
+<HomeView lang={lang} />

@@ -1,0 +1,376 @@
+/* The home run. Default = complete static page (no WebGL, reduced motion, no JavaScript).
+   Everything spatial hangs off html.gl, which an inline head script sets. */
+
+/* ------------------------------------------------- static (default) page */
+
+#world, .hud, .intro, .lens, .giant, .marquee { display: none; }
+.rm-only, .gl-only { display: none; }
+html.gl span.gl-only { display: inline; }
+html.gl p.gl-only { display: block; }
+html.rm .rm-only { display: block; margin-top: 1.5rem; }
+
+.sec { padding: clamp(3.5rem, 9vw, 7rem) var(--pad); border-top: 1px solid var(--hair); }
+.sec--hero { border-top: 0; padding-top: 2.5rem; }
+.sec .beat + .beat, .sec .beat + figure, .sec figure + .beat { margin-top: 1.6rem; }
+.sec .plate { max-width: 44rem; }
+.beat__cta { margin-top: 1rem; }
+.cap { display: none; }
+.cap__note { margin-top: 0.5rem; }
+.beat--hint { display: none; }
+.beat--fig { max-width: 60rem; }
+.beat--failed.plate { max-width: 60rem; }
+.host { color: var(--haze); margin-top: 1rem; }
+
+.hero { display: grid; gap: 1.6rem; }
+.hero__name .ln { display: block; }
+.hero__side { display: grid; gap: 1rem; max-width: 40rem; }
+.hero__seek { font-size: 1rem; font-weight: 520; max-width: 46ch; }
+.hero__intro.plate { background: none; padding: 0; }
+.hero__intro { display: grid; gap: 0.85rem; }
+.hero__poster { width: 100%; height: auto; margin-top: 1rem; outline: 1px solid rgb(244 246 255 / 0.25); outline-offset: -1px; }
+.skiprun {
+  display: inline-flex; align-items: center; gap: 0.5em; min-height: 44px; font-weight: 640; font-size: 0.95rem;
+  text-decoration: underline; text-decoration-color: var(--fil); text-decoration-thickness: 2px; text-underline-offset: 0.3em;
+  transition: color 160ms var(--ease-snap);
+}
+.skiprun:hover { color: var(--cone); }
+.skiprun span { color: var(--fil); font-weight: 800; }
+
+.fallback-wipe { margin: 1.6rem 0; max-width: 72rem; }
+.pfr__static { margin-top: 1.6rem; }
+.sec--pfr img.static-only { margin-top: 1.6rem; max-width: 44rem; width: 100%; height: auto; }
+.feed { width: min(100%, 420px); height: auto; outline: 1px solid rgb(244 246 255 / 0.35); outline-offset: -1px; background: var(--deep); }
+.beat--hmi .feed { width: min(100%, 220px); }
+.beat--hmi figcaption, .pfr__static figcaption { margin-top: 0.45rem; max-width: 420px; }
+.sensor { display: none; }
+.sensor label { display: grid; gap: 0.3rem; font-size: 0.86rem; font-weight: 600; }
+.sensor output { float: right; font-variant-numeric: tabular-nums; color: var(--cone); }
+.sensor__seen { grid-column: 1 / -1; color: var(--cone); }
+
+/* lab teaser */
+.labhome__head { display: grid; gap: 0.7rem; justify-items: start; max-width: 44rem; }
+.labcards { margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1.2rem; }
+.labcard { background: var(--deep); display: grid; grid-template-rows: auto 1fr; outline: 1px solid var(--hair); outline-offset: -1px; }
+.labcard__media { display: block; aspect-ratio: 2 / 1; background: var(--deep); overflow: hidden; }
+.labcard__media .media { width: 100%; height: 100%; object-fit: contain; outline: 0; }
+.labcard__txt { padding: 0.9rem 1rem 1rem; display: grid; gap: 0.6rem; align-content: start; }
+.labcard__name { font-size: clamp(1.3rem, 2vw, 1.9rem); font-stretch: 116%; font-weight: 780; letter-spacing: -0.025em; line-height: 1; overflow-wrap: anywhere; }
+.labcard__name a { text-decoration: none; }
+.labcard__name a:hover { color: var(--cone); }
+.labcard__what { color: var(--haze); }
+.labcard .bigfig--m { grid-template-columns: auto minmax(0, 1fr); gap: 0.2rem 0.9rem; align-items: start; padding-top: 0.6rem; border-top: 1px solid var(--hair); }
+.labcard .bigfig__num { color: var(--paper); line-height: 1; }
+
+/* project index */
+.index__head { display: grid; gap: 0.3rem; }
+.index__list { margin-top: 1.6rem; display: grid; gap: 0.6rem; max-width: 52rem; }
+.irow { background: var(--plate); padding: 0.9rem 1.1rem 0.8rem; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.15rem 1rem; }
+.irow__when { color: var(--haze); padding-top: 0.45rem; }
+.irow__name { font-size: clamp(1.25rem, 1.9vw, 1.7rem); font-stretch: 112%; font-weight: 740; letter-spacing: -0.02em; line-height: 1.1; }
+.irow__name a { text-decoration: underline; text-decoration-color: var(--fil); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+.irow__name a:hover { color: var(--cone); }
+.irow__line, .irow__links { grid-column: 2; }
+.irow__line { font-size: 0.94rem; line-height: 1.45; }
+.irow__links { display: flex; flex-wrap: wrap; gap: 0 1.1rem; font-size: 0.9rem; }
+
+.contact { display: grid; gap: 1.3rem; justify-items: start; }
+.contact__fine { margin-top: 0.6rem; }
+
+@media (max-width: 560px) {
+  .irow { grid-template-columns: 1fr; }
+  .irow__line, .irow__links { grid-column: 1; }
+  .irow__when { padding-top: 0; }
+}
+
+/* ------------------------------------------------------- 3D run layout */
+
+html.gl body { background: var(--void); }
+html.gl #world { display: block; position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+html.gl .static-only { display: none !important; }
+html.gl .top { position: fixed; inset: 0 0 auto 0; background: none; border: 0; pointer-events: none; }
+html.gl .top a { pointer-events: auto; }
+html.gl .top { transition: background-color 300ms var(--ease-snap); }
+/* over the world the two halves of the header sit on plates, like the instruments:
+   paper on a plate stays above 4.5:1 whatever the splats behind it do */
+html.gl .top__name, html.gl .top__nav { background: var(--plate); padding: 0 0.9rem; transition: background-color 300ms var(--ease-snap); }
+html.gl.in-flow .top { background: var(--void); border-bottom: 1px solid var(--hair); pointer-events: auto; }
+html.gl.in-flow .top__name, html.gl.in-flow .top__nav { background-color: transparent; }
+html.gl main { position: relative; z-index: 10; pointer-events: none; }
+html.gl main a, html.gl main button, html.gl main input, html.gl main video, html.gl main .beat.is-on,
+html.gl .labhome, html.gl .index { pointer-events: auto; }
+html.gl .sec { padding: 0; border: 0; position: relative; }
+html.gl .stage {
+  position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: clip;
+  padding: 5rem var(--pad) calc(var(--pad) + 0.5rem);
+}
+html.gl .sec--hero { height: 190vh; }
+html.gl .sec--aist { height: 1050vh; }
+html.gl .sec--svlr { height: 150vh; }
+html.gl .sec--tlse { height: 430vh; }
+html.gl .sec--usine { height: 430vh; }
+html.gl .sec--pfr { height: 400vh; }
+html.gl .sec--contact { height: 100vh; height: 100dvh; }
+
+html.gl .beat {
+  position: absolute; margin: 0 !important; opacity: 0; visibility: hidden;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 420ms var(--ease-snap), transform 700ms var(--ease-converge), visibility 0s linear 420ms;
+}
+html.gl .beat.is-on { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+html.gl .beat--title { left: var(--pad); top: 50%; transform: translate3d(0, calc(-50% + 28px), 0); max-width: min(44rem, 46vw); }
+html.gl .beat--title .host { margin-top: 1.1rem; font-size: 0.9rem; line-height: 1.45; max-width: 30rem; padding: 0.7rem 0.9rem; }
+html.gl .beat--title.is-on { transform: translate3d(0, -50%, 0); }
+html.gl .beat--bl { left: var(--pad); bottom: calc(var(--pad) + 0.5rem); max-width: min(35rem, 44vw); }
+html.gl .beat--br { right: calc(var(--pad) + 208px); bottom: calc(var(--pad) + 0.5rem); max-width: min(33rem, 40vw); }
+html.gl .beat--tl { left: var(--pad); top: 5.6rem; max-width: min(31rem, 38vw); }
+html.gl .beat--bl > .t, html.gl .beat--bl > .t-xl, html.gl .beat--tl > .t-xl { margin-bottom: 1rem; }
+html.gl .beat--bl > .t { max-width: 18ch; margin-bottom: 0.8rem; }
+
+html.gl .giant {
+  display: block; position: absolute; right: calc(var(--pad) + 190px); bottom: 3.5vh; margin: 0;
+  font-size: clamp(8rem, 25vw, 30rem); line-height: 0.8; font-weight: 240; letter-spacing: -0.04em;
+  color: transparent; -webkit-text-stroke: 1.5px var(--paper); opacity: 0; will-change: transform, opacity;
+  transform-origin: 100% 100%; pointer-events: none;
+}
+
+/* panorama beats: --band-* are measured in main.ts and shared with the shader */
+html.gl .beat--pano-top { left: 0; right: 0; top: auto; bottom: calc(100vh - var(--band-t, 15vh) + 0.7rem); text-align: center; }
+html.gl .beat--pano-bottom {
+  left: var(--band-l, 13vw); right: max(var(--band-l, 13vw), calc(var(--pad) + 196px)); top: calc(var(--band-b, 70vh) + 0.55rem);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0.15rem 1rem;
+}
+html.gl .cap { display: block; }
+/* the repair front travels left to right: repaired on the left, raw on the right */
+html.gl .cap--fix { order: 1; }
+html.gl .cap--raw { order: 2; text-align: right; }
+html.gl .cap__note { order: 3; grid-column: 1 / -1; font-size: 0.8rem; line-height: 1.4; max-width: 92ch; margin-top: 0.1rem; }
+/* one giant figure at a time under the panorama */
+html.gl .beat--fig { left: var(--band-l, 13vw); right: max(var(--band-l, 13vw), calc(var(--pad) + 196px)); bottom: calc(var(--pad) + 0.2rem); max-width: none; }
+html.gl .beat--fig .bigfig { align-items: end; }
+/* as large as the band allows while its meaning keeps a readable column beside it */
+html.gl .beat--fig { container-type: inline-size; }
+html.gl .beat--fig .bigfig__num { font-size: clamp(3rem, min(16cqw, 18vh), 10.4rem); line-height: 0.82; }
+html.gl .beat--fig .bigfig__meaning { font-size: 0.86rem; line-height: 1.42; max-width: 44ch; padding-bottom: 0.3rem; }
+html.gl .beat--failed { max-width: min(46rem, 60vw); padding: 1rem 1.25rem 1.1rem; }
+html.gl .beat--failed .bigfig__num { color: var(--fil); font-size: clamp(3.4rem, 9vw, 9rem); line-height: 0.82; }
+html.gl .beat--failed .bigfig__meaning { font-size: 0.95rem; line-height: 1.45; max-width: 34ch; }
+
+/* headlines sit on the world: a soft ground keeps them readable over bright splats */
+html.gl .beat .t-xl, html.gl .beat > .t, html.gl .usine__title, html.gl .hero__name, html.gl .contact .d-l { text-shadow: 0 0 0.5em rgb(6 11 58 / 0.5), 0 0.03em 0.1em rgb(6 11 58 / 0.55); }
+
+/* TLSe */
+html.gl .beat--tlse .t-xl { font-size: clamp(1.8rem, 3.6vw, 3.6rem); max-width: 16ch; }
+html.gl .marquee {
+  display: block; position: absolute; left: 0; right: 0; top: 16vh; overflow: clip; opacity: 0;
+  transition: opacity 500ms var(--ease-snap);
+}
+html.gl .marquee.is-on { opacity: 1; }
+html.gl .marquee__track { display: flex; gap: 0.6em; white-space: nowrap; width: max-content; will-change: transform; color: transparent; -webkit-text-stroke: 1.5px var(--paper); }
+html.gl .marquee__track span:nth-child(odd) { color: var(--paper); -webkit-text-stroke: 0; }
+html.gl .sensor { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1.2rem; margin: 0.9rem 0 1rem; }
+
+/* Usine */
+html.gl .beat--usine { left: var(--pad); top: 5.6rem; }
+html.gl .usine__title { font-size: clamp(3.6rem, 15.5vw, 17rem); white-space: nowrap; transform-origin: 0 0; }
+
+/* Fil rouge */
+html.gl .beat--hmi { right: var(--pad); top: 5.6rem; width: min(168px, 13vw, 15vh); background: var(--plate); padding: 0.45rem 0.45rem 0.55rem; }
+html.gl .beat--hmi .feed { width: 100%; }
+html.gl .beat--hmi figcaption { font-size: 0.74rem; line-height: 1.35; }
+html.gl .beat--hint { display: block; left: var(--pad); bottom: calc(var(--pad) + 0.5rem); max-width: min(31rem, 38vw); color: var(--paper); background: var(--plate); padding: 0.6rem 0.8rem; line-height: 1.5; }
+html.gl .beat--hint span[data-o] { color: var(--fil); }
+html.gl .hint__feed { color: var(--haze); }
+
+/* lab and index: normal flow, the camera leaves through the roof behind them */
+html.gl .sec--lab { padding: 34vh calc(var(--pad) + 210px) 16vh var(--pad); overflow-x: clip; }
+html.gl .labhome__head { background: var(--plate); padding: 1rem 1.2rem 1.1rem; max-width: 40rem; }
+html.gl .labcards { margin-top: 1.4rem; grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 68rem; }
+html.gl .sec--index { padding: 12vh calc(var(--pad) + 210px) 22vh var(--pad); }
+html.gl .index__head { background: var(--plate); padding: 0.9rem 1.2rem 1rem; display: table; }
+html.gl .index__list { max-width: min(46rem, 100%); }
+
+/* contact */
+html.gl .contact { align-content: end; padding-bottom: calc(var(--pad) + 1rem); gap: 1.1rem; }
+html.gl .contact > * { max-width: min(60rem, 100% - 220px); }
+html.gl .contact .lead { background: var(--plate); padding: 0.6rem 0.9rem; max-width: 46ch; }
+html.gl .contact__fine { background: var(--plate); padding: 0.6rem 0.9rem; margin-top: 0; }
+
+/* hero */
+html.gl .hero { display: block; }
+html.gl .sec--hero { padding-top: 0; }
+/* the name is sized from the width, and from the height on short windows so that it never climbs into the plate above it */
+html.gl .hero__name { position: absolute; left: var(--pad); bottom: calc(var(--pad) - 0.04em); font-size: clamp(3.4rem, min(11.6vw, 18.6vh), 12.6rem); }
+html.gl .hero__side { position: absolute; left: var(--pad); top: 5.6rem; max-width: 27rem; gap: 0.9rem; }
+html.gl .hero__intro.plate { background: var(--plate); padding: 1.05rem 1.15rem 1.1rem; }
+html.gl .skiprun { background: var(--plate); padding: 0 0.8rem; }
+html.gl.booting .hero__side, html.gl.booting .hero__name, html.gl.booting .hud { opacity: 0; }
+
+/* ----------------------------------------------------------------- HUD */
+
+html.gl .hud {
+  display: grid; gap: 0.5rem; position: fixed; right: var(--pad); bottom: calc(var(--pad) + 0.5rem); z-index: 30; width: 176px;
+  transition: opacity 600ms var(--ease-snap), visibility 0s linear 0s;
+}
+html.gl .hud.is-away { opacity: 0; visibility: hidden; transition: opacity 400ms var(--ease-snap), visibility 0s linear 400ms; }
+.hud__read { display: grid; gap: 0.18rem; background: var(--plate); padding: 0.5rem 0.55rem; }
+.hud__read div { display: flex; justify-content: space-between; gap: 0.5rem; }
+.hud__read dt { color: var(--haze); }
+.hud__read dd { text-align: right; white-space: nowrap; }
+.map { position: relative; width: 176px; height: 220px; background: var(--plate); outline: 1px solid rgb(169 187 255 / 0.4); outline-offset: -1px; }
+#map { width: 176px; height: 220px; }
+.map__wps { position: absolute; inset: 0; }
+.map__wps a { position: absolute; width: 26px; height: 26px; margin: -13px 0 0 -13px; display: block; text-decoration: none; }
+.map__wps a::before {
+  content: ''; position: absolute; left: 9px; top: 9px; width: 8px; height: 8px; background: var(--paper); border: 1.5px solid var(--deep);
+  transition: transform 160ms var(--ease-snap), background-color 160ms var(--ease-snap);
+}
+.map__wps a:hover::before, .map__wps a:focus-visible::before, .map__wps a.is-here::before { background: var(--fil); transform: scale(1.35); }
+.map__wps span {
+  position: absolute; right: 30px; top: 3px; white-space: nowrap; background: var(--paper); color: var(--deep);
+  font-size: 0.72rem; font-stretch: 85%; font-weight: 680; padding: 0.2rem 0.45rem; opacity: 0; visibility: hidden; pointer-events: none;
+  transition: opacity 140ms var(--ease-snap);
+}
+.map__wps a:hover span, .map__wps a:focus-visible span { opacity: 1; visibility: visible; }
+.hud__mode {
+  background: var(--paper); color: var(--void); border: 0; min-height: 36px; padding: 0 0.6rem; text-align: left; cursor: pointer;
+  transition: background-color 160ms var(--ease-snap), color 160ms var(--ease-snap), transform 140ms var(--ease-snap);
+}
+.hud__mode:hover { background: var(--cone); color: var(--deep); }
+.hud__mode:active { transform: scale(0.97); }
+
+/* lens ring: rides with the pointer, the pointer itself stays */
+html.gl .lens {
+  display: block; position: fixed; left: 0; top: 0; width: 300px; height: 300px; margin: -150px 0 0 -150px; z-index: 5;
+  border: 1.5px solid var(--paper); border-radius: 50%; pointer-events: none; opacity: 0;
+  transition: opacity 240ms var(--ease-snap);
+}
+html.gl .lens.is-on { opacity: 1; }
+.lens__label { position: absolute; left: 50%; top: -1.3rem; transform: translateX(-50%); white-space: nowrap; background: var(--paper); color: var(--deep); padding: 0.15rem 0.4rem; }
+html.small .lens { display: none !important; }
+
+/* --------------------------------------------------------------- intro */
+
+html.gl .intro {
+  display: block; position: fixed; inset: 0; z-index: 35; pointer-events: none;
+  transition: opacity 700ms var(--ease-snap);
+}
+.intro__status { position: absolute; left: var(--pad); top: calc(var(--top-h) + 1.5rem); }
+.intro__iter { position: absolute; left: var(--pad); bottom: calc(var(--pad) + 0.2rem); text-shadow: 0 0 0.4em rgb(6 11 58 / 0.7); }
+.intro__iter small { display: block; margin-top: 0.5rem; color: var(--haze); }
+.intro__read { position: absolute; right: var(--pad); bottom: calc(var(--pad) + 0.5rem); width: 236px; display: grid; gap: 0.2rem; background: var(--plate); padding: 0.55rem 0.6rem; }
+.intro__read div { display: flex; justify-content: space-between; gap: 0.6rem; }
+.intro__read dt { color: var(--haze); }
+.intro__skip { position: absolute; right: var(--pad); top: calc(var(--top-h) + 1.1rem); background: var(--paper); color: var(--deep); padding: 0.4rem 0.6rem; }
+html.gl.intro-done .intro { opacity: 0; }
+
+/* letters used by the convergence animation */
+.cv-char { display: inline-block; will-change: transform, opacity, filter; }
+.cv-word { display: inline-block; white-space: nowrap; }
+
+/* short desktop windows: the caption keeps its first sentence (which run this is), the rest is in the case study */
+@media (max-height: 800px) {
+  html.gl .cap__more { display: none; }
+  html.gl .hero__line { font-size: 1.06rem; line-height: 1.36; }
+  html.gl .hero__side { gap: 0.7rem; }
+}
+
+/* -------------------------------------------------------------- mobile */
+
+@media (max-width: 760px) {
+  /* the two intro captions share a line on a desktop; on a phone the longer languages need two */
+  .intro__skip { top: calc(var(--top-h) + 2.9rem); right: auto; left: var(--pad); }
+  .intro__read { left: var(--pad); right: var(--pad); width: auto; }
+  .intro__iter { bottom: calc(var(--pad) + 6.6rem); }
+  html.gl .top__name, html.gl .top__nav { padding: 0 0.7rem; }
+  html.gl .top__nav { gap: 0.9rem; }
+  html.gl .stage { padding-top: 4.2rem; }
+  html.gl .hud { width: 104px; right: 10px; bottom: 10px; gap: 0.3rem; }
+  html.gl .hud__read { padding: 0.35rem 0.4rem; font-size: 0.62rem; }
+  html.gl .hud__read div:not(:nth-child(3)) { display: none; }
+  html.gl .hud__read dt { display: none; }
+  .map, #map { width: 104px; height: 130px; }
+  .map__wps a::before { left: 10px; top: 10px; width: 6px; height: 6px; }
+  .map__wps span { display: none; }
+  .hud__mode { font-size: 0.6rem; padding: 0 0.4rem; min-height: 32px; }
+
+  html.gl .hero__name { bottom: 212px; font-size: min(14vw, 7.6vh); }
+  html.gl .hero__side { top: 4.4rem; right: var(--pad); max-width: none; }
+  html.gl .hero__links .btn { min-height: 42px; padding: 0 0.8rem; font-size: 0.92rem; }
+
+  html.gl .beat--bl, html.gl .beat--br, html.gl .beat--tl, html.gl .beat--title {
+    left: 10px; right: 124px; top: auto; bottom: 10px; max-width: none; transform: translate3d(0, 28px, 0);
+  }
+  html.gl .beat--bl.is-on, html.gl .beat--br.is-on, html.gl .beat--tl.is-on, html.gl .beat--title.is-on { transform: none; }
+  html.gl .beat--title { top: 4.6rem; bottom: auto; right: 10px; }
+  html.gl .beat--tl { top: 4.4rem; bottom: auto; right: 10px; }
+  html.gl .beat--tl.plate { top: auto; bottom: 10px; right: 124px; }
+  html.gl .plate { padding: 0.75rem 0.8rem 0.85rem; }
+  html.gl .beat .body { font-size: 0.9rem; line-height: 1.48; }
+  html.gl .beat .small { font-size: 0.78rem; }
+  html.gl .giant { right: 6px; bottom: 150px; font-size: 46vw; -webkit-text-stroke-width: 1px; }
+  html.gl .beat--pano-top { padding: 0 10px; }
+  html.gl .cap__note { font-size: 0.74rem; }
+  /* the band, its caption and a giant figure share one phone screen: the second sentence waits for the case study */
+  html.gl .cap__more { display: none; }
+  html.gl .beat--pano-bottom { right: 10px; left: 10px; }
+  html.gl .beat--fig { left: 10px; right: 10px; top: calc(var(--band-b, 46vh) + 6.4rem); bottom: auto; }
+  html.gl .beat--fig .bigfig, html.gl .beat--failed .bigfig { grid-template-columns: 1fr; }
+  html.gl .beat--fig .bigfig__num { font-size: clamp(4rem, 21vw, 5.4rem); }
+  html.gl .beat--fig .bigfig__meaning { font-size: 0.86rem; line-height: 1.42; padding: 0; max-width: 34ch; }
+  html.gl .beat--failed { max-width: none; }
+  html.gl .beat--failed .bigfig__num { font-size: 4.4rem; }
+  html.gl .beat--failed .bigfig__meaning { font-size: 0.84rem; }
+  html.gl .marquee { top: 12vh; }
+  html.gl .sensor { grid-template-columns: 1fr; }
+  html.gl .beat--usine { top: 4.6rem; left: 10px; }
+  html.gl .usine__title { font-size: 15.4vw; }
+  html.gl .beat--hmi { right: 10px; top: 4.4rem; bottom: auto; width: 23vw; padding: 0.3rem; }
+  html.gl .beat--hmi figcaption { display: none; }
+  html.gl .sec--pfr .beat--tl:not(.plate) { right: calc(23vw + 22px); }
+  html.gl .sec--pfr .beat--tl:not(.plate) .plate { display: none; }
+  html.gl .sec--pfr .beat--tl:not(.plate) { background: var(--plate); padding: 0.6rem 0.7rem 0.7rem; left: 10px; }
+  html.gl .sec--pfr .beat--tl:not(.plate) .kick { margin-bottom: 0.4rem; font-size: 0.82rem; }
+  html.gl .sec--pfr .beat--tl:not(.plate) .t-xl { margin: 0; }
+  html.gl .beat--hint { display: none; }
+  html.gl .contact > * { max-width: calc(100% - 114px); }
+  html.gl .contact .d-l { max-width: none; background: var(--plate); padding: 0.12em 0.2em 0.06em; margin-left: -0.2em; }
+  html.gl .sec--lab { padding: 30vh 10px 12vh; }
+  html.gl .labcards { grid-template-columns: 1fr; }
+  html.gl .sec--index { padding: 8vh 10px 18vh; }
+  html.gl .sec--aist { height: 950vh; }
+}
+
+/* a short phone screen, which is what a phone browser with its toolbars shows: the hero keeps the line,
+   what I am looking for and the links, and gives up the list of fields (it is in the last section too) */
+@media (max-width: 760px) and (max-height: 720px) {
+  html.gl .hero__side { top: 4.2rem; gap: 0.5rem; }
+  html.gl .hero__intro.plate { padding: 0.6rem 0.7rem 0.65rem; gap: 0.45rem; }
+  html.gl .hero__line { font-size: 1rem; line-height: 1.32; }
+  html.gl .hero__seek { font-size: 0.94rem; line-height: 1.4; }
+  html.gl .hero__seek .hz { display: none; }
+  html.gl .hero__links { gap: 0.4rem; }
+  html.gl .hero__links .btn, html.gl .skiprun { min-height: 38px; }
+}
+
+@media (max-width: 760px) and (max-height: 600px) {
+  /* shorter still: the view switch gives its place to the name */
+  html.gl .hud__mode { display: none; }
+  html.gl .hero__name { bottom: 176px; }
+}
+
+/* a short laptop window: the plate goes wide instead of tall, links and skip link share a row */
+@media (min-width: 761px) and (max-height: 720px) {
+  html.gl .hero__side { max-width: min(46rem, 100vw - 2 * var(--pad) - 230px); grid-template-columns: auto 1fr; gap: 0.7rem 0.8rem; align-items: center; }
+  html.gl .hero__intro { grid-column: 1 / -1; }
+  html.gl .hero__line, html.gl .hero__seek { max-width: none; }
+  /* the plate ends about 20 rem down: the name takes what is left under it */
+  html.gl .hero__name { font-size: clamp(3.4rem, min(11.6vw, (100vh - 370px) * 0.595), 12.6rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not(.gl) * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
+
+@media print {
+  #world, .hud, .intro, .lens { display: none !important; }
+}

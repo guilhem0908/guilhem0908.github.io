@@ -1,0 +1,107 @@
+---
+// /cv/ (and /fr/cv/): the one-page CV. A sheet of paper on the blueprint ground; the same markup
+// prints on one A4 page, and tools/cv_pdf.py renders public/cv/Guilhem_Carmouze_CV_<LANG>.pdf from it.
+// All copy is in data/cv/<lang>.ts; the facts that do not depend on the language are in data/site.ts.
+import fs from 'node:fs';
+import path from 'node:path';
+import Base from '../layouts/Base.astro';
+import CvEntry from '../components/CvEntry.astro';
+import '../styles/cv.css';
+import { getCv, cvPdfName, cvPdfPath } from '../data/cv';
+import { SITE_URL, person, type Lang } from '../data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const cv = getCv(lang);
+const { ui, header: hd, headings: hs } = cv;
+
+// the PDF is rendered from this very page (python tools/cv_pdf.py) and committed under public/cv/
+const pdfFile = path.join(process.cwd(), 'public', cvPdfPath(lang));
+const pdfBytes = fs.existsSync(pdfFile) ? fs.statSync(pdfFile).size : 0;
+if (!pdfBytes) console.warn(`[cv] ${cvPdfPath(lang)} is missing: run "python tools/cv_pdf.py" and commit the PDF.`);
+
+const bare = (url: string) => url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+
+<Base lang={lang} kind="cv" title={cv.meta.title} description={cv.meta.description} footer={false}>
+  <div class="cv-page">
+    <div class="cv-bar">
+      {pdfBytes > 0 && <a class="btn btn--solid" href={cvPdfPath(lang)} download={cvPdfName(lang)}>{ui.download}</a>}
+      <button class="btn" type="button" data-print hidden>{ui.print}</button>
+      <p class="cv-bar__note">{ui.pageNote}{pdfBytes > 0 && ` ${ui.pdfWord}, ${Math.max(1, Math.round(pdfBytes / 1024))} ${ui.sizeUnit}.`}</p>
+    </div>
+
+    <article class="cv" aria-label={ui.sheetLabel}>
+      <header class="cv-head">
+        <div class="cv-head__id">
+          <h1 class="cv-name">{person.name}</h1>
+          <p class="cv-title">{hd.title}</p>
+          <p class="cv-seek"><span class="cv-seek__tag">{hd.seeking.tag}</span> {hd.seeking.text} {hd.seeking.fields}</p>
+        </div>
+        <ul class="cv-contact">
+          <li>{hd.location}</li>
+          <li><a href={`mailto:${person.email}`}>{person.email}</a></li>
+          <li><a href={person.linkedin}>{bare(person.linkedin)}</a></li>
+          <li><a href={person.github}>{bare(person.github)}</a></li>
+          <li><a href={SITE_URL + '/'}>{bare(SITE_URL)}</a></li>
+        </ul>
+      </header>
+
+      <div class="cv-cols">
+        <div class="cv-main">
+          <section class="cv-sec" aria-labelledby="cv-education">
+            <h2 class="cv-h" id="cv-education">{hs.education}</h2>
+            {cv.education.map((e) => <CvEntry entry={e} code={ui.code} />)}
+          </section>
+          <section class="cv-sec" aria-labelledby="cv-research">
+            <h2 class="cv-h" id="cv-research">{hs.research}</h2>
+            {cv.research.map((e) => <CvEntry entry={e} code={ui.code} />)}
+          </section>
+          <section class="cv-sec" aria-labelledby="cv-projects">
+            <h2 class="cv-h" id="cv-projects">{hs.projects}</h2>
+            {cv.projects.map((e) => <CvEntry entry={e} code={ui.code} />)}
+          </section>
+        </div>
+
+        <div class="cv-side">
+          <section class="cv-sec" aria-labelledby="cv-skills">
+            <h2 class="cv-h" id="cv-skills">{hs.skills}</h2>
+            <dl class="cv-skills">
+              {cv.skills.map((s) => (
+                <div>
+                  <dt>{s.group}</dt>
+                  <dd>{s.items}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+          <section class="cv-sec" aria-labelledby="cv-side">
+            <h2 class="cv-h" id="cv-side">{hs.side}</h2>
+            <p class="cv-entry__note">{cv.side.note}</p>
+            <ul class="cv-sideprojects">
+              {cv.side.items.map((p) => (
+                <li><a class="cv-sideprojects__name" href={p.href} rel="noopener">{p.name}</a><span>{p.text}</span></li>
+              ))}
+            </ul>
+          </section>
+          <section class="cv-sec" aria-labelledby="cv-languages">
+            <h2 class="cv-h" id="cv-languages">{hs.languages}</h2>
+            <ul class="cv-langs">
+              {cv.languages.map((l) => <li><strong>{l.name}</strong> {l.level}</li>)}
+            </ul>
+          </section>
+          <section class="cv-sec" aria-labelledby="cv-other">
+            <h2 class="cv-h" id="cv-other">{hs.other}</h2>
+            {cv.other.map((e) => <CvEntry entry={e} code={ui.code} />)}
+          </section>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <script slot="scripts" is:inline>
+    // the print button needs a script, so it appears only when scripts run
+    var b = document.querySelector('[data-print]');
+    if (b) { b.hidden = false; b.addEventListener('click', function () { window.print(); }); }
+  </script>
+</Base>

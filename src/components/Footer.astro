@@ -1,0 +1,24 @@
+---
+// Closing block of every page except the home run (which ends on its own contact stage).
+import { getContent } from '../data';
+import { person, type Lang } from '../data/site';
+import { cvReady, href } from '../i18n/routes';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = getContent(lang);
+---
+
+<footer class="foot">
+  <div class="foot__in">
+    <p class="foot__seek lead">{t.seeking.long} <span class="hz">{t.seeking.fields}</span></p>
+    <p class="foot__mail"><a class="mail mail--s" href={`mailto:${person.email}`}>{person.email}</a></p>
+    <ul class="links">
+      {cvReady(lang) && <li><a class="btn btn--solid" href={href(lang, 'cv')}>{t.home.heroLinks.cv}</a></li>}
+      <li><a class="btn" href={person.github} rel="me noopener">{t.home.heroLinks.github}</a></li>
+      <li><a class="btn" href={person.linkedin} rel="me noopener">{t.home.heroLinks.linkedin}</a></li>
+      <li><a class="btn" href={href(lang, 'home')}>{t.ui.backToRun}</a></li>
+    </ul>
+    <p class="small hz foot__fine">{t.ui.footer.rights} {t.person.school}<br />{t.ui.footer.built}</p>
+  </div>
+</footer>

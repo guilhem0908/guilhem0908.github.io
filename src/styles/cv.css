@@ -1,0 +1,155 @@
+/* The CV page: a sheet of paper on the blueprint ground. Calm, no motion.
+   The same rules print on one A4 page: tools/cv_pdf.py renders the PDF from the built page.
+
+   Every size inside the sheet is in em, so the sheet scales as one object: on screen the
+   font size is chosen so that the sheet is as wide as the container (70em = A4 width at
+   8.5pt); in print the font size is fixed (--cv-print-size) and the sheet is exactly A4.
+   Below 880 px the sheet stops imitating paper and reflows to one column. */
+
+.cv-page {
+  padding: clamp(1.1rem, 2.6vw, 2.2rem) var(--pad) clamp(3rem, 7vw, 6rem);
+  container-type: inline-size;
+}
+
+/* ------------------------------------------------------------- toolbar */
+
+.cv-bar {
+  width: min(100%, 62rem); margin: 0 auto 1rem;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem 1.1rem;
+}
+.cv-bar .btn[hidden] { display: none; }
+.cv-bar__note { color: var(--haze); font-size: 0.86rem; line-height: 1.4; }
+
+/* --------------------------------------------------------------- sheet */
+
+.cv {
+  --ink: var(--deep);
+  --ink-2: color-mix(in srgb, var(--deep) 72%, var(--paper));
+  --rule: color-mix(in srgb, var(--deep) 24%, transparent);
+  --cv-print-size: 8.5pt;
+  --side: 19.6em;
+  --gap: 2.5em;
+
+  font-size: calc(min(100cqw, 62rem) / 70);
+  width: 70em; min-height: 98.9em; margin: 0 auto;
+  padding: 3.3em 3.7em 3.2em;
+  background: var(--paper); color: var(--ink);
+  box-shadow: 0.8rem 0.8rem 0 var(--deep);
+  font-weight: 440; line-height: 1.36; text-wrap: pretty;
+}
+.cv a { color: var(--void); text-decoration: underline; text-decoration-thickness: 0.07em; text-underline-offset: 0.18em; }
+.cv ::selection { background: var(--fil); color: #fff; }
+.cv :focus-visible { outline: 2px solid var(--fil); outline-offset: 2px; box-shadow: none; }
+.cv strong { font-weight: 700; }
+
+/* ---------------------------------------------------------------- head */
+
+.cv-head {
+  display: grid; grid-template-columns: minmax(0, 1fr) var(--side); gap: 0 var(--gap); align-items: end;
+  padding-bottom: 1.15em; margin-bottom: 1.45em;
+  border-bottom: 0.26em solid var(--fil);
+}
+.cv-name {
+  font-size: 3.05em; font-stretch: 125%; font-weight: 860; line-height: 0.88; letter-spacing: -0.035em;
+  text-transform: uppercase; white-space: nowrap; word-spacing: 0.12em; margin-left: -0.04em;
+}
+.cv-title { margin-top: 0.55em; font-size: 1.26em; font-stretch: 108%; font-weight: 640; line-height: 1.15; letter-spacing: -0.01em; }
+.cv-seek { margin-top: 0.8em; max-width: 56ch; }
+.cv-seek__tag {
+  display: inline-block; margin-right: 0.45em; padding: 0.3em 0.5em 0.26em; vertical-align: 0.08em;
+  background: var(--void); color: var(--paper);
+  font-size: 0.78em; font-stretch: 78%; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; line-height: 1;
+}
+.cv-contact { font-size: 1em; line-height: 1.55; padding-left: 1.2em; border-left: 1px solid var(--rule); overflow-wrap: anywhere; }
+.cv-contact li:first-child { color: var(--ink-2); }
+
+/* ------------------------------------------------------------- columns */
+
+.cv-cols { display: grid; grid-template-columns: minmax(0, 1fr) var(--side); gap: 0 var(--gap); align-items: start; }
+.cv-sec + .cv-sec { margin-top: 1.35em; }
+
+.cv-h {
+  display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.75em;
+  font-size: 0.82em; font-stretch: 78%; font-weight: 740; line-height: 1.2; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--void);
+}
+.cv-h::before { content: ''; flex: none; width: 0.62em; height: 0.62em; background: var(--fil); }
+.cv-h::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+
+/* ------------------------------------------------------------- entries */
+
+.cv-entry + .cv-entry { margin-top: 0.9em; }
+.cv-entry__head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5em 1em; }
+.cv-entry__title { font-size: 1.1em; font-stretch: 106%; font-weight: 700; line-height: 1.2; letter-spacing: -0.005em; text-wrap: balance; }
+.cv-entry__when {
+  flex: none; font-size: 0.8em; font-stretch: 78%; font-weight: 660; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--ink-2); white-space: nowrap; font-variant-numeric: tabular-nums;
+}
+.cv-entry__org { margin-top: 0.12em; color: var(--ink-2); }
+.cv-entry__note { margin-top: 0.4em; font-size: 0.9em; line-height: 1.38; color: var(--ink-2); }
+.cv-live {
+  display: inline-block; margin-left: 0.55em; padding: 0.28em 0.46em 0.24em; vertical-align: 0.14em;
+  background: var(--cone); color: var(--deep);
+  font-size: 0.64em; font-stretch: 78%; font-weight: 740; letter-spacing: 0.07em; text-transform: uppercase; line-height: 1;
+}
+
+.cv-list { margin-top: 0.42em; display: grid; gap: 0.36em; }
+/* a grid, not a positioned bullet: positioned boxes are painted after the normal flow, which would
+   put the text of every bullet at the end of the PDF's text stream (reading order, ATS, copy-paste) */
+.cv-list li { display: grid; grid-template-columns: 0.42em minmax(0, 1fr); column-gap: 0.68em; }
+.cv-list li::before { content: ''; width: 0.42em; height: 0.42em; margin-top: 0.5em; background: var(--fil); }
+
+.cv-links { margin-top: 0.5em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.1em 1.1em; font-size: 0.92em; }
+.cv-links__k { font-size: 0.82em; font-stretch: 78%; font-weight: 720; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+
+/* ---------------------------------------------------------- side column */
+
+.cv-skills > div + div { margin-top: 0.6em; }
+.cv-skills dt { font-size: 0.78em; font-stretch: 78%; font-weight: 740; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); line-height: 1.3; }
+.cv-skills dd { margin: 0; }
+
+.cv-sideprojects { margin-top: 0.55em; display: grid; gap: 0.5em; }
+.cv-sideprojects li { display: grid; }
+.cv-sideprojects__name { font-weight: 700; justify-self: start; }
+
+.cv-langs { display: grid; gap: 0.2em; }
+.cv-langs strong { font-weight: 700; margin-right: 0.15em; }
+
+.cv-side .cv-entry__head { flex-direction: column; gap: 0; }
+.cv-side .cv-entry__title { font-size: 1em; }
+
+/* -------------------------------------------------------------- reflow */
+
+@container (max-width: 880px) {
+  .cv {
+    --side: 1fr; --gap: 0;
+    font-size: 1rem; width: 100%; min-height: 0;
+    padding: 1.5rem clamp(1rem, 4.4cqw, 2rem) 1.8rem;
+    box-shadow: 0.45rem 0.45rem 0 var(--deep);
+  }
+  .cv-head { grid-template-columns: 1fr; gap: 1.1rem; align-items: start; }
+  .cv-name { font-size: clamp(2.05rem, 10.6cqw, 3.1rem); white-space: normal; line-height: 0.9; }
+  .cv-title { font-size: 1.15rem; }
+  .cv-contact { padding-left: 0; border-left: 0; display: flex; flex-wrap: wrap; gap: 0.1rem 1.1rem; }
+  .cv-contact li:first-child { flex-basis: 100%; }
+  .cv-cols { grid-template-columns: 1fr; }
+  .cv-entry__head { flex-direction: column; gap: 0.15rem; }
+  .cv-entry__when { white-space: normal; }
+  .cv-sec + .cv-sec { margin-top: 1.9rem; }
+  .cv-h { font-size: 0.8rem; }
+  .cv-side { margin-top: 1.9rem; }
+  .cv-list li, .cv-skills dd, .cv-sideprojects li, .cv-langs li, .cv-entry__org { font-size: 0.98rem; }
+}
+
+/* --------------------------------------------------------------- print */
+
+@page { size: A4; margin: 0; }
+
+@media print {
+  html, body { background: #fff !important; color: var(--deep); }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .top, .skip, .cv-bar, .foot { display: none !important; }
+  .cv-page { padding: 0; container-type: normal; }
+  .cv { font-size: var(--cv-print-size); width: 210mm; min-height: 0; margin: 0; background: #fff; box-shadow: none; }
+  .cv a { color: var(--void); }
+}

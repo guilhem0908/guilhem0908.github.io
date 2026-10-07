@@ -1,0 +1,15 @@
+---
+// /<lang>/<section>/<slug>/  Case studies in the other languages (/fr/projets/<slug>/).
+import CaseStudyView from '../../../views/CaseStudyView.astro';
+import { SEGMENTS, prefixedLangs, readyCases } from '../../../i18n/routes';
+import type { CaseSlug, Lang } from '../../../data/site';
+
+export function getStaticPaths() {
+  return prefixedLangs().flatMap((lang) =>
+    readyCases().map((slug) => ({ params: { lang, section: SEGMENTS[lang].work, slug } })),
+  );
+}
+const { lang, slug } = Astro.params as { lang: Lang; slug: CaseSlug };
+---
+
+<CaseStudyView lang={lang} slug={slug} />

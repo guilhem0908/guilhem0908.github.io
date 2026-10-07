@@ -1,0 +1,23 @@
+---
+// One entry of the CV sheet: a role, a degree or a project. Markup only; the look is in styles/cv.css.
+import type { CvEntry } from '../data/cv/types';
+
+interface Props { entry: CvEntry; code: string }
+const { entry: e, code } = Astro.props;
+---
+
+<article class="cv-entry">
+  <header class="cv-entry__head">
+    <h3 class="cv-entry__title">{e.title}{e.tag && <span class="cv-live">{e.tag}</span>}</h3>
+    <p class="cv-entry__when">{e.when}</p>
+  </header>
+  {e.org && <p class="cv-entry__org">{e.org}</p>}
+  {e.bullets && <ul class="cv-list">{e.bullets.map((b) => <li>{b}</li>)}</ul>}
+  {e.note && <p class="cv-entry__note">{e.note}</p>}
+  {e.links && (
+    <p class="cv-links">
+      <span class="cv-links__k">{code}</span>
+      {e.links.map((l) => <a href={l.href} rel="noopener">{l.label}</a>)}
+    </p>
+  )}
+</article>

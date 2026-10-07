@@ -1,0 +1,113 @@
+---
+// The case-study template. Static and fast: no WebGL, one light moment (the window word).
+// Order: title and outcome, meta strip, buttons, lead media, three-line summary, context,
+// what I built (with a diagram), results, what failed, credits, links, next project.
+import Base from '../layouts/Base.astro';
+import Blocks from '../components/Blocks.astro';
+import Compare from '../components/Compare.astro';
+import Media from '../components/Media.astro';
+import '../styles/page.css';
+import { getContent } from '../data';
+import { caseStudies, media, repos, type CaseSlug, type Lang } from '../data/site';
+import { href, nextCase } from '../i18n/routes';
+
+interface Props { lang: Lang; slug: CaseSlug }
+const { lang, slug } = Astro.props;
+const t = getContent(lang);
+const c = t.work[slug] ?? getContent('en').work[slug];
+if (!c) throw new Error(`No content for case study ${slug}`);
+const L = t.ui.caseLabels;
+const cfg = caseStudies[slug];
+const code = cfg.code[0];
+const next = nextCase(slug);
+const nextCopy = next ? (t.work[next] ?? getContent('en').work[next]) : null;
+const win = c.window ? media[c.window.media] : null;
+const metaRows: [string, string][] = [
+  [L.role, c.meta.role], [L.team, c.meta.team], [L.period, c.meta.period],
+  [L.organisation, c.meta.organisation], [L.stack, c.meta.stack],
+];
+const sections: [string, string, typeof c.context][] = [
+  ['context', L.context, c.context],
+  ['built', L.builtTitle, c.built],
+  ['results', L.results, c.results],
+  ['failed', L.failed, c.failed],
+  ['credits', L.credits, c.credits],
+];
+---
+
+<Base lang={lang} kind="work" slug={slug} title={c.metaTitle} description={c.metaDescription}>
+  <article class="case">
+    <header class="case__head page">
+      <p class="kick">{c.kicker}</p>
+      <h1 class="t-xl case__title" style="view-transition-name: case-title">{c.title}</h1>
+      <p class="lead case__outcome">{c.outcome}</p>
+
+      <dl class="metastrip">
+        {metaRows.map(([k, v]) => <div><dt class="read">{k}</dt><dd>{v}</dd></div>)}
+      </dl>
+
+      {(code || cfg.report || c.videoAnchor) && (
+        <ul class="links case__btns">
+          {code && <li><a class="btn btn--solid" href={repos[code]} rel="noopener">{t.ui.code}</a></li>}
+          {cfg.report && <li><a class="btn" href={cfg.report} rel="noopener">{t.ui.report}</a></li>}
+          {c.videoAnchor && <li><a class="btn" href={`#${c.videoAnchor}`} data-play-target={c.videoAnchor}>{t.ui.video}</a></li>}
+        </ul>
+      )}
+    </header>
+
+    <section class="darkroom" aria-label={c.lead.kind === 'compare' ? c.lead.alt : undefined}>
+      {c.window && win && win.kind === 'image' && (
+        <p class="window d-xl" aria-hidden="true" style={`--win:url(${win.src}); --win-ratio:${win.w / win.h}`}>{c.window.word}</p>
+      )}
+      <div class="page">
+        <figure class:list={['lead-media', c.lead.kind === 'media' && 'lead-media--fit']}
+          style={c.lead.kind === 'media' ? `--ar:${media[c.lead.media].w / media[c.lead.media].h}` : undefined}>
+          {c.lead.kind === 'compare' ? (
+            <Compare id="lead" before={c.lead.before} after={c.lead.after} video={c.lead.video}
+              beforeLabel={c.lead.beforeLabel} afterLabel={c.lead.afterLabel} alt={c.lead.alt}
+              play={c.lead.play} pause={c.lead.pause} slider={c.lead.slider} />
+          ) : (
+            <div id="lead"><Media name={c.lead.media} alt={c.lead.alt} eager /></div>
+          )}
+          <figcaption class="small hz">{c.lead.caption}</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="page case__sum" aria-labelledby="sum-h">
+      <h2 class="read case__sumh" id="sum-h">{L.summary}</h2>
+      <dl class="sum3">
+        <div class="rv"><dt class="t-s">{L.problem}</dt><dd class="body">{c.summary.problem}</dd></div>
+        <div class="rv"><dt class="t-s">{L.built}</dt><dd class="body">{c.summary.built}</dd></div>
+        <div class="rv"><dt class="t-s">{L.result}</dt><dd class="body">{c.summary.result}</dd></div>
+      </dl>
+    </section>
+
+    {sections.map(([id, title, blocks]) => blocks.length > 0 && (
+      <section class:list={['page', 'case__sec', `case__sec--${id}`]} aria-labelledby={`${id}-h`}>
+        <h2 class="t case__sech" id={`${id}-h`}>{title}</h2>
+        <div class="case__body">
+          <Blocks blocks={blocks} repoLabel={t.ui.repositoryLabel} />
+        </div>
+      </section>
+    ))}
+
+    <section class="page case__sec case__sec--links" aria-labelledby="links-h">
+      <h2 class="t case__sech" id="links-h">{L.links}</h2>
+      <ul class="case__links">
+        {c.links.map((l) => <li><a class="lnk" href={l.href} rel="noopener">{l.label}</a></li>)}
+      </ul>
+    </section>
+
+    <nav class="page case__next" aria-label={L.next}>
+      <p class="read">{L.next}</p>
+      {next && nextCopy ? (
+        <a class="nextlink d-l" href={href(lang, 'work', next)} data-case={next}>{nextCopy.title}</a>
+      ) : (
+        <a class="nextlink d-l" href={href(lang, 'lab')}>{L.nextLab}</a>
+      )}
+      <p><a class="lnk" href={`${href(lang, 'home')}#${cfg.room}`}>{t.ui.backToRun}</a></p>
+    </nav>
+  </article>
+  <script src="../scripts/page.ts"></script>
+</Base>

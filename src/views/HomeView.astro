@@ -1,0 +1,354 @@
+---
+// The home page: the NAV RUN. One fixed WebGL world, transparent sections over it.
+// Without WebGL or under reduced motion the same markup is a complete static page.
+import Base from '../layouts/Base.astro';
+import BigFigure from '../components/BigFigure.astro';
+import Compare from '../components/Compare.astro';
+import Media from '../components/Media.astro';
+import '../styles/home.css';
+import { getContent } from '../data';
+import { CASE_SLUGS, caseStudies, external, media, person, publishedSide, repos, slugOfRoom, type Lang, type RoomId } from '../data/site';
+import { caseReady, cvReady, href } from '../i18n/routes';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = getContent(lang);
+const en = getContent('en');
+const h = t.home;
+const run = h.run;
+const cv = cvReady(lang) ? href(lang, 'cv') : null;
+const labHref = href(lang, 'lab');
+
+/** link to the case study of a room, or null while that page is switched off */
+const caseOf = (room: RoomId) => {
+  const slug = slugOfRoom(room);
+  return caseReady(slug) ? { slug, href: href(lang, 'work', slug) } : null;
+};
+const aistCase = caseOf('aist'), tlseCase = caseOf('tlse'), usineCase = caseOf('usine'), pfrCase = caseOf('pfr');
+const codeOf = (room: RoomId) => caseStudies[slugOfRoom(room)].code;
+
+const side = publishedSide
+  .map((p) => ({ ...p, copy: t.lab.projects[p.name] ?? en.lab.projects[p.name] }))
+  .filter((p) => p.copy);
+
+const waypoints: [string, string][] = [
+  ['hero', h.waypoints.hero], ['aist', h.waypoints.aist], ['tlse', h.waypoints.tlse], ['usine', h.waypoints.usine], ['pfr', h.waypoints.pfr],
+];
+
+const f = h.aist.figures;
+// placeholders of the readouts that the run overwrites: same decimal sign as the live values
+const n1 = new Intl.NumberFormat(t.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const zero = n1.format(0);
+---
+
+<Base lang={lang} kind="home" title={t.meta.homeTitle} description={t.meta.homeDescription} footer={false}>
+  <Fragment slot="head">
+    <script is:inline>
+      (function () {
+        var d = document.documentElement;
+        var q = new URLSearchParams(location.search);
+        var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var opt = false;
+        try { opt = sessionStorage.getItem('navrun-3d') === '1'; } catch (e) {}
+        if (q.has('static')) return;
+        if (rm && !opt && !q.has('motion')) { d.classList.add('rm'); return; }
+        try {
+          var c = document.createElement('canvas');
+          var gl = c.getContext('webgl2');
+          if (!gl) return;
+          var lose = gl.getExtension('WEBGL_lose_context');
+          if (lose) lose.loseContext();
+        } catch (e) { return; }
+        d.classList.add('gl', 'booting');
+        if (window.matchMedia('(max-width: 760px)').matches) d.classList.add('small');
+      })();
+    </script>
+  </Fragment>
+
+  <Fragment slot="backdrop">
+    <canvas id="world" aria-hidden="true"></canvas>
+    <div class="lens" aria-hidden="true"><span class="lens__label read"></span></div>
+  </Fragment>
+
+  <Fragment slot="chrome">
+    <aside class="hud" aria-label={run.hud.label}>
+      <dl class="hud__read read">
+        <div><dt>{run.hud.waypoint}</dt><dd data-r="wp">{run.zones.lobby}</dd></div>
+        <div><dt>{run.hud.pose}</dt><dd data-r="pose">x {zero.padStart(4, '0')} z {zero.padStart(4, '0')} 000°</dd></div>
+        <div><dt>{run.hud.run}</dt><dd data-r="run">{zero} / {zero} m</dd></div>
+        <div class="hud__wide"><dt>{run.hud.gaussians}</dt><dd data-r="count">0</dd></div>
+      </dl>
+      <div class="map">
+        <canvas id="map" width="176" height="220" role="img" aria-label={run.hud.mapAlt}></canvas>
+        <ul class="map__wps" aria-label={run.hud.jump}>
+          {waypoints.map(([id, label]) => <li><a href={`#${id}`} data-wp={id} aria-label={label}><span aria-hidden="true">{label}</span></a></li>)}
+        </ul>
+      </div>
+      <button class="hud__mode read" type="button" data-mode aria-live="polite">{run.view.prefix} {run.view.colour}</button>
+    </aside>
+
+    <div class="intro" aria-hidden="true">
+      <p class="intro__status read" data-i="status">{run.intro.building}</p>
+      <p class="intro__iter fig"><span data-i="iter">0</span><small class="read"> {run.intro.iterations}</small></p>
+      <dl class="intro__read read">
+        <div><dt>{run.intro.gaussians}</dt><dd data-i="count">0</dd></div>
+        <div><dt>{run.intro.residual}</dt><dd data-i="res">{new Intl.NumberFormat(t.locale, { minimumFractionDigits: 3 }).format(0)} m</dd></div>
+        <div><dt>{run.intro.grid}</dt><dd data-i="grid">{run.intro.pending}</dd></div>
+        <div><dt>{run.intro.path}</dt><dd data-i="path">{run.intro.pending}</dd></div>
+      </dl>
+      <p class="intro__skip read">{run.intro.skip}</p>
+    </div>
+  </Fragment>
+
+  <!-- 1. hero -->
+  <section id="hero" data-sec="hero" class="sec sec--hero">
+    <div class="stage hero">
+      <h1 class="hero__name d-xl" data-converge>
+        <span class="ln">{person.first}</span>
+        <span class="ln">{person.last}</span>
+      </h1>
+      <div class="hero__side">
+        <div class="hero__intro plate">
+          <p class="lead hero__line">{t.person.line}</p>
+          <p class="hero__seek"><span class="tag">{t.seeking.tag}</span> {t.seeking.short}. <span class="hz">{t.seeking.fields}</span></p>
+        </div>
+        <ul class="links hero__links">
+          {cv && <li><a class="btn btn--solid" href={cv}>{h.heroLinks.cv}</a></li>}
+          <li><a class:list={['btn', !cv && 'btn--solid']} href={person.github} rel="me noopener">{h.heroLinks.github}</a></li>
+          <li><a class="btn" href={person.linkedin} rel="me noopener">{h.heroLinks.linkedin}</a></li>
+          <li><a class="btn" href={`mailto:${person.email}`}>{h.heroLinks.email}</a></li>
+        </ul>
+        <p class="hero__skip"><a class="skiprun" href="#work">{h.heroLinks.skip} <span aria-hidden="true">↓</span></a></p>
+      </div>
+      <img class="hero__poster static-only" src={media.poster.src} width={media.poster.w} height={media.poster.h} loading="lazy" alt={h.posterAlt} />
+    </div>
+  </section>
+
+  <!-- 2. AIST flagship -->
+  <section id="aist" data-sec="aist" class="sec sec--aist" data-case-scope>
+    <div class="stage">
+      <div class="beat beat--title" data-in="-0.05" data-out="0.105">
+        <p class="kick">{h.aist.kicker}</p>
+        <h2 class="t-xl" data-converge data-case-title>{h.aist.title}</h2>
+        <p class="body plate host">{h.aist.host}</p>
+        {aistCase && <p class="beat__cta"><a class="btn btn--solid" href={aistCase.href} data-case={aistCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
+      </div>
+      <p class="giant fig" aria-hidden="true" data-giant>{h.aist.giant}</p>
+
+      <div class="beat beat--br plate" data-in="0.118" data-out="0.205">
+        <p class="tag">{h.aist.inputTag}</p>
+        <p class="body">{h.aist.goal}</p>
+        <p class="body hz">{h.aist.input} <span class="gl-only">{h.aist.inputWall}</span></p>
+      </div>
+
+      <div class="beat beat--bl plate" data-in="0.235" data-out="0.345">
+        <h3 class="t" data-converge>{h.aist.problemTitle}</h3>
+        <p class="body">{h.aist.problem} <span class="gl-only">{h.aist.problemRoom}</span></p>
+      </div>
+
+      <div class="beat beat--pano-top" data-in="0.47" data-out="0.775">
+        <h3 class="t" data-converge>{h.aist.unwrapTitle}</h3>
+      </div>
+      <figure class="static-only fallback-wipe">
+        <Compare before="panoRaw" after="panoRepaired" beforeLabel={h.aist.rawLabel} afterLabel={h.aist.fixedLabel}
+          alt={h.aist.fallbackAlt} slider={h.aist.fallbackAlt} />
+      </figure>
+      <div class="beat beat--pano-bottom" data-in="0.495" data-out="0.775">
+        <p class="cap cap--raw read" data-raw>{h.aist.rawLabel}</p>
+        <p class="cap cap--fix read" data-fix>{h.aist.fixedLabel}</p>
+        <p class="small hz cap__note">{h.aist.caption} <span class="cap__more">{h.aist.captionMore}</span></p>
+      </div>
+      <div class="beat beat--fig" data-in="0.478" data-out="0.54"><BigFigure figure={f.rig} size="l" /></div>
+      <div class="beat beat--fig" data-in="0.55" data-out="0.675"><BigFigure figure={f.warp} size="l" /></div>
+      <div class="beat beat--fig" data-in="0.685" data-out="0.775"><BigFigure figure={f.depth} size="l" /></div>
+
+      <div class="beat beat--bl beat--failed plate" data-in="0.8" data-out="0.9"><BigFigure figure={f.failed} size="l" /></div>
+
+      <div class="beat beat--br plate" data-in="0.915" data-out="1.03">
+        <h3 class="t-s">{h.aist.endTitle}</h3>
+        <p class="body">{h.aist.end}</p>
+        {aistCase && <p class="beat__cta"><a class="btn btn--solid" href={aistCase.href} data-case={aistCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
+        <ul class="links links--inline">
+          {codeOf('aist').map((r) => <li><a class="lnk" href={repos[r]} rel="noopener">{r}</a></li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SVLR (short, team-framed) -->
+  <section id="svlr" data-sec="svlr" class="sec sec--svlr">
+    <div class="stage">
+      <div class="beat beat--br plate" data-in="-0.35" data-out="0.8">
+        <h2 class="t-s">{h.svlr.title}</h2>
+        <p class="body">{h.svlr.text}</p>
+        <p class="body"><a class="lnk" href={external.svlrReport} rel="noopener">{h.svlr.link}</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. TLSe Racing -->
+  <section id="tlse" data-sec="tlse" class="sec sec--tlse" data-case-scope>
+    <div class="stage">
+      <div class="marquee" aria-hidden="true" data-marquee>
+        <div class="marquee__track d-l">
+          <span>{h.tlse.marquee}</span><span>{h.tlse.marquee}</span><span>{h.tlse.marquee}</span><span>{h.tlse.marquee}</span>
+        </div>
+      </div>
+      <div class="beat beat--bl beat--tlse plate" data-in="0.03" data-out="0.44">
+        <p class="kick">{h.tlse.kicker}</p>
+        <h2 class="t-xl t-xl--tight" data-converge data-case-title>{h.tlse.title}</h2>
+        <p class="body">{h.tlse.mine}</p>
+      </div>
+      <div class="beat beat--bl plate" data-in="0.47" data-out="0.95">
+        <p class="body gl-only"><strong>{h.tlse.demo}</strong></p>
+        <div class="sensor">
+          <label for="sensor-range">{h.tlse.range} <output for="sensor-range" data-o="range">{n1.format(6.5)} m</output>
+            <input id="sensor-range" type="range" min="3" max="10" step="0.5" value="6.5" data-sensor="range"
+              aria-label={h.tlse.range} aria-valuetext={`${n1.format(6.5)} m`} />
+          </label>
+          <label for="sensor-angle">{h.tlse.opening} <output for="sensor-angle" data-o="angle">100°</output>
+            <input id="sensor-angle" type="range" min="40" max="150" step="5" value="100" data-sensor="angle"
+              aria-label={h.tlse.opening} aria-valuetext="100°" />
+          </label>
+          <p class="read sensor__seen"><span data-o="seen">0</span> {h.tlse.selected}</p>
+        </div>
+        <p class="body">{h.tlse.team}</p>
+        <p class="small hz">{h.tlse.also}</p>
+        {tlseCase && <p class="beat__cta"><a class="btn btn--solid" href={tlseCase.href} data-case={tlseCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
+        <ul class="links links--inline">
+          {codeOf('tlse').map((r) => <li><a class="lnk" href={repos[r]} rel="noopener">{r}</a></li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Usine 4.0 -->
+  <section id="usine" data-sec="usine" class="sec sec--usine" data-case-scope>
+    <div class="stage">
+      <div class="beat beat--usine" data-in="0.04" data-out="0.93">
+        <p class="kick">{h.usine.kicker} <span class="tag tag--cone">{h.usine.status}</span></p>
+        <h2 class="d-xl usine__title" data-converge data-case-title>{h.usine.title}</h2>
+      </div>
+      <div class="beat beat--br plate" data-in="0.22" data-out="0.93">
+        <p class="body">{h.usine.text}</p>
+        <p class="small hz gl-only">{h.usine.note}</p>
+        {usineCase && <p class="beat__cta"><a class="btn btn--solid" href={usineCase.href} data-case={usineCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Projet Fil Rouge -->
+  <section id="pfr" data-sec="pfr" class="sec sec--pfr" data-case-scope>
+    <div class="stage">
+      <div class="beat beat--tl" data-in="0.04" data-out="0.5">
+        <p class="kick">{h.pfr.kicker}</p>
+        <h2 class="t-xl t-xl--tight" data-converge data-case-title>{h.pfr.title}</h2>
+        <p class="body plate">{h.pfr.mine}</p>
+      </div>
+      <div class="beat beat--tl plate" data-in="0.53" data-out="0.99">
+        <p class="body">{h.pfr.team}</p>
+        <p class="body hz">{h.pfr.before}</p>
+        {pfrCase && <p class="beat__cta"><a class="btn btn--solid" href={pfrCase.href} data-case={pfrCase.slug}>{t.ui.readCase} <span aria-hidden="true">→</span></a></p>}
+        <ul class="links links--inline">
+          {codeOf('pfr').map((r) => <li><a class="lnk" href={repos[r]} rel="noopener">{r}</a></li>)}
+        </ul>
+      </div>
+      <figure class="beat beat--hmi" data-in="0.14" data-out="0.99">
+        <video class="feed" muted loop playsinline preload="none" poster={media.pfrHmi.poster} width={media.pfrHmi.w} height={media.pfrHmi.h} data-feed aria-label={h.pfr.hmi}>
+          <source src={media.pfrHmi.mp4} type="video/mp4" />
+        </video>
+        <figcaption class="small">{h.pfr.hmi}</figcaption>
+      </figure>
+      <p class="beat beat--hint read" data-in="0.2" data-out="0.99"><span data-o="bearing">{run.bearing} +{zero.padStart(4, '0')}°</span><br />{h.pfr.demo}<br /><span class="hint__feed">{h.pfr.feedWall} {h.pfr.feed}</span></p>
+      <figure class="static-only pfr__static">
+        <video class="feed" muted loop playsinline controls preload="none" poster={media.pfrBall.poster} width={media.pfrBall.w} height={media.pfrBall.h} aria-label={h.pfr.feed}>
+          <source src={media.pfrBall.mp4} type="video/mp4" />
+        </video>
+        <figcaption class="small">{h.pfr.feed}</figcaption>
+      </figure>
+      <img class="static-only" src={media.pfrRobot.src} width={media.pfrRobot.w} height={media.pfrRobot.h} loading="lazy" alt={h.pfr.robotAlt} />
+    </div>
+  </section>
+
+  <!-- 7. lab: the published side projects -->
+  <section id="lab" data-sec="lab" class="sec sec--lab">
+    <div class="labhome">
+      <header class="labhome__head" data-rise>
+        <h2 class="t">{h.lab.title}</h2>
+        <p class="body">{h.lab.text}</p>
+        <p><a class="btn" href={labHref}>{h.lab.more} <span aria-hidden="true">→</span></a></p>
+      </header>
+      <ul class="labcards">
+        {side.map((p) => (
+          <li class="labcard" data-rise>
+            <a class="labcard__media" href={`${labHref}#${p.name}`} tabindex="-1" aria-hidden="true">
+              <Media name={p.visual!} alt="" vt={`lab-${p.name}`} />
+            </a>
+            <div class="labcard__txt">
+              <h3 class="labcard__name"><a href={`${labHref}#${p.name}`}>{p.name}</a></h3>
+              <p class="small labcard__what">{p.copy!.what}</p>
+              <BigFigure figure={p.copy!.result} size="m" />
+              <p class="labcard__links"><a class="lnk" href={repos[p.repo!]} rel="noopener">{t.ui.repository}</a></p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- 8. project index: the run without the run -->
+  <section id="work" data-sec="index" class="sec sec--index">
+    <div class="index">
+      <header class="index__head" data-rise>
+        <h2 class="t">{h.index.title}</h2>
+        <p class="body hz">{h.index.text}</p>
+      </header>
+      <ol class="index__list">
+        {CASE_SLUGS.map((slug) => {
+          const row = h.index.rows[slug];
+          const cfg = caseStudies[slug];
+          const ready = caseReady(slug);
+          const to = href(lang, 'work', slug);
+          return (
+            <li class="irow" data-rise data-case-scope>
+              <p class="irow__when read">{row.when}</p>
+              <h3 class="irow__name" data-case-title>{ready ? <a href={to} data-case={slug}>{row.name}</a> : row.name}</h3>
+              <p class="irow__line body">{row.line}</p>
+              <p class="irow__links">
+                {ready && <a class="lnk" href={to} data-case={slug}>{t.ui.readCase}</a>}
+                <a class="lnk" href={`#${cfg.room}`}>{h.index.room}</a>
+                {cfg.code.map((r) => <a class="lnk" href={repos[r]} rel="noopener">{r}</a>)}
+              </p>
+            </li>
+          );
+        })}
+        <li class="irow" data-rise>
+          <p class="irow__when read">2026</p>
+          <h3 class="irow__name"><a href={labHref}>{h.lab.title}</a></h3>
+          <p class="irow__line body">{h.lab.text}</p>
+          <p class="irow__links"><a class="lnk" href={labHref}>{h.lab.more}</a></p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 9. contact -->
+  <section id="contact" data-sec="contact" class="sec sec--contact">
+    <div class="stage contact">
+      <h2 class="d-l" data-converge data-on-view>{h.contact.title}</h2>
+      <p class="lead">{t.seeking.long} <span class="hz">{t.seeking.fields}</span></p>
+      <p class="contact__mail"><a class="mail" href={`mailto:${person.email}`}>{person.email}</a></p>
+      <ul class="links">
+        {cv && <li><a class="btn btn--solid" href={cv}>{h.heroLinks.cv}</a></li>}
+        <li><a class:list={['btn', !cv && 'btn--solid']} href={person.github} rel="me noopener">{h.heroLinks.github}</a></li>
+        <li><a class="btn" href={person.linkedin} rel="me noopener">{h.heroLinks.linkedin}</a></li>
+      </ul>
+      <p class="small hz contact__fine">{t.person.school}<br />{t.person.city}. {t.person.languages}.</p>
+      <p class="rm-only"><button class="btn" type="button" data-start3d>{h.start3d}</button></p>
+    </div>
+  </section>
+
+  <noscript><style>{'.rm-only{display:none}'}</style></noscript>
+  <script type="application/json" id="run-i18n" set:html={JSON.stringify({ locale: t.locale, ...run })} />
+  <script src="../scripts/main.ts"></script>
+</Base>

@@ -1,0 +1,13 @@
+---
+// /work/<slug>/  One page per case study that is switched on in data/site.ts.
+import CaseStudyView from '../../views/CaseStudyView.astro';
+import { readyCases } from '../../i18n/routes';
+import type { CaseSlug } from '../../data/site';
+
+export function getStaticPaths() {
+  return readyCases().map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params as { slug: CaseSlug };
+---
+
+<CaseStudyView lang="en" slug={slug} />

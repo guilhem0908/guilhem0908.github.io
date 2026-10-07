@@ -1,0 +1,49 @@
+---
+// A pipeline as a red thread through its stages. Solid nodes are the author's work,
+// outlined nodes are inputs, outputs and upstream components. Stages flagged `loop` are bracketed.
+import type { Block } from '../data/types';
+type P = Extract<Block, { kind: 'pipeline' }>;
+interface Props { block: P }
+const { block } = Astro.props;
+const first = block.nodes.findIndex((n) => n.loop);
+const last = block.nodes.length - 1 - [...block.nodes].reverse().findIndex((n) => n.loop);
+const groups = first < 0
+  ? [{ loop: false, nodes: block.nodes }]
+  : [
+      { loop: false, nodes: block.nodes.slice(0, first) },
+      { loop: true, nodes: block.nodes.slice(first, last + 1) },
+      { loop: false, nodes: block.nodes.slice(last + 1) },
+    ].filter((g) => g.nodes.length);
+const num = new Map(block.nodes.map((node, i) => [node, String(i + 1).padStart(2, '0')]));
+---
+
+<figure class="pipe2">
+  <h3 class="t-s pipe2__title">{block.title}</h3>
+  <ol class="pipe2__flow">
+    {groups.map((g) => g.loop ? (
+      <li class="pipe2__loop">
+        <p class="pipe2__looplabel read"><span aria-hidden="true">↺</span> {block.loopLabel}</p>
+        <ol class="pipe2__inner">
+          {g.nodes.map((node) => (
+            <li class:list={['pipe2__node', node.mine && 'is-mine']}>
+              <span class="pipe2__n read">{num.get(node)}</span>
+              <strong>{node.label}</strong>
+              {node.detail && <span class="pipe2__detail">{node.detail}</span>}
+            </li>
+          ))}
+        </ol>
+      </li>
+    ) : g.nodes.map((node) => (
+      <li class:list={['pipe2__node', node.mine && 'is-mine']}>
+        <span class="pipe2__n read">{num.get(node)}</span>
+        <strong>{node.label}</strong>
+        {node.detail && <span class="pipe2__detail">{node.detail}</span>}
+      </li>
+    )))}
+  </ol>
+  <figcaption class="small">
+    <span class="pipe2__key"><i class="pipe2__sw is-mine"></i>{block.legend.mine}</span>
+    <span class="pipe2__key"><i class="pipe2__sw"></i>{block.legend.upstream}</span>
+    <span class="pipe2__cap hz">{block.caption}</span>
+  </figcaption>
+</figure>

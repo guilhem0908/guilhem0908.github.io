@@ -1,0 +1,22 @@
+# dependencies and build output
+node_modules/
+dist/
+.astro/
+
+# local scratch: screenshots, captures, intermediate media
+_work/
+shots/
+*.log
+
+# editors and OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# environment
+.env
+.env.*
+
+# data that must not be public yet (see src/data/site.ts)
+src/data/*.local.ts

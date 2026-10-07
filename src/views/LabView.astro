@@ -1,0 +1,72 @@
+---
+// /lab/: the published side projects. Each one: its hero visual, what it shows, one result,
+// stack, repository. Unpublished projects stay in data/site.ts and render nothing.
+import Base from '../layouts/Base.astro';
+import BigFigure from '../components/BigFigure.astro';
+import Media from '../components/Media.astro';
+import '../styles/page.css';
+import { getContent } from '../data';
+import { media, publishedSide, repos, type Lang } from '../data/site';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = getContent(lang);
+const en = getContent('en');
+const projects = publishedSide
+  .map((p) => ({ ...p, copy: t.lab.projects[p.name] ?? en.lab.projects[p.name] }))
+  .filter((p) => p.copy);
+---
+
+<Base lang={lang} kind="lab" title={t.meta.labTitle} description={t.meta.labDescription}>
+  <article class="lab">
+    <header class="page lab__head">
+      <p class="kick">{t.lab.kicker}</p>
+      <h1 class="d-l lab__title">{t.lab.title}</h1>
+      <p class="lead lab__intro">{t.lab.intro}</p>
+      <p class="body lab__disc plate">{t.lab.disclosure}</p>
+      <nav class="lab__toc" aria-label={t.lab.title}>
+        <ul>
+          {projects.map((p) => <li><a class="lnk" href={`#${p.name}`}>{p.name}</a></li>)}
+        </ul>
+      </nav>
+    </header>
+
+    {projects.map((p, i) => (
+      <section class="labp" id={p.name} aria-labelledby={`${p.name}-h`}>
+        <div class="darkroom labp__stage">
+          <div class="page">
+            <figure class="labp__fig" style={`--ar:${media[p.visual!].w / media[p.visual!].h}`}>
+              <Media name={p.visual!} alt={p.copy!.shows} vt={`lab-${p.name}`} eager={i === 0} />
+            </figure>
+          </div>
+        </div>
+        <div class="page labp__body">
+          <div class="labp__main">
+            <h2 class="d-l labp__name" id={`${p.name}-h`}>{p.name}</h2>
+            <p class="lead labp__what">{p.copy!.what}</p>
+            <p><a class="btn btn--solid" href={repos[p.repo!]} rel="noopener">{t.ui.repositoryLabel} {p.name}</a></p>
+          </div>
+          <div class="labp__side">
+            <div class="rv">
+              <h3 class="read labp__label">{t.lab.labels.result}</h3>
+              <BigFigure figure={p.copy!.result} size="l" />
+            </div>
+            <div class="rv">
+              <h3 class="read labp__label">{t.lab.labels.shows}</h3>
+              <p class="body">{p.copy!.shows}</p>
+            </div>
+            <div class="rv">
+              <h3 class="read labp__label">{t.lab.labels.extends}</h3>
+              <p class="body">{p.copy!.extends}</p>
+            </div>
+            <div class="rv">
+              <h3 class="read labp__label">{t.lab.labels.stack}</h3>
+              <ul class="chips">{p.stack.map((s) => <li>{s}</li>)}</ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    ))}
+  </article>
+  <script src="../scripts/page.ts"></script>
+</Base>

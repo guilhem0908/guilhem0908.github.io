@@ -1,0 +1,22 @@
+---
+// /<lang>/<page>/  Single pages in the other languages: the lab (/fr/labo/) and the CV (/fr/cv/).
+// The CV page is generated for the languages that have a CV file (src/data/cv/<lang>.ts).
+import LabView from '../../views/LabView.astro';
+import CvView from '../../views/CvView.astro';
+import { SEGMENTS, cvPrefixedLangs, cvReady, prefixedLangs } from '../../i18n/routes';
+import type { Lang } from '../../data/site';
+
+export function getStaticPaths() {
+  return [
+    ...prefixedLangs().map((lang) => ({ params: { lang, page: SEGMENTS[lang].lab }, props: { kind: 'lab' as const } })),
+    ...cvPrefixedLangs()
+      .filter((lang) => cvReady(lang))
+      .map((lang) => ({ params: { lang, page: SEGMENTS[lang].cv }, props: { kind: 'cv' as const } })),
+  ];
+}
+const { lang } = Astro.params as { lang: Lang };
+const { kind } = Astro.props;
+---
+
+{kind === 'lab' && <LabView lang={lang} />}
+{kind === 'cv' && <CvView lang={lang} />}

@@ -1,0 +1,90 @@
+---
+// Renders the typed blocks of a case-study section.
+import BigFigure from './BigFigure.astro';
+import Media from './Media.astro';
+import Pipeline from './Pipeline.astro';
+import { media, repos } from '../data/site';
+import type { Block } from '../data/types';
+interface Props { blocks: Block[]; repoLabel: string }
+const { blocks, repoLabel } = Astro.props;
+---
+
+{blocks.map((b) => {
+  if (b.kind === 'text') return (
+    <div class="blk blk--text rv">
+      {b.title && <h3 class="t-s">{b.title}</h3>}
+      {b.body.map((p) => <p class="body">{p}</p>)}
+    </div>
+  );
+  if (b.kind === 'list') return (
+    <div class="blk blk--list rv">
+      {b.title && <h3 class="t-s">{b.title}</h3>}
+      <ul class="plist">
+        {b.items.map((it) => <li><p class="body">{it.title && <strong>{it.title} </strong>}{it.text}</p></li>)}
+      </ul>
+    </div>
+  );
+  if (b.kind === 'figures') return (
+    <div class:list={['blk', 'blk--figs', `blk--figs-${Math.min(b.items.length, 2)}`]}>
+      {b.items.map((f) => <BigFigure figure={f} size="xl" class="rv" />)}
+    </div>
+  );
+  if (b.kind === 'media') return (
+    <figure class:list={['blk', 'blk--media', 'rv', b.wide && 'blk--wide']}>
+      <Media name={b.media} alt={b.alt} />
+      <figcaption class="small hz">{b.caption}</figcaption>
+    </figure>
+  );
+  if (b.kind === 'pair') return (
+    <div class="blk blk--wide blk--pair rv">
+      {b.items.map((it) => (
+        <figure>
+          <Media name={it.media} alt={it.alt} />
+          <figcaption class="small hz">{it.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+  if (b.kind === 'strip') return (
+    <div class="blk blk--wide blk--strip rv">
+      {b.items.map((it) => (
+        <figure style={`--ar:${media[it.media].w / media[it.media].h}`}>
+          <Media name={it.media} alt={it.alt} />
+          <figcaption class="small hz">{it.caption}</figcaption>
+        </figure>
+      ))}
+    </div>
+  );
+  if (b.kind === 'steps') return (
+    <ol class="blk steps">
+      {b.items.map((s) => (
+        <li class="step rv">
+          <p class="step__tag read">{s.tag}</p>
+          <h3 class="t-s step__title">{s.title}</h3>
+          <p class="body">{s.body}</p>
+          {s.note && <p class="small hz step__note">{s.note}</p>}
+          {s.repo && (
+            <p class="step__repo">
+              <a class="lnk" href={repos[s.repo]} rel="noopener">{repoLabel} {s.repo}</a>
+              {s.repoNote && <span class="small hz">{s.repoNote}</span>}
+            </p>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+  if (b.kind === 'pipeline') return <div class="blk blk--wide rv"><Pipeline block={b} /></div>;
+  if (b.kind === 'table') return (
+    <figure class="blk blk--wide blk--table rv">
+      <div class="tbl" tabindex="0" role="group" aria-label={b.caption}>
+        <table>
+          <thead><tr>{b.head.map((h) => <th scope="col">{h}</th>)}</tr></thead>
+          <tbody>
+            {b.rows.map((r) => <tr>{r.map((c, i) => i === 0 ? <th scope="row">{c}</th> : <td class={i === 1 ? 'tbl__val' : undefined}>{c}</td>)}</tr>)}
+          </tbody>
+        </table>
+      </div>
+      <figcaption class="small hz">{b.caption}</figcaption>
+    </figure>
+  );
+})}
