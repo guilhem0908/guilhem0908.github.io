@@ -145,6 +145,7 @@ async function run() {
   const prepare = (el: HTMLElement) => {
     let tw = tweens.get(el);
     if (tw) return tw;
+    const q0 = performance.now();
     const split = SplitText.create(el, { type: 'words,chars', charsClass: 'cv-char', wordsClass: 'cv-word', aria: 'auto' });
     const chars = split.chars as HTMLElement[];
     const big = el.classList.contains('d-xl') || el.classList.contains('d-l') || !!el.closest('.d-xl, .d-l');
@@ -163,6 +164,9 @@ async function run() {
     });
     tw.progress(1); // builds the animation now and leaves the letters where they belong
     tweens.set(el, tw);
+    const q1 = performance.now();
+    void el.offsetHeight;
+    perf.event('prepare', `${chars.length} letters, split+tween ${(q1 - q0).toFixed(1)} ms, layout ${(performance.now() - q1).toFixed(1)} ms`);
     return tw;
   };
   const converge = (el: HTMLElement, delay = 0) => {
@@ -322,7 +326,8 @@ async function run() {
     // the name opens from condensed to wide: a horizontal scale in CSS, which the compositor animates on its
     // own (animating the width axis of the font laid the name out again on every frame)
     heroName.classList.add('is-opening');
-    gsap.from([heroSide.children, '.hud'], { opacity: 0, y: 18, duration: 0.9, ease: 'converge', stagger: 0.07, delay: 0.25, clearProps: 'all' });
+    // (fromTo: the instruments have a CSS transition on opacity, so their current value is not their resting one)
+    gsap.fromTo([heroSide.children, '.hud'], { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.9, ease: 'converge', stagger: 0.07, delay: 0.15, clearProps: 'all' });
   };
 
   // ------------------------------------------- the invitation to scroll
@@ -425,8 +430,10 @@ async function run() {
   $$('[data-on-view]').forEach((el) => {
     ScrollTrigger.create({ trigger: el, start: 'top 92%', onEnter: () => converge(el), onEnterBack: () => converge(el) });
   });
-  // one clip at a time: several videos playing together make the browser halve the frame rate of the page
-  autoplayVideos($('main'), { single: true });
+  // one clip at a time: several videos playing together make the browser halve the frame rate of the page.
+  // The camera feed of the last room is a video too: a lab clip waits until it has been paused for a moment.
+  let feedSeen = 0;
+  autoplayVideos($('main'), { single: true, gate: () => !world.feedPlaying && performance.now() - feedSeen > 450 });
 
   // ---------------------------------------------------------------- loop
   const T: Record<string, number> = {};
@@ -470,9 +477,10 @@ async function run() {
     perf.begin(rafStart || now, lastY < 0 ? 0 : lastY);
     if (rec) perf.set(F.TWEEN, now - rafStart);
     lenis.raf(time * 1000);
+    const pL = rec ? performance.now() : 0;
     const y = window.scrollY;
     const p1 = rec ? performance.now() : 0;
-    if (rec) { perf.set(F.LENIS, p1 - now); perf.set(F.Y, y); perf.y = y; }
+    if (rec) { perf.set(F.LENIS, pL - now); perf.set(F.Y, y); perf.y = y; if (p1 - pL > 3) perf.event('reflow', `${(p1 - pL).toFixed(1)} ms`); }
     if (!scrolled && y > 12) cueOff();
     // lab and index are plain flow: the header gets a ground, the map steps aside on phones
     const flow = open && D.progress('lab', y) > -0.02 && y < D.yOf('contact', 0) - window.innerHeight * 0.45;
@@ -496,7 +504,9 @@ async function run() {
     tgt.fov = T.fov + (40 - T.fov) * sstep(0, 1, te);
     world.planShift = I.active ? 0 : 1;
     pfrP = D.progress('pfr', y);
-    world.inPfr = pfrP > 0.02 && D.progress('lab', y) < 0.7;
+    // the feed on the wall plays in the room and stops as the camera leaves through the roof (its last frame stays)
+    world.inPfr = pfrP > 0.02 && D.progress('lab', y) < 0.12;
+    if (world.feedPlaying) feedSeen = now;
     world.frame(deltaMs / 1000);
     const p2 = rec ? performance.now() : 0;
 

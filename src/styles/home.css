@@ -215,7 +215,10 @@ html.gl .hero__name.is-opening { animation: name-open 1.5s var(--ease-converge) 
 html.gl .hero__side { position: absolute; left: var(--pad); top: 5.6rem; max-width: 27rem; gap: 0.9rem; }
 html.gl .hero__intro.plate { background: var(--plate); padding: 1.05rem 1.15rem 1.1rem; }
 html.gl .skiprun { background: var(--plate); padding: 0 0.8rem; }
-html.gl.booting .hero__side, html.gl.booting .hero__name, html.gl.booting .hud { opacity: 0; }
+html.gl.booting .hero__side, html.gl.booting .hud { opacity: 0; }
+/* not quite invisible: the browser paints the name and its soft ground once while the scene is being
+   trained, so that the blur of that ground is ready when the letters arrive */
+html.gl.booting .hero__name { opacity: 0.012; }
 
 /* the invitation: on the floor beside the path, in the gap the first line of the name leaves.
    It arrives with the hero and leaves at the first scroll (html.cue-on, set by main.ts). */

@@ -177,19 +177,21 @@ def analyse(d):
         if r[f['DT']] <= LONG:
             continue
         near = [f"{e['kind']} {e['detail']}".strip() for e in d['events'] if -260 <= e['t'] - r[f['T']] <= 60]
-        parts = {k: r[f[k]] for k in ('JS', 'LENIS', 'SIM', 'DRAW', 'DOM', 'PAINT', 'SORT', 'APPLY', 'GPU')}
+        parts = {k: r[f[k]] if k in f else 0 for k in ('JS', 'TWEEN', 'LENIS', 'SIM', 'DRAW', 'DOM', 'PAINT', 'SORT', 'APPLY', 'GPU')}
         longs.append({'dt': r[f['DT']], 'y': r[f['Y']], 'at': where(r[f['Y']], d['sections'], d['vh']),
                       'splats': r[f['SPLATS']], **parts, 'near': near[:6]})
-    mean = lambda k: statistics.fmean(r[f[k]] for r in rows) if rows else 0
+    mean = lambda k: statistics.fmean(r[f[k]] for r in rows) if rows and k in f else 0
     out = {
         'frames': len(rows), 'median': pct(dt, 0.5), 'p95': pct(dt, 0.95), 'p99': pct(dt, 0.99), 'worst': max(dt) if dt else 0,
         'over33': sum(1 for v in dt if v > LONG), 'over50': sum(1 for v in dt if v > VERY),
-        'js': mean('JS'), 'lenis': mean('LENIS'), 'sim': mean('SIM'), 'draw': mean('DRAW'), 'dom': mean('DOM'), 'paint': mean('PAINT'),
+        'js': mean('JS'), 'tween': mean('TWEEN'), 'lenis': mean('LENIS'), 'sim': mean('SIM'), 'draw': mean('DRAW'), 'dom': mean('DOM'), 'paint': mean('PAINT'),
         'js_p99': pct([r[f['JS']] for r in rows], 0.99), 'paint_p99': pct([r[f['PAINT']] for r in rows], 0.99),
         'sort': mean('SORT'), 'apply': mean('APPLY'), 'lat': mean('LAT'),
         'upload_kb': mean('UPLOAD') / 1024, 'gpu': statistics.fmean(gpu) if gpu else -1, 'gpu_p95': pct(gpu, 0.95) if gpu else -1,
         'gpu_max': max(gpu) if gpu else -1, 'splats': mean('SPLATS'), 'splats_max': max((r[f['SPLATS']] for r in rows), default=0),
-        'scale': d.get('scale'), 'long': longs,
+        'scale': d.get('scale'), 'scale_min': min((r[f['SCALE']] for r in rows if r[f['SCALE']] > 0), default=0),
+        'sorts': sum(1 for r in rows if r[f['SORT']] > 0), 'long': longs,
+        'quality': [f"{e['detail']}" for e in d['events'] if e['kind'] == 'quality'],
     }
     # where the GPU works hardest
     if gpu:
@@ -271,7 +273,7 @@ with sync_playwright() as pw:
                 if not A.quiet:
                     for i, r in enumerate(runs):
                         for L in r['long']:
-                            print(f"    run {i + 1}: {L['dt']:6.1f} ms at {L['at']:<12} (y {L['y']:.0f})  js {L['JS']:.1f} [lenis {L['LENIS']:.1f} sim {L['SIM']:.1f} draw {L['DRAW']:.1f} dom {L['DOM']:.1f}] "
+                            print(f"    run {i + 1}: {L['dt']:6.1f} ms at {L['at']:<12} (y {L['y']:.0f})  js {L['JS']:.1f} [tween {L['TWEEN']:.1f} lenis {L['LENIS']:.1f} sim {L['SIM']:.1f} draw {L['DRAW']:.1f} dom {L['DOM']:.1f}] "
                                   f"paint {L['PAINT']:.1f} gpu {L['GPU']:.1f} sort {L['SORT']:.1f}+{L['APPLY']:.1f}  {'; '.join(L['near'])}")
 
         if 'idle' in A.scenarios:
@@ -315,8 +317,8 @@ summary = []
 for c in results['cases']:
     runs = c['runs']
     row = {'scenario': c['scenario'], 'viewport': c['viewport'], 'speed': c.get('speed')}
-    for k in ('frames', 'median', 'p95', 'p99', 'worst', 'over33', 'over50', 'js', 'js_p99', 'lenis', 'sim', 'draw', 'dom', 'paint', 'paint_p99', 'sort', 'apply', 'lat',
-              'upload_kb', 'gpu', 'gpu_p95', 'gpu_max', 'splats', 'splats_max', 'scale', 'layout_ms', 'style_ms', 'script_ms', 'task_ms', 'heap_mb', 'hero_ms', 'interactive_ms', 'max_scroll'):
+    for k in ('frames', 'median', 'p95', 'p99', 'worst', 'over33', 'over50', 'js', 'js_p99', 'tween', 'lenis', 'sim', 'draw', 'dom', 'paint', 'paint_p99', 'sort', 'sorts', 'apply', 'lat',
+              'upload_kb', 'gpu', 'gpu_p95', 'gpu_max', 'splats', 'splats_max', 'scale', 'scale_min', 'layout_ms', 'style_ms', 'script_ms', 'task_ms', 'heap_mb', 'hero_ms', 'interactive_ms', 'max_scroll'):
         v = med(runs, k)
         if v is not None:
             row[k] = round(v, 2)

@@ -46,11 +46,13 @@ function generate(inp: GenInput) {
   flg = new Uint8Array(count);
   rooms = new Uint8Array(count);
   const M = 0.3; // a wall belongs to the rooms on both of its sides
+  const TALL = 3.45; // the factory hall stands higher than the walls around it (3.4 m): its top is never hidden
   for (let i = 0; i < count; i++) {
     grp[i] = meta[i * 4 + 1]; flg[i] = meta[i * 4 + 2];
     const room = meta[i * 4 + 3];
     let bits = 0;
     if (grp[i]) bits = room ? 1 << room : 255; // a moving group stays in the room it was built in
+    else if (pos[i * 4 + 1] > TALL) bits = 255; // seen over the walls of the lower rooms next to it
     else {
       const x = pos[i * 4], z = pos[i * 4 + 2];
       for (let r = 1; r < ROOMS.length; r++) {

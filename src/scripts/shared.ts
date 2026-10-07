@@ -5,8 +5,9 @@
  * single: only the clip that is most in view plays, the others wait on their frame. The home run needs
  * it: with two or more videos playing, Chromium halves the frame rate of the whole page (measured:
  * 60 frames a second with one clip, 37 with two, 30 with three), and the world behind them stutters.
+ * gate: asked before a clip starts; while it answers no, the clip waits and asks again.
  */
-export function autoplayVideos(root: ParentNode = document, opts: { single?: boolean } = {}) {
+export function autoplayVideos(root: ParentNode = document, opts: { single?: boolean; gate?: () => boolean } = {}) {
   const vids = Array.from(root.querySelectorAll<HTMLVideoElement>('video[data-autoplay]'));
   if (!vids.length) return;
   const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -28,7 +29,15 @@ export function autoplayVideos(root: ParentNode = document, opts: { single?: boo
   const seen = new Map<HTMLVideoElement, number>(); // share of each clip that is on screen
   let current: HTMLVideoElement | null = null;
   let hovered: HTMLVideoElement | null = null;
+  let retry = 0;
   const pick = () => {
+    clearTimeout(retry);
+    if (opts.gate && !opts.gate()) {
+      // another video has the floor: nothing plays here, and we ask again shortly
+      current?.pause(); current = null;
+      if ([...seen.values()].some((r) => r > 0)) retry = window.setTimeout(pick, 200);
+      return;
+    }
     let best: HTMLVideoElement | null = null, score = 0.3;
     for (const [v, r] of seen) {
       // the clip under the pointer wins; the one playing keeps its place unless another is clearly more in view

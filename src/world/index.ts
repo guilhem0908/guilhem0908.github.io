@@ -126,6 +126,8 @@ export class World {
   inPfr = false;
   /** the camera travelled during the last frame (a change of render scale cannot be seen) */
   moving = false;
+  /** test switch (tools/sight.py): draw every room, whatever the camera can see */
+  noSight = false;
 
   private mat!: RawShaderMaterial;
   private geo!: InstancedBufferGeometry;
@@ -157,6 +159,7 @@ export class World {
   private lost = false;
   private gpu!: GpuTimer;
   private frameNo = 0;
+  private landed = false;
   private baseDpr = 1;
   private keepCur = 1;
   // depth sort: what the last request was made with
@@ -197,11 +200,12 @@ export class World {
       this.onLost?.();
     });
     // starting level: a pixel budget for the kind of GPU this is; the governor corrects it within a second
-    const { tier, megapixels } = deviceTier(this.gpuName);
+    const { tier, megapixels, intro } = deviceTier(this.gpuName);
     this.tier = tier;
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
     const dpr = Math.min(window.devicePixelRatio || 1, this.dprCap);
-    this.gov.start(w * h * dpr * dpr, megapixels * (opts.mobile ? 0.8 : 1));
+    this.gov.start(w * h * dpr * dpr, megapixels * (opts.mobile ? 0.8 : 1), intro);
+    this.keepCur = this.gov.keep;
     this.resize();
   }
 
@@ -435,15 +439,15 @@ void main() {
     const e = cam.matrixWorldInverse.elements;
     const tanY = Math.tan((cam.fov * Math.PI) / 360);
     const far = c.fogFar * 1.14 + 1;
-    const key = `${far.toFixed(2)} ${tanY.toFixed(4)} ${cam.aspect.toFixed(3)} ${this.sensorRange} ${this.sensorHalf.toFixed(3)} ${this.keepCur.toFixed(3)} ${c.top > 0.001 || c.train < 0.999 ? 1 : 0}`;
+    // from above, and while the scene is being trained, every room is in view
+    const all = c.top > 0.001 || c.train < 0.999 || this.noSight;
+    const key = `${far.toFixed(2)} ${tanY.toFixed(4)} ${cam.aspect.toFixed(3)} ${this.sensorRange} ${this.sensorHalf.toFixed(3)} ${this.keepCur.toFixed(3)} ${all ? 1 : 0}`;
     if (key === this.sortKey && this.camMove < 0.004 && now - this.sortAt < 50) return;
     this.sortKey = key;
     this.sorting = true;
     this.sortAt = now;
     this.sortView.set(e);
     this.viewMsg.set(e);
-    // from above, and while the scene is being trained, every room is in view
-    const all = c.top > 0.001 || c.train < 0.999;
     const msg: any = {
       type: 'sort', id: ++this.sortId,
       view: this.viewMsg, groups: this.groups,
@@ -504,6 +508,9 @@ void main() {
     this.setGroup(GROUP.BALL, this.ball.x, this.ball.z, t * 1.5, 0);
   }
 
+  /** the video of the camera feed is running (no other clip should play at the same time) */
+  get feedPlaying() { return !!this.feedVideo && !this.feedVideo.paused; }
+
   /** bearing of the ball in the robot frame, for the HUD (the quantity the controller regulates) */
   ballBearing() {
     let e = Math.atan2(this.ball.z - this.robot.z, this.ball.x - this.robot.x) - this.robot.th;
@@ -527,7 +534,9 @@ void main() {
     }
 
     // quality: one decision per frame, applied before anything is drawn at the new size
-    if (this.gov.tick(dtRaw * 1000, this.moving || c.train < 0.999)) this.applyQuality();
+    // landed: the camera is down and the rooms out of sight are no longer drawn
+    if (!this.landed && c.train > 0.999 && c.top < 0.001) { this.landed = true; if (this.gov.land()) this.applyQuality(); }
+    if (this.gov.tick(dtRaw * 1000, this.moving || !this.landed)) this.applyQuality();
     const keep = this.gov.keep;
     if (Math.abs(keep - this.keepCur) > 0.0005) this.keepCur += Math.sign(keep - this.keepCur) * Math.min(Math.abs(keep - this.keepCur), dt * 0.35);
 
