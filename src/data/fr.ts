@@ -1053,7 +1053,7 @@ const fr: SiteContent = {
         {
           kind: 'table',
           caption:
-            'Une cellule simulée et un banc d’essai d’images public, pas des données d’usine. Les nombres sont réécrits par un script de chaque dépôt et vérifiés contre son README.',
+            'Une cellule simulée et un banc d’essai d’images public, pas des données d’usine. Les nombres sont régénérés par un script de chaque dépôt et vérifiés contre son README.',
           head: ['Ce qui a été mesuré', 'Valeur', 'Comment le lire'],
           rows: [
             ['usine40-cell-pipeline : plus grand écart entre l’OEE stocké par le pipeline et l’OEE du journal d’événements, sur 3 600 fenêtres de station de 30 s', '0,000 pp', 'Rien n’est perdu ni inventé entre l’automate simulé et le tableau de bord ; cela ne montre pas que l’OEE est le bon indicateur. Une coupure du broker de 60 s en QoS 0 laisse 45 fenêtres sur 240 avec un OEE faux.'],
@@ -1082,7 +1082,7 @@ const fr: SiteContent = {
             { title: 'Un monde de grille.', text: 'Les déplacements prennent un pas de temps sur une grille 4-connexe : pas d’accélération, de temps de rotation, d’empreinte de robot ni d’erreur de localisation. Les chemins réservés sont exécutés parfaitement, alors qu’une vraie flotte a besoin de marges ou de replanification quand un robot est en retard.' },
             { title: 'Une demande sans fin, ni batteries, ni machines.', text: 'Les chargeurs sont des places de stationnement, les stations sont toujours prêtes et la file de commandes ne se vide jamais. L’étude mesure la capacité, pas le temps d’attente d’une commande dans une file.' },
             { title: 'Trois plans dessinés à la main, des flottes jusqu’à 16.', text: 'Dans l’atelier ouvert et les allées étroites, la meilleure flotte est une borne inférieure, puisque la courbe monte encore à 16 robots, le maximum que les chargeurs peuvent garer. Les allées à sens unique, la solution d’ingénierie habituelle, ne sont pas étudiées.' },
-            { title: 'Les deux études plus courtes sont petites.', text: 'usine40-cell-pipeline fait tourner une cellule simulée, et une erreur d’OEE nulle montre que rien n’est perdu ni inventé en chemin, pas que l’OEE est le bon indicateur. visual-quality-gate couvre cinq des quinze catégories de MVTec AD, et son seuil PatchCore a refusé des bonnes pièces environ deux fois plus souvent que la cible.' },
+            { title: 'Les deux études plus courtes sont petites.', text: 'usine40-cell-pipeline fait tourner une cellule simulée, et une erreur d’OEE nulle montre que rien n’est perdu ni inventé en chemin, pas que l’OEE est le bon indicateur. visual-quality-gate couvre cinq des quinze catégories de MVTec AD, et sa plus grande banque mémoire PatchCore (WR50-10%) a refusé des bonnes pièces environ deux fois plus souvent que la cible.' },
           ],
         },
       ],
@@ -1159,13 +1159,13 @@ const fr: SiteContent = {
           from: '28,8',
           value: '1,6',
           unit: '%',
-          meaning: 'Part des chemins qui entrent dans la géométrie réelle à un seuil d’opacité de 0,5, avec des défauts modérés : comptage des centres, puis accumulation d’empreintes (1 000 paires départ-arrivée sur 10 appartements synthétiques). La carte qui a le plus faible IoU planifie mieux (0,652 contre 0,663).',
+          meaning: 'Part des chemins qui entrent dans la géométrie réelle à un seuil d’opacité de 0,5, avec des défauts modérés : comptage des centres, puis accumulation d’empreintes (1 000 paires départ-arrivée sur 10 appartements synthétiques). La carte qui a le plus faible IoU planifie mieux (0,652 contre 0,663). Le comptage des centres est meilleur à 0,3, où 1,8 % des chemins entrent dans la géométrie réelle mais 4,9 % des paires deviennent inatteignables ; le plateau au-dessus de 0,5 découle des amplitudes de défauts que j’ai choisies.',
         },
         extends: 'Mon rapport de stage dérivait une grille d’occupation d’une tranche d’une scène 3DGS fournie et planifiait dessus avec A*, en notant que le lien entre l’opacité des gaussiennes et la géométrie de collision n’était validé que partiellement. Ce projet l’étudie sur des appartements synthétiques à la géométrie connue. Rien du stage n’est réutilisé.',
       },
       'cone-ekf-slam': {
         what: 'Localisation EKF et EKF-SLAM sur des pistes de cônes de Formula Student simulées, vues à travers un champ de vision limité, avec les tests de cohérence (NEES, NIS) qui montrent quand l’incertitude annoncée par le filtre n’est plus fiable.',
-        shows: 'Une piste de cônes fermée vue de dessus : le chemin réel en gris, l’estimation d’EKF-SLAM en rouge, le secteur du capteur et les ellipses à 99 % de la pose et de chaque cône cartographié. L’incertitude de pose monte à 0,65 m avant que les premiers cônes soient revus à t = 37,5 s, puis retombe à 0,03 m, et les ellipses des cônes hors de vue rétrécissent avec elle (graine de piste 7, 1,3 tour). Deux courbes en dessous suivent le NEES de la pose et les incertitudes.',
+        shows: 'Une piste de cônes fermée vue de dessus : le chemin réel en gris, l’estimation d’EKF-SLAM en rouge, le secteur du capteur et les ellipses à 99 % de la pose et de chaque cône cartographié. L’incertitude de pose monte à 0,65 m (1 sigma) avant que les premiers cônes soient revus à t = 37,5 s, puis retombe à 0,03 m, et les ellipses des cônes hors de vue rétrécissent avec elle (graine de piste 7, 1,3 tour). Deux courbes en dessous suivent le NEES de la pose et les incertitudes.',
         result: {
           from: '17 / 50',
           value: '1 / 50',
@@ -1184,7 +1184,7 @@ const fr: SiteContent = {
         extends: 'Le planificateur du stage déplaçait un robot sur une carte vide. Ce projet ajoute le temps, une table de réservations et du Conflict-Based Search, et mesure la flotte. Il est indépendant du projet de promotion de dernière année sur l’Usine 4.0.',
       },
       'usine40-cell-pipeline': {
-        what: 'Une cellule de production simulée de l’Usine 4.0 (Industrie 4.0) qui traverse OPC UA, MQTT, PostgreSQL et Grafana, avec l’OEE (taux de rendement synthétique) du tableau de bord vérifié contre le journal d’événements du simulateur, et chaque latence et chaque perte mesurées.',
+        what: 'Une cellule de production simulée d’usine connectée (Usine 4.0, Industrie 4.0) qui traverse OPC UA, MQTT, PostgreSQL et Grafana, avec l’OEE (taux de rendement synthétique) du tableau de bord vérifié contre le journal d’événements du simulateur, et chaque latence et chaque perte mesurées.',
         shows: 'Le tableau de bord Grafana en direct pendant un scénario scripté : production nominale, une panne injectée qui déclenche l’alerte de défaut, un arrêt de la passerelle qui fait passer la frise à NO DATA et déclenche l’alerte de données périmées, puis la reprise. Les images sont de vraies captures du tableau de bord provisionné ; seule la bande de légende est ajoutée.',
         result: {
           value: '0,000',
@@ -1192,18 +1192,18 @@ const fr: SiteContent = {
           meaning: 'Plus grand écart entre l’OEE stocké par le pipeline et l’OEE recalculé à partir du journal d’événements du simulateur, sur 3 600 fenêtres de station de 30 s. Le seul moyen que j’ai trouvé de le casser est de perdre des échantillons : une coupure du broker de 60 s en QoS 0 laisse 45 fenêtres sur 240 avec un OEE faux.',
         },
         extends: 'À l’AIST, j’ai préparé une interface ROS 2 avec rejet des images périmées, limites de vitesse et minuterie de sécurité (dead-man). Ici, je voulais la même rigueur côté machines d’une usine : horodater chaque valeur à la source, ne jamais faire confiance à un message parce qu’il est arrivé, compter ce qui se perd. Il est indépendant du projet de promotion de dernière année sur l’Usine 4.0.',
-        short: 'Une cellule simulée à travers OPC UA, MQTT, PostgreSQL et Grafana : l’OEE stocké égale celui du journal d’événements dans chaque fenêtre comparée, écart maximal 0,000 pp.',
+        short: 'Une cellule simulée à travers OPC UA, MQTT, PostgreSQL et Grafana : l’OEE stocké égale celui du journal d’événements quand aucun échantillon n’est perdu, et une coupure du broker de 60 s en QoS 0 fausse 45 fenêtres sur 240.',
       },
       'visual-quality-gate': {
-        what: 'Un contrôle qualité visuel sans entraînement pour une ligne de l’Usine 4.0 (Industrie 4.0) : PaDiM et PatchCore réimplémentés en PyTorch, mesurés sur cinq catégories de MVTec AD et jugés sur la question d’un responsable de ligne : combien de bonnes pièces je refuse pour arrêter combien de défauts ?',
+        what: 'Un contrôle qualité visuel sans entraînement pour une ligne d’usine connectée (Usine 4.0, Industrie 4.0) : PaDiM et PatchCore réimplémentés en PyTorch, mesurés sur cinq catégories de MVTec AD et jugés sur la question d’un responsable de ligne : combien de bonnes pièces je refuse pour arrêter combien de défauts ?',
         shows: 'Cinq pièces de test notées par PatchCore WR50-10% (graine 0), chacune avec sa carte d’anomalie, son score, son seuil et son verdict OK ou NOK : le défaut attrapé médian, la bonne pièce acceptée médiane, le défaut attrapé le plus proche du seuil, la pire fuite (une pièce défectueuse acceptée) et le pire faux rejet (une bonne pièce refusée).',
-        credit: 'Images : MVTec AD (Bergmann et al., CVPR 2019), CC BY-NC-SA 4.0.',
+        credit: 'Images : MVTec AD (Bergmann et al., CVPR 2019), CC BY-NC-SA 4.0, adaptées (cartes d’anomalie et légendes ajoutées).',
         result: {
           value: '10,5',
           unit: '%',
           meaning: 'des bonnes pièces refusées par PatchCore WR50-10% quand son seuil, fixé sur des bonnes pièces mises de côté, vise 5 % : 43 sur 408 sur 3 graines, soit 2,1 fois la cible, alors que 6,3 % des pièces défectueuses (85 sur 1 353) passent quand même.',
         },
-        extends: 'Pendant ma première année du cycle ingénieur, j’ai co-écrit avec Alec Bossard un détecteur de balles de couleur en C pur, qui marche quand ce qu’on cherche est une couleur qu’on sait nommer d’avance. Ce projet en est le successeur à caractéristiques apprises : le détecteur ne voit que des bonnes pièces, et le seuil est lui aussi fixé sur des bonnes pièces. Il est indépendant du projet de promotion sur l’Usine 4.0.',
+        extends: 'Pendant ma première année du cycle ingénieur, j’ai co-écrit avec un camarade de promotion un détecteur de balles de couleur en C pur, qui marche quand ce qu’on cherche est une couleur qu’on sait nommer d’avance. Ce projet en est le successeur à caractéristiques apprises : le détecteur ne voit que des bonnes pièces, et le seuil est lui aussi fixé sur des bonnes pièces. Il est indépendant du projet de promotion sur l’Usine 4.0.',
       },
     },
     outro: 'Une question sur l’un d’eux ? Mon e-mail est en bas de la page.',
