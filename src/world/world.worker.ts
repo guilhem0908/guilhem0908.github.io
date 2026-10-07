@@ -76,6 +76,7 @@ interface SortMsg {
 }
 
 function sort(m: SortMsg) {
+  const t0 = performance.now();
   const v = m.view, g = m.groups;
   const out = m.recycle && m.recycle.byteLength >= count * 4 ? new Float32Array(m.recycle) : new Float32Array(count);
   const near = 0.1, far = m.far;
@@ -111,7 +112,7 @@ function sort(m: SortMsg) {
   let acc = 0;
   for (let k = 65535; k >= 0; k--) { const c = counts[k]; counts[k] = acc; acc += c; }
   for (let j = 0; j < n; j++) out[counts[keys[j]]++] = idx[j];
-  (self as unknown as DedicatedWorkerGlobalScope).postMessage({ type: 'sorted', id: m.id, order: out, n }, [out.buffer]);
+  (self as unknown as DedicatedWorkerGlobalScope).postMessage({ type: 'sorted', id: m.id, order: out, n, ms: performance.now() - t0 }, [out.buffer]);
 }
 
 self.onmessage = (e: MessageEvent) => {

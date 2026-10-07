@@ -8,6 +8,7 @@ import { CustomEase } from 'gsap/CustomEase';
 import Lenis from 'lenis';
 import { Director, inOut, inOut3, linear, type Key } from '../world/director';
 import type { World, WorldState } from '../world/index';
+import { F, perf } from '../world/perf';
 import type { SiteContent } from '../data/types';
 import { Minimap } from './minimap';
 import { autoplayVideos, nameCaseTitleOnClick } from './shared';
@@ -182,6 +183,7 @@ async function run() {
     if (bt.on === on) return;
     bt.on = on;
     bt.el.classList.toggle('is-on', on);
+    if (on) perf.event('beat', `${bt.sec} ${bt.a}`);
     if (on) bt.conv.forEach((c) => converge(c, 0.05));
     if (bt.feed) { if (on) bt.feed.play().catch(() => {}); else bt.feed.pause(); }
   };
@@ -306,6 +308,7 @@ async function run() {
   const introDone = () => {
     if (!I.active) return;
     I.active = false; I.train = 1; I.top = 0; I.pathReveal = 1;
+    perf.event('intro-done');
     html.classList.remove('booting');
     html.classList.add('intro-done');
     lenis.start();
@@ -315,6 +318,7 @@ async function run() {
   let heroShown = false;
   const heroIn = () => {
     heroShown = true;
+    perf.event('hero-in');
     html.classList.remove('booting');
     $$('.hero__name .ln').forEach((ln, i) => converge(ln, i * 0.12));
     const w = { v: 75 };
@@ -383,8 +387,13 @@ async function run() {
     hudAwayY = labHead.getBoundingClientRect().top + window.scrollY - window.innerHeight - 40;
   };
   const frame = (time: number, deltaMs: number) => {
+    const rec = perf.on;
+    const p0 = rec ? performance.now() : 0;
+    perf.begin(p0, lastY < 0 ? 0 : lastY);
     lenis.raf(time * 1000);
     const y = window.scrollY;
+    const p1 = rec ? performance.now() : 0;
+    if (rec) { perf.set(F.LENIS, p1 - p0); perf.set(F.Y, y); perf.y = y; }
     // lab and index are plain flow: the header gets a ground, the map steps aside on phones
     const flow = !I.active && D.progress('lab', y) > -0.02 && y < D.yOf('contact', 0) - window.innerHeight * 0.45;
     html.classList.toggle('in-flow', flow);
@@ -401,6 +410,7 @@ async function run() {
     pfrP = D.progress('pfr', y);
     world.inPfr = pfrP > 0.02 && D.progress('lab', y) < 0.7;
     world.frame(deltaMs / 1000);
+    const p2 = rec ? performance.now() : 0;
 
     // beats
     for (const bt of beats) {
@@ -465,7 +475,10 @@ async function run() {
       const here = world.cur.top > 0.5 ? '' : s < m.lobbyDoor ? 'hero' : s < m.aistExit ? 'aist' : s < m.factoryDoor ? 'tlse' : s < m.pfrDoor ? 'usine' : 'pfr';
       wpLinks.forEach((a) => a.classList.toggle('is-here', a.dataset.wp === here));
     }
+    if (rec) { const p3 = performance.now(); perf.set(F.DOM, p3 - p2); perf.end(p3); }
   };
+  // ?perf records the frames from the first one (tools/perf.py reads them)
+  if (q.has('perf')) perf.start();
   gsap.ticker.add(frame);
 
   const onResize = () => {
@@ -491,6 +504,7 @@ async function run() {
   };
 
   // test hooks (screenshots, video capture)
+  (window as any).__perf = perf;
   (window as any).__navrun = {
     lenis, D, world, info,
     jump: (yy: number) => { lenis.scrollTo(yy, { immediate: true, force: true }); },

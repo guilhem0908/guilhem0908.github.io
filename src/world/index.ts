@@ -14,6 +14,7 @@ import panoVert from './shaders/pano.vert.glsl?raw';
 import panoFrag from './shaders/pano.frag.glsl?raw';
 import { AIST_C, CELLS, GROUP, PEN, SCREEN } from './layout';
 import { Traffic } from './traffic';
+import { F, GpuTimer, perf } from './perf';
 import type { Img } from './gen/scene';
 
 export interface WorldState {
@@ -141,6 +142,10 @@ export class World {
   private feedWanted = false;
   private bg = new Color();
   private lost = false;
+  private gpu!: GpuTimer;
+  private sortAt = 0;
+  private seenPrograms = 0;
+  private seenTextures = 0;
   onLost: (() => void) | null = null;
 
   constructor(canvas: HTMLCanvasElement, opts: { mobile: boolean }) {
@@ -158,6 +163,7 @@ export class World {
     this.renderer.setClearColor(this.bg, 1);
     this.worker = new Worker(new URL('./world.worker.ts', import.meta.url), { type: 'module' });
     for (let i = 0; i < GROUP.COUNT; i++) this.groupVecs.push(new Vector4());
+    this.gpu = new GpuTimer(this.renderer.getContext() as WebGL2RenderingContext);
     canvas.addEventListener('webglcontextlost', (e) => {
       e.preventDefault();
       this.lost = true;
@@ -351,6 +357,7 @@ void main() {
     v.setAttribute('playsinline', ''); v.setAttribute('muted', '');
     v.src = '/media/pfr-ball.mp4';
     v.addEventListener('playing', () => {
+      perf.event('video', 'feed playing');
       const t = new VideoTexture(v);
       t.minFilter = LinearFilter; t.magFilter = LinearFilter; t.generateMipmaps = false; t.colorSpace = NoColorSpace;
       mat.uniforms.tFeed.value = t; mat.uniforms.uHas.value = 1;
@@ -370,6 +377,7 @@ void main() {
     add('/media/pano.webm', 'video/webm');
     add('/media/pano.mp4', 'video/mp4');
     v.addEventListener('playing', () => {
+      perf.event('video', 'panorama playing');
       const t = new VideoTexture(v);
       t.minFilter = LinearFilter; t.magFilter = LinearFilter; t.generateMipmaps = false;
       t.colorSpace = NoColorSpace; t.wrapS = t.wrapT = ClampToEdgeWrapping;
@@ -404,7 +412,8 @@ void main() {
     return out;
   }
 
-  private onSorted(d: { id: number; order: Float32Array; n: number }) {
+  private onSorted(d: { id: number; order: Float32Array; n: number; ms?: number }) {
+    const t0 = performance.now();
     this.sorting = false;
     this.order.array.set(d.order.subarray(0, d.n));
     this.order.clearUpdateRanges();
@@ -413,11 +422,16 @@ void main() {
     this.geo.instanceCount = d.n;
     this.visibleCount = d.n;
     this.recycle = d.order.buffer as ArrayBuffer;
+    if (perf.on) {
+      const t1 = performance.now();
+      perf.set(F.SORT, d.ms ?? 0); perf.add(F.APPLY, t1 - t0); perf.set(F.LAT, t1 - this.sortAt); perf.add(F.UPLOAD, d.n * 4);
+    }
   }
 
   private requestSort() {
     if (this.sorting || this.lost) return;
     this.sorting = true;
+    this.sortAt = performance.now();
     const tanY = Math.tan((this.camera.fov * Math.PI) / 360);
     const msg: any = {
       type: 'sort', id: ++this.sortId,
@@ -487,6 +501,7 @@ void main() {
 
   frame(dtRaw: number) {
     if (!this.mat || this.lost) return;
+    const t0 = perf.on ? performance.now() : 0;
     const dt = Math.min(0.05, dtRaw);
     this.time += dt;
     const c = this.cur, tg = this.target;
@@ -622,7 +637,21 @@ void main() {
     this.mesh.visible = !(c.pano > 0.999);
 
     if (this.mesh.visible) this.requestSort();
+    const rec = perf.on;
+    const t1 = rec ? performance.now() : 0;
+    if (rec) { perf.set(F.SIM, t1 - t0); this.gpu.poll((tag, ms) => perf.late(tag, F.GPU, ms)); this.gpu.begin(perf.frames); }
     this.renderer.render(this.scene, cam);
+    if (rec) {
+      this.gpu.end();
+      perf.set(F.DRAW, performance.now() - t1);
+      perf.set(F.SPLATS, this.mesh.visible ? this.geo.instanceCount : 0);
+      perf.set(F.SCALE, this.renderer.getPixelRatio());
+      // a shader program or a texture that reaches the GPU for the first time during the run
+      const inf = this.renderer.info;
+      const np = inf.programs?.length ?? 0, nt = inf.memory.textures;
+      if (np !== this.seenPrograms) { perf.event('program', `${this.seenPrograms} -> ${np}`); this.seenPrograms = np; }
+      if (nt !== this.seenTextures) { perf.event('texture', `${this.seenTextures} -> ${nt}`); this.seenTextures = nt; }
+    }
   }
 
   setBand(band: number, y: number) {
